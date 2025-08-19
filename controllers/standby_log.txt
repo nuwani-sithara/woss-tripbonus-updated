@@ -1,0 +1,384 @@
+empID:  | Standby Count: 
+empID:  | Standby Count: 
+empID:  | Standby Count: 
+empID:  | Standby Count: 
+empID:  | Standby Count: 
+empID:  | Standby Count: 
+empID:  | Standby Count: 
+empID:  | Standby Count: 
+empID:  | Standby Count: 
+empID:  | Standby Count: 
+empID:  | Standby Count: 
+empID:  | Standby Count: 
+empID:  | Standby Count: 
+empID:  | Standby Count: 
+empID: 1 | Standby Count: 3
+empID: 2 | Standby Count: 1
+empID: 6 | Standby Count: 3
+empID: 7 | Standby Count: 2
+empID: 8 | Standby Count: 2
+empID: 9 | Standby Count: 1
+empID: 11 | Standby Count: 1
+empID: 1 | Standby Count: 3
+empID: 2 | Standby Count: 1
+empID: 6 | Standby Count: 3
+empID: 7 | Standby Count: 2
+empID: 8 | Standby Count: 2
+empID: 9 | Standby Count: 1
+empID: 11 | Standby Count: 1
+empID: 1 | Standby Count: 3
+empID: 2 | Standby Count: 1
+empID: 6 | Standby Count: 3
+empID: 7 | Standby Count: 2
+empID: 8 | Standby Count: 2
+empID: 9 | Standby Count: 1
+empID: 11 | Standby Count: 1
+empID: 1 | Standby Count: 5
+empID: 2 | Standby Count: 3
+empID: 6 | Standby Count: 4
+empID: 7 | Standby Count: 3
+empID: 8 | Standby Count: 3
+empID: 9 | Standby Count: 1
+empID: 11 | Standby Count: 2
+empID: 2 | Standby Count: 1
+empID: 6 | Standby Count: 1
+empID: 7 | Standby Count: 1
+empID: 8 | Standby Count: 1
+empID: 2 | Standby Count: 1
+empID: 3 | Standby Count: 1
+empID: 7 | Standby Count: 1
+empID: 2 | Standby Count: 1
+empID: 3 | Standby Count: 1
+empID: 7 | Standby Count: 1
+empID: 2 | Standby Count: 1
+empID: 3 | Standby Count: 1
+empID: 7 | Standby Count: 1
+empID: 2 | Standby Count: 1
+empID: 3 | Standby Count: 1
+empID: 7 | Standby Count: 1
+empID: 2 | Standby Count: 1
+empID: 3 | Standby Count: 1
+empID: 7 | Standby Count: 1
+empID: 1 | Standby Count: 1
+empID: 2 | Standby Count: 2
+empID: 3 | Standby Count: 1
+empID: 6 | Standby Count: 1
+empID: 7 | Standby Count: 2
+empID: 1 | Standby Count: 1
+empID: 2 | Standby Count: 1
+empID: 3 | Standby Count: 1
+empID: 6 | Standby Count: 1
+empID: 1 | Standby Count: 1
+empID: 2 | Standby Count: 1
+empID: 3 | Standby Count: 1
+empID: 6 | Standby Count: 1
+empID: 1 | Standby Count: 1
+empID: 2 | Standby Count: 1
+empID: 3 | Standby Count: 1
+empID: 6 | Standby Count: 1
+empID: 1 | Standby Count: 1
+empID: 2 | Standby Count: 1
+empID: 3 | Standby Count: 1
+empID: 6 | Standby Count: 1
+empID: 1 | Standby Count: 1
+empID: 2 | Standby Count: 1
+empID: 3 | Standby Count: 1
+empID: 6 | Standby Count: 1
+empID: 1 | Standby Count: 1
+empID: 2 | Standby Count: 1
+empID: 3 | Standby Count: 1
+empID: 6 | Standby Count: 1
+empID: 1 | Standby Count: 1
+empID: 2 | Standby Count: 1
+empID: 3 | Standby Count: 1
+empID: 6 | Standby Count: 1
+empID: 1 | Standby Count: 2
+empID: 2 | Standby Count: 1
+empID: 3 | Standby Count: 1
+empID: 6 | Standby Count: 2
+empID: 7 | Standby Count: 1
+empID: 8 | Standby Count: 1
+empID: 2 | standby_attendanceID: 71 | status: 1 | count: 0
+empID: 3 | standby_attendanceID: 71 | status: 1 | count: 0
+empID: 7 | standby_attendanceID: 71 | status: 1 | count: 0
+empID: 8 | standby_attendanceID: 71 | status: 1 | count: 0
+empID: 1 | standby_attendanceID: 71 | status: 1 | count: 0
+empID: 2 | standby_attendanceID: 71 | status: 1 | count: 1
+empID: 3 | standby_attendanceID: 71 | status: 0 | count: 0
+empID: 7 | standby_attendanceID: 71 | status: 1 | count: 1
+empID: 8 | standby_attendanceID: 71 | status: 1 | count: 3
+empID: 1 | standby_attendanceID: 71 | status: 1 | count: 1
+empID: 2 | standby_attendanceID: 71 | status: 1 | count: 1
+empID: 3 | standby_attendanceID: 71 | status: 0 | count: 0
+empID: 7 | standby_attendanceID: 71 | status: 1 | count: 1
+empID: 8 | standby_attendanceID: 71 | status: 1 | count: 3
+empID: 1 | standby_attendanceID: 71 | status: 1 | count: 1
+empID: 2 | standby_attendanceID: 71 | status: 1 | count: 1
+empID: 3 | standby_attendanceID: 71 | status: 0 | count: 0
+empID: 7 | standby_attendanceID: 71 | status: 1 | count: 1
+empID: 8 | standby_attendanceID: 71 | status: 1 | count: 3
+empID: 1 | standby_attendanceID: 71 | status: 1 | count: 1
+empID: 2 | standby_attendanceID: 71 | status: 1 | count: 1
+empID: 3 | standby_attendanceID: 71 | status: 0 | count: 0
+empID: 7 | standby_attendanceID: 71 | status: 1 | count: 1
+empID: 8 | standby_attendanceID: 71 | status: 1 | count: 3
+empID: 1 | standby_attendanceID: 71 | status: 1 | count: 1
+empID: 2 | standby_attendanceID: 71 | status: 1 | count: 1
+empID: 3 | standby_attendanceID: 71 | status: 0 | count: 0
+empID: 7 | standby_attendanceID: 71 | status: 1 | count: 1
+empID: 8 | standby_attendanceID: 71 | status: 1 | count: 3
+empID: 1 | standby_attendanceID: 71 | status: 1 | count: 1
+empID: 2 | standby_attendanceID: 71 | status: 1 | count: 1
+empID: 3 | standby_attendanceID: 71 | status: 0 | count: 0
+empID: 7 | standby_attendanceID: 71 | status: 1 | count: 1
+empID: 8 | standby_attendanceID: 71 | status: 1 | count: 3
+empID: 1 | standby_attendanceID: 71 | status: 1 | count: 1
+empID: 2 | standby_attendanceID: 71 | status: 1 | count: 1
+empID: 3 | standby_attendanceID: 71 | status: 0 | count: 0
+empID: 7 | standby_attendanceID: 71 | status: 1 | count: 1
+empID: 8 | standby_attendanceID: 71 | status: 1 | count: 3
+empID: 1 | standby_attendanceID: 71 | status: 1 | count: 1
+empID: 2 | standby_attendanceID: 71 | status: 1 | count: 3
+empID: 3 | standby_attendanceID: 71 | status: 0 | count: 0
+empID: 7 | standby_attendanceID: 71 | status: 1 | count: 3
+empID: 8 | standby_attendanceID: 71 | status: 1 | count: 3
+empID: 1 | standby_attendanceID: 71 | status: 1 | count: 3
+empID: 2 | standby_attendanceID: 71 | status: 1 | count: 3
+empID: 3 | standby_attendanceID: 71 | status: 0 | count: 0
+empID: 7 | standby_attendanceID: 71 | status: 1 | count: 3
+empID: 8 | standby_attendanceID: 71 | status: 1 | count: 3
+empID: 1 | standby_attendanceID: 71 | status: 1 | count: 3
+empID: 2 | standby_attendanceID: 71 | status: 1 | count: 3
+empID: 3 | standby_attendanceID: 71 | status: 0 | count: 0
+empID: 7 | standby_attendanceID: 71 | status: 1 | count: 3
+empID: 8 | standby_attendanceID: 71 | status: 1 | count: 3
+empID: 1 | standby_attendanceID: 71 | status: 1 | count: 3
+empID: 2 | standby_attendanceID: 71 | status: 1 | count: 3
+empID: 3 | standby_attendanceID: 71 | status: 0 | count: 0
+empID: 7 | standby_attendanceID: 71 | status: 1 | count: 3
+empID: 8 | standby_attendanceID: 71 | status: 1 | count: 3
+empID: 1 | standby_attendanceID: 71 | status: 1 | count: 3
+empID: 2 | standby_attendanceID: 71 | status: 1 | count: 3
+empID: 3 | standby_attendanceID: 71 | status: 0 | count: 0
+empID: 7 | standby_attendanceID: 71 | status: 1 | count: 3
+empID: 8 | standby_attendanceID: 71 | status: 1 | count: 3
+empID: 1 | standby_attendanceID: 71 | status: 1 | count: 3
+empID: 2 | standby_attendanceID: 71 | status: 1 | count: 3
+empID: 3 | standby_attendanceID: 71 | status: 0 | count: 0
+empID: 7 | standby_attendanceID: 71 | status: 1 | count: 3
+empID: 8 | standby_attendanceID: 71 | status: 1 | count: 3
+empID: 1 | standby_attendanceID: 71 | status: 1 | count: 3
+empID: 2 | standby_attendanceID: 71 | status: 1 | count: 3
+empID: 3 | standby_attendanceID: 71 | status: 0 | count: 0
+empID: 7 | standby_attendanceID: 71 | status: 1 | count: 3
+empID: 8 | standby_attendanceID: 71 | status: 1 | count: 3
+empID: 1 | standby_attendanceID: 71 | status: 1 | count: 3
+empID: 2 | standby_attendanceID: 71 | status: 1 | count: 3
+empID: 3 | standby_attendanceID: 71 | status: 0 | count: 0
+empID: 7 | standby_attendanceID: 71 | status: 1 | count: 3
+empID: 8 | standby_attendanceID: 71 | status: 1 | count: 3
+empID: 1 | standby_attendanceID: 71 | status: 1 | count: 3
+empID: 2 | standby_attendanceID: 71 | status: 1 | count: 3
+empID: 3 | standby_attendanceID: 71 | status: 0 | count: 0
+empID: 7 | standby_attendanceID: 71 | status: 1 | count: 3
+empID: 8 | standby_attendanceID: 71 | status: 1 | count: 3
+empID: 1 | standby_attendanceID: 71 | status: 1 | count: 3
+empID: 2 | standby_attendanceID: 71 | status: 1 | count: 3
+empID: 3 | standby_attendanceID: 71 | status: 0 | count: 0
+empID: 7 | standby_attendanceID: 71 | status: 1 | count: 3
+empID: 8 | standby_attendanceID: 71 | status: 1 | count: 3
+empID: 1 | standby_attendanceID: 71 | status: 1 | count: 3
+empID: 2 | standby_attendanceID: 71 | status: 1 | count: 3
+empID: 3 | standby_attendanceID: 71 | status: 0 | count: 0
+empID: 7 | standby_attendanceID: 71 | status: 1 | count: 3
+empID: 8 | standby_attendanceID: 71 | status: 1 | count: 3
+empID: 1 | standby_attendanceID: 71 | status: 1 | count: 3
+empID: 2 | standby_attendanceID: 71 | status: 1 | count: 3
+empID: 3 | standby_attendanceID: 71 | status: 0 | count: 0
+empID: 7 | standby_attendanceID: 71 | status: 1 | count: 3
+empID: 8 | standby_attendanceID: 71 | status: 1 | count: 3
+empID: 1 | standby_attendanceID: 71 | status: 1 | count: 3
+empID: 2 | standby_attendanceID: 71 | status: 1 | count: 3
+empID: 3 | standby_attendanceID: 71 | status: 0 | count: 0
+empID: 7 | standby_attendanceID: 71 | status: 1 | count: 3
+empID: 8 | standby_attendanceID: 71 | status: 1 | count: 3
+empID: 1 | standby_attendanceID: 71 | status: 1 | count: 3
+empID: 2 | standby_attendanceID: 71 | status: 1 | count: 3
+empID: 3 | standby_attendanceID: 71 | status: 0 | count: 0
+empID: 7 | standby_attendanceID: 71 | status: 1 | count: 3
+empID: 8 | standby_attendanceID: 71 | status: 1 | count: 3
+empID: 1 | standby_attendanceID: 71 | status: 1 | count: 3
+empID: 2 | standby_attendanceID: 71 | status: 1 | count: 3
+empID: 3 | standby_attendanceID: 71 | status: 0 | count: 0
+empID: 7 | standby_attendanceID: 71 | status: 1 | count: 3
+empID: 8 | standby_attendanceID: 71 | status: 1 | count: 3
+empID: 1 | standby_attendanceID: 71 | status: 1 | count: 3
+empID: 2 | standby_attendanceID: 71 | status: 1 | count: 3
+empID: 3 | standby_attendanceID: 71 | status: 0 | count: 0
+empID: 7 | standby_attendanceID: 71 | status: 1 | count: 3
+empID: 8 | standby_attendanceID: 71 | status: 1 | count: 3
+empID: 1 | standby_attendanceID: 71 | status: 1 | count: 3
+empID: 2 | standby_attendanceID: 71 | status: 1 | count: 3
+empID: 3 | standby_attendanceID: 71 | status: 0 | count: 0
+empID: 7 | standby_attendanceID: 71 | status: 1 | count: 3
+empID: 8 | standby_attendanceID: 71 | status: 1 | count: 3
+empID: 1 | standby_attendanceID: 71 | status: 1 | count: 3
+empID: 2 | standby_attendanceID: 71 | status: 1 | count: 3
+empID: 3 | standby_attendanceID: 71 | status: 0 | count: 0
+empID: 7 | standby_attendanceID: 71 | status: 1 | count: 3
+empID: 8 | standby_attendanceID: 71 | status: 1 | count: 4
+empID: 1 | standby_attendanceID: 71 | status: 1 | count: 3
+empID: 2 | standby_attendanceID: 71 | status: 1 | count: 3
+empID: 3 | standby_attendanceID: 71 | status: 0 | count: 0
+empID: 7 | standby_attendanceID: 71 | status: 1 | count: 3
+empID: 8 | standby_attendanceID: 71 | status: 1 | count: 4
+empID: 1 | standby_attendanceID: 71 | status: 1 | count: 3
+empID: 2 | standby_attendanceID: 71 | status: 1 | count: 3
+empID: 3 | standby_attendanceID: 71 | status: 0 | count: 0
+empID: 7 | standby_attendanceID: 71 | status: 1 | count: 3
+empID: 8 | standby_attendanceID: 71 | status: 1 | count: 4
+empID: 1 | standby_attendanceID: 71 | status: 1 | count: 3
+empID: 2 | standby_attendanceID: 71 | status: 1 | count: 3
+empID: 3 | standby_attendanceID: 71 | status: 0 | count: 0
+empID: 7 | standby_attendanceID: 71 | status: 1 | count: 3
+empID: 8 | standby_attendanceID: 71 | status: 1 | count: 4
+empID: 1 | standby_attendanceID: 71 | status: 1 | count: 3
+empID: 7 | standby_attendanceID: 87 | status: 1 | count: 0
+empID: 12 | standby_attendanceID: 87 | status: 1 | count: 0
+empID: 6 | standby_attendanceID: 87 | status: 1 | count: 1
+empID: 1 | standby_attendanceID: 87 | status: 1 | count: 0
+empID: 7 | standby_attendanceID: 87 | status: 1 | count: 0
+empID: 12 | standby_attendanceID: 87 | status: 1 | count: 0
+empID: 6 | standby_attendanceID: 87 | status: 1 | count: 1
+empID: 1 | standby_attendanceID: 87 | status: 1 | count: 0
+empID: 8 | standby_attendanceID: 109 | status: 1 | count: 1
+empID: 7 | standby_attendanceID: 109 | status: 1 | count: 1
+empID: 6 | standby_attendanceID: 109 | status: 1 | count: 1
+empID: 3 | standby_attendanceID: 109 | status: 1 | count: 1
+empID: 1 | standby_attendanceID: 109 | status: 1 | count: 1
+empID: 19 | standby_attendanceID: 110 | status: 1 | count: 1
+empID: 18 | standby_attendanceID: 110 | status: 1 | count: 1
+empID: 2 | standby_attendanceID: 111 | status: 0 | count: 0
+empID: 16 | standby_attendanceID: 111 | status: 0 | count: 0
+empID: 16 | standby_attendanceID: 112 | status: 1 | count: 0
+empID: 15 | standby_attendanceID: 112 | status: 1 | count: 0
+empID: 8 | standby_attendanceID: 109 | status: 1 | count: 1
+empID: 7 | standby_attendanceID: 109 | status: 1 | count: 1
+empID: 6 | standby_attendanceID: 109 | status: 1 | count: 1
+empID: 3 | standby_attendanceID: 109 | status: 1 | count: 1
+empID: 1 | standby_attendanceID: 109 | status: 1 | count: 1
+empID: 19 | standby_attendanceID: 110 | status: 1 | count: 1
+empID: 18 | standby_attendanceID: 110 | status: 1 | count: 1
+empID: 2 | standby_attendanceID: 111 | status: 0 | count: 0
+empID: 16 | standby_attendanceID: 111 | status: 0 | count: 0
+empID: 16 | standby_attendanceID: 112 | status: 1 | count: 0
+empID: 15 | standby_attendanceID: 112 | status: 1 | count: 0
+empID: 8 | standby_attendanceID: 109 | status: 1 | count: 1
+empID: 7 | standby_attendanceID: 109 | status: 1 | count: 1
+empID: 6 | standby_attendanceID: 109 | status: 1 | count: 1
+empID: 3 | standby_attendanceID: 109 | status: 1 | count: 1
+empID: 1 | standby_attendanceID: 109 | status: 1 | count: 1
+empID: 19 | standby_attendanceID: 110 | status: 1 | count: 1
+empID: 18 | standby_attendanceID: 110 | status: 1 | count: 1
+empID: 2 | standby_attendanceID: 111 | status: 0 | count: 0
+empID: 16 | standby_attendanceID: 111 | status: 0 | count: 0
+empID: 16 | standby_attendanceID: 112 | status: 1 | count: 0
+empID: 15 | standby_attendanceID: 112 | status: 1 | count: 0
+empID: 8 | standby_attendanceID: 109 | status: 1 | count: 1
+empID: 7 | standby_attendanceID: 109 | status: 1 | count: 1
+empID: 6 | standby_attendanceID: 109 | status: 1 | count: 1
+empID: 3 | standby_attendanceID: 109 | status: 1 | count: 1
+empID: 1 | standby_attendanceID: 109 | status: 1 | count: 1
+empID: 19 | standby_attendanceID: 110 | status: 1 | count: 1
+empID: 18 | standby_attendanceID: 110 | status: 1 | count: 1
+empID: 2 | standby_attendanceID: 111 | status: 0 | count: 0
+empID: 16 | standby_attendanceID: 111 | status: 0 | count: 0
+empID: 16 | standby_attendanceID: 112 | status: 1 | count: 0
+empID: 15 | standby_attendanceID: 112 | status: 1 | count: 0
+empID: 8 | standby_attendanceID: 109 | status: 1 | count: 1
+empID: 7 | standby_attendanceID: 109 | status: 1 | count: 1
+empID: 6 | standby_attendanceID: 109 | status: 1 | count: 1
+empID: 3 | standby_attendanceID: 109 | status: 1 | count: 1
+empID: 1 | standby_attendanceID: 109 | status: 1 | count: 1
+empID: 19 | standby_attendanceID: 110 | status: 1 | count: 1
+empID: 18 | standby_attendanceID: 110 | status: 1 | count: 1
+empID: 2 | standby_attendanceID: 111 | status: 0 | count: 0
+empID: 16 | standby_attendanceID: 111 | status: 0 | count: 0
+empID: 16 | standby_attendanceID: 112 | status: 1 | count: 0
+empID: 15 | standby_attendanceID: 112 | status: 1 | count: 0
+empID: 8 | standby_attendanceID: 109 | status: 1 | count: 1
+empID: 7 | standby_attendanceID: 109 | status: 1 | count: 1
+empID: 6 | standby_attendanceID: 109 | status: 1 | count: 1
+empID: 3 | standby_attendanceID: 109 | status: 1 | count: 1
+empID: 1 | standby_attendanceID: 109 | status: 1 | count: 1
+empID: 19 | standby_attendanceID: 110 | status: 1 | count: 1
+empID: 18 | standby_attendanceID: 110 | status: 1 | count: 1
+empID: 2 | standby_attendanceID: 111 | status: 0 | count: 0
+empID: 16 | standby_attendanceID: 111 | status: 0 | count: 0
+empID: 16 | standby_attendanceID: 112 | status: 1 | count: 0
+empID: 15 | standby_attendanceID: 112 | status: 1 | count: 0
+empID: 8 | standby_attendanceID: 109 | status: 1 | count: 1
+empID: 7 | standby_attendanceID: 109 | status: 1 | count: 1
+empID: 6 | standby_attendanceID: 109 | status: 1 | count: 1
+empID: 3 | standby_attendanceID: 109 | status: 1 | count: 1
+empID: 1 | standby_attendanceID: 109 | status: 1 | count: 1
+empID: 19 | standby_attendanceID: 110 | status: 1 | count: 1
+empID: 18 | standby_attendanceID: 110 | status: 1 | count: 1
+empID: 2 | standby_attendanceID: 111 | status: 0 | count: 0
+empID: 16 | standby_attendanceID: 111 | status: 0 | count: 0
+empID: 16 | standby_attendanceID: 112 | status: 1 | count: 0
+empID: 15 | standby_attendanceID: 112 | status: 1 | count: 0
+empID: 8 | standby_attendanceID: 109 | status: 1 | count: 1
+empID: 7 | standby_attendanceID: 109 | status: 1 | count: 1
+empID: 6 | standby_attendanceID: 109 | status: 1 | count: 1
+empID: 3 | standby_attendanceID: 109 | status: 1 | count: 1
+empID: 1 | standby_attendanceID: 109 | status: 1 | count: 1
+empID: 19 | standby_attendanceID: 110 | status: 1 | count: 1
+empID: 18 | standby_attendanceID: 110 | status: 1 | count: 1
+empID: 2 | standby_attendanceID: 111 | status: 0 | count: 0
+empID: 16 | standby_attendanceID: 111 | status: 0 | count: 0
+empID: 16 | standby_attendanceID: 112 | status: 1 | count: 0
+empID: 15 | standby_attendanceID: 112 | status: 1 | count: 0
+empID: 8 | standby_attendanceID: 109 | status: 1 | count: 1
+empID: 7 | standby_attendanceID: 109 | status: 1 | count: 1
+empID: 6 | standby_attendanceID: 109 | status: 1 | count: 1
+empID: 3 | standby_attendanceID: 109 | status: 1 | count: 1
+empID: 1 | standby_attendanceID: 109 | status: 1 | count: 1
+empID: 19 | standby_attendanceID: 110 | status: 1 | count: 1
+empID: 18 | standby_attendanceID: 110 | status: 1 | count: 1
+empID: 2 | standby_attendanceID: 111 | status: 0 | count: 0
+empID: 16 | standby_attendanceID: 111 | status: 0 | count: 0
+empID: 16 | standby_attendanceID: 112 | status: 1 | count: 0
+empID: 15 | standby_attendanceID: 112 | status: 1 | count: 0
+empID: 8 | standby_attendanceID: 109 | status: 1 | count: 1
+empID: 7 | standby_attendanceID: 109 | status: 1 | count: 1
+empID: 6 | standby_attendanceID: 109 | status: 1 | count: 1
+empID: 3 | standby_attendanceID: 109 | status: 1 | count: 1
+empID: 1 | standby_attendanceID: 109 | status: 1 | count: 1
+empID: 19 | standby_attendanceID: 110 | status: 1 | count: 1
+empID: 18 | standby_attendanceID: 110 | status: 1 | count: 1
+empID: 2 | standby_attendanceID: 111 | status: 0 | count: 0
+empID: 16 | standby_attendanceID: 111 | status: 0 | count: 0
+empID: 16 | standby_attendanceID: 112 | status: 1 | count: 0
+empID: 15 | standby_attendanceID: 112 | status: 1 | count: 0
+empID: 2 | standby_attendanceID: 113 | status: 1 | count: 0
+empID: 3 | standby_attendanceID: 113 | status: 1 | count: 0
+empID: 6 | standby_attendanceID: 113 | status: 0 | count: 0
+empID: 7 | standby_attendanceID: 113 | status: 1 | count: 0
+empID: 1 | standby_attendanceID: 113 | status: 1 | count: 0
+empID: 8 | standby_attendanceID: 114 | status: 1 | count: 0
+empID: 9 | standby_attendanceID: 114 | status: 1 | count: 0
+empID: 2 | standby_attendanceID: 113 | status: 1 | count: 0
+empID: 3 | standby_attendanceID: 113 | status: 1 | count: 0
+empID: 6 | standby_attendanceID: 113 | status: 0 | count: 0
+empID: 7 | standby_attendanceID: 113 | status: 1 | count: 0
+empID: 1 | standby_attendanceID: 113 | status: 1 | count: 0
+empID: 8 | standby_attendanceID: 114 | status: 1 | count: 0
+empID: 9 | standby_attendanceID: 114 | status: 1 | count: 0
+empID: 2 | standby_attendanceID: 113 | status: 1 | count: 0
+empID: 3 | standby_attendanceID: 113 | status: 1 | count: 0
+empID: 6 | standby_attendanceID: 113 | status: 0 | count: 0
+empID: 7 | standby_attendanceID: 113 | status: 1 | count: 0
+empID: 1 | standby_attendanceID: 113 | status: 1 | count: 0
+empID: 8 | standby_attendanceID: 114 | status: 1 | count: 0
+empID: 9 | standby_attendanceID: 114 | status: 1 | count: 0

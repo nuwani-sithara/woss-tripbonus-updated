@@ -1,0 +1,65 @@
+Array
+(
+    [startDate] => Array
+        (
+            [0] => 2025-06-20
+        )
+
+    [endDate] => Array
+        (
+            [0] => 2025-06-21
+        )
+
+    [vesselID] => Array
+        (
+            [0] => 1
+        )
+
+    [jobTypeID] => Array
+        (
+            [0] => 1
+        )
+
+    [boatID] => Array
+        (
+            [0] => 1
+        )
+
+    [portID] => Array
+        (
+            [0] => 1
+        )
+
+    [divers] => Array
+        (
+            [0] => Array
+                (
+                    [0] => 2
+                    [1] => 3
+                )
+
+        )
+
+    [comment] => Array
+        (
+            [0] => arghte
+        )
+
+    [name] => Array
+        (
+            [0] => 
+        )
+
+    [vessel] => Array
+        (
+            [0] => 
+        )
+
+    [date] => Array
+        (
+            [0] => 
+        )
+
+    [eaidMap] => {"2":18,"3":19}
+    [add_job] => 
+)
