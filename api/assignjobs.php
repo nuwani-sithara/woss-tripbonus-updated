@@ -14,13 +14,26 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 }
 
 try {
-    $tripID = (int)($_POST['tripID'] ?? 0);
+    // Get tripID from URL or POST body
+    $tripID = (int)($_GET['tripID'] ?? $_POST['tripID'] ?? 0);
     $standby_attendanceID = (int)($_POST['standby_attendanceID'] ?? 0);
     $divers = $_POST['divers'] ?? [];
     $otherDivers = $_POST['otherDivers'] ?? [];
 
     if (!$tripID) {
         throw new Exception("tripID is required.");
+    }
+
+    // Also allow JSON raw body
+    $input = file_get_contents("php://input");
+    $data = json_decode($input, true);
+    if ($data) {
+        $standby_attendanceID = $data['standby_attendanceID'] ?? $standby_attendanceID;
+        $divers = $data['divers'] ?? $divers;
+        $otherDivers = $data['otherDivers'] ?? $otherDivers;
+        $providedDate = $data['date'] ?? null;
+    } else {
+        $providedDate = $_POST['date'] ?? null;
     }
 
     $conn->begin_transaction();
@@ -59,7 +72,7 @@ try {
     assignDivers($conn, $otherDivers, $tripID);
 
     // Assign job creator (supervisor)
-    $creatorID = $_SESSION['userID'] ?? 0;
+    $creatorID = $_SESSION['userID'] ?? (int)($_GET['userID'] ?? $_POST['userID'] ?? 0);
     if ($creatorID) {
         $stmt = $conn->prepare("SELECT empID FROM employees WHERE userID = ?");
         $stmt->bind_param("i", $creatorID);
@@ -84,9 +97,19 @@ try {
         $stmt->close();
     }
 
-    // Job attendance
-    $tripDate = $conn->query("SELECT trip_date FROM trips WHERE tripID = $tripID")->fetch_assoc()['trip_date'];
+    // ✅ Fix: Get job date
+    $tripDate = $providedDate;
+    if (!$tripDate) {
+        $res = $conn->query("SELECT trip_date FROM trips WHERE tripID = $tripID");
+        if ($res && $res->num_rows > 0) {
+            $tripDate = $res->fetch_assoc()['trip_date'];
+        }
+    }
+    if (!$tripDate) {
+        throw new Exception("No valid date provided or found for tripID $tripID");
+    }
 
+    // Job attendance
     $stmt = $conn->prepare("SELECT job_attendanceID FROM job_attendance WHERE tripID = ?");
     $stmt->bind_param("i", $tripID);
     $stmt->execute();
@@ -121,7 +144,7 @@ try {
 
     $response['success'] = true;
     $response['message'] = "Job assignments and attendance updated successfully.";
-    $response['data'] = ['tripID' => $tripID];
+    $response['data'] = ['tripID' => $tripID, 'date' => $tripDate];
 
 } catch (Exception $e) {
     $conn->rollback();

@@ -5,16 +5,17 @@ include '../config/dbConnect.php';
 include 'helpers.php';
 include 'update_functions.php'; // make sure deleteTrip is defined here
 
-// Only allow POST requests
-if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+// ✅ Allow both POST and GET
+if ($_SERVER['REQUEST_METHOD'] !== 'POST' && $_SERVER['REQUEST_METHOD'] !== 'GET') {
     echo json_encode(['success' => false, 'error' => 'Invalid request method.']);
     exit();
 }
 
-// Get JSON input
+// Get input (JSON → POST → GET)
 $input = file_get_contents("php://input");
 $data = json_decode($input, true);
 if (!$data) $data = $_POST;
+if (!$data) $data = $_GET;
 
 // Determine userID
 $userID = isset($_SESSION['userID']) ? (int)$_SESSION['userID'] : null;
