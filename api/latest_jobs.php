@@ -17,6 +17,7 @@ if (!$loggedUserID) {
     exit();
 }
 
+// --- 1. Fetch latest 10 jobs ---
 $latestJobs = [];
 $sql = "SELECT 
           j.jobID,
@@ -59,8 +60,18 @@ if ($res) {
     }
 }
 
+// --- 2. Fetch total jobs count ---
+$totalCount = 0;
+$sqlCount = "SELECT COUNT(*) as total FROM jobs WHERE jobCreatedBy = $loggedUserID";
+$resCount = $conn->query($sqlCount);
+if ($resCount && $row = $resCount->fetch_assoc()) {
+    $totalCount = (int)$row['total'];
+}
+
+// --- Final Response ---
 echo json_encode([
     "success" => true,
     "data" => $latestJobs,
-    "count" => count($latestJobs)
+    "returned_count" => count($latestJobs), // only latest 10
+    "total_count" => $totalCount            // ALL jobs created by user
 ]);
