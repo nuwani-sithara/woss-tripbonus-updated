@@ -73,41 +73,6 @@ if ($res) {
 }
 
 // 3. Latest 10 Jobs Created by Supervisor
-// $latestJobs = [];
-// $sql = "SELECT 
-//           j.jobID,
-//           j.start_date,
-//           j.end_date,
-//           j.comment,
-//           jt.type_name as job_type,
-//           v.vessel_name,
-//           CASE 
-//             WHEN a.approval_status IS NULL THEN 'Pending'
-//             WHEN a.approval_status = 1 THEN 'Approved'
-//             WHEN a.approval_status = 3 THEN 'Rejected'
-//             ELSE 'Pending'
-//           END as status,
-//           CASE 
-//             WHEN a.approval_status IS NULL THEN 'warning'
-//             WHEN a.approval_status = 1 THEN 'success'
-//             WHEN a.approval_status = 3 THEN 'danger'
-//             ELSE 'warning'
-//           END as status_class,
-//           CASE 
-//             WHEN a.approval_status IS NULL THEN 'fas fa-clock'
-//             WHEN a.approval_status = 1 THEN 'fas fa-check-circle'
-//             WHEN a.approval_status = 3 THEN 'fas fa-times-circle'
-//             ELSE 'fas fa-clock'
-//           END as status_icon
-//         FROM jobs j
-//         LEFT JOIN jobtype jt ON j.jobtypeID = jt.jobtypeID
-//         LEFT JOIN vessels v ON j.vesselID = v.vesselID
-//         LEFT JOIN approvals a ON j.jobID = a.jobID AND a.approval_stage = 'job_approval'
-//         WHERE j.jobCreatedBy = $loggedUserID
-//         ORDER BY j.start_date DESC
-//         LIMIT 10";
-
-// 3. Latest 10 Jobs Created by Supervisor
 $latestJobs = [];
 $sql = "SELECT 
           j.jobID,
