@@ -332,7 +332,7 @@ $totalCount = $totalResult ? $totalResult->fetch_assoc()['count'] : 0;
                                     <div class="flex-grow-1 ms-3">
                                         <h6 class="card-title mb-1">View Job Details</h6>
                                         <p class="card-text text-muted small">View detailed information about specific jobs</p>
-                                        <a href="jobManagement.php" class="btn btn-info btn-sm">
+                                        <a href="supervisorinchargejobs.php" class="btn btn-info btn-sm">
                                             <i class="fas fa-arrow-right me-1"></i> Manage Jobs
                                         </a>
                                     </div>
