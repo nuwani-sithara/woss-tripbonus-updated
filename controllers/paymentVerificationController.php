@@ -440,7 +440,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
         
         echo 'success';
 
-        // Send notification to OM & CEO
+        // Send notification to OM
         $notifyUrl = 'https://tripbonus.worldsubsea.lk/controllers/sendPaymentVerifyNotificationController.php';
         $notifyData = [
             'paymentVerifyID' => $paymentVerifyID,

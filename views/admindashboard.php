@@ -24,7 +24,7 @@ if (!$conn) {
 // Fetch role-wise user counts
 $userCounts = [];
 $roleNames = [];
-$excludedRoles = ['Operations Officer', 'Operations Manager', 'Accountant', 'CEO', 'Director'];
+$excludedRoles = ['Operations Officer', 'Operations Manager', 'Accountant', 'Director'];
 $sql = "SELECT u.roleID, r.role_name, COUNT(*) as user_count FROM users u JOIN roles r ON u.roleID = r.roleID GROUP BY u.roleID";
 $res = $conn->query($sql);
 if ($res) {

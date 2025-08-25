@@ -104,8 +104,8 @@ if (!$conn) {
               class="d-flex align-items-left align-items-md-center flex-column flex-md-row pt-2 pb-4"
             >
               <div>
-                <h3 class="fw-bold mb-3">CEO Dashboard</h3>
-                <h6 class="op-7 mb-2">Dashboard - CEO</h6>
+                <h3 class="fw-bold mb-3">Dashboard</h3>
+                <h6 class="op-7 mb-2">Dashboard</h6>
               </div>
               <div class="ms-md-auto py-2 py-md-0">
                 <a href="#" class="btn btn-label-info btn-round me-2">Manage</a>
@@ -512,7 +512,7 @@ if (!$conn) {
                         </div>
                         <div class="info-user ms-3">
                           <div class="username">Chad</div>
-                          <div class="status">CEO Zeleaf</div>
+                          <div class="status">Zeleaf</div>
                         </div>
                         <button class="btn btn-icon btn-link op-8 me-1">
                           <i class="far fa-envelope"></i>

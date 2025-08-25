@@ -11,7 +11,6 @@ $userID = $_SESSION['userID'];
 function getApprovals($conn, $month, $year) {
     $roles = [
         'accountant' => ['table' => 'paymentverify', 'by' => 'paymentVerifyBy', 'date' => 'paymentVerifyDate'],
-        'ceo' => ['table' => 'ceoverify', 'by' => 'ceoVerifyBy', 'date' => 'ceoVerifyDate'],
         'director' => ['table' => 'directorverify', 'by' => 'directorVerifyBy', 'date' => 'directorVerifyDate'],
     ];
     $result = [];
@@ -53,7 +52,7 @@ function getTotals($conn, $month, $year) {
 }
 
 function allApproved($approvals) {
-    return $approvals['accountant'] && $approvals['ceo'] && $approvals['director'];
+    return $approvals['accountant'] && $approvals['director'];
 }
 
 function logAction($conn, $userID, $action_type, $month, $year, $file_type = null, $recipients = null, $details = null) {

@@ -274,7 +274,6 @@ function fetchPayments(month, year) {
             // Monthly Totals and Approver Details
             const totals = data.monthlyTotals || {};
             const approver = data.approver;
-            const ceo = data.ceo;
             let totalsHtml = '';
             if (Object.keys(totals).length > 0) {
                 totalsHtml += `
@@ -293,15 +292,15 @@ function fetchPayments(month, year) {
                 </div>
                 `;
             }
-            if ((approver && approver.fname) || (ceo && ceo.fname)) {
+            if (approver && approver.fname) {
                 totalsHtml += `
                 <div class="table-responsive mb-3">
                     <table class="approval-table table table-bordered align-middle" style="min-width: 500px;">
                         <thead class="table-light">
                             <tr>
-                                <th style="padding: 14px 18px;">Approval Stage</th>
-                                <th style="padding: 14px 18px;">Approved By</th>
-                                <th style="padding: 14px 18px;">Date</th>
+                                <th style=\"padding: 14px 18px;\">Approval Stage</th>
+                                <th style=\"padding: 14px 18px;\">Approved By</th>
+                                <th style=\"padding: 14px 18px;\">Date</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -318,19 +317,7 @@ function fetchPayments(month, year) {
                                         : '<span class="text-muted">-</span>'}
                                 </td>
                             </tr>
-                            <tr>
-                                <td style="padding: 16px 18px; font-size: 1.05rem;"><i class="fas fa-user-tie approval-icon"></i> CEO Approval</td>
-                                <td style="padding: 16px 18px;">
-                                    ${ceo && ceo.fname
-                                        ? `<span class="approver-name">${ceo.fname} ${ceo.lname ? ceo.lname : ''}</span>`
-                                        : '<span class="text-muted">Not approved yet</span>'}
-                                </td>
-                                <td style="padding: 16px 18px;">
-                                    ${ceo && ceo.ceoVerifyDate
-                                        ? `<span class="approval-date">${ceo.ceoVerifyDate}</span>`
-                                        : '<span class="text-muted">-</span>'}
-                                </td>
-                            </tr>
+                            
                         </tbody>
                     </table>
                 </div>

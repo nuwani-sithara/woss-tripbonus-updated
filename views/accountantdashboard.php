@@ -512,7 +512,7 @@ if (!$conn) {
                         </div>
                         <div class="info-user ms-3">
                           <div class="username">Chad</div>
-                          <div class="status">CEO Zeleaf</div>
+                          <div class="status">Zeleaf</div>
                         </div>
                         <button class="btn btn-icon btn-link op-8 me-1">
                           <i class="far fa-envelope"></i>

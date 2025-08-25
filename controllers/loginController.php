@@ -60,7 +60,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 header("Location: ../views/paymentverification.php");
                 break;
             case 6: 
-                header("Location: ../views/ceoverification.php");
+                header("Location: ../views/directorverfication.php");
                 break;
             case 7: 
                 header("Location: ../views/directordashboard.php");

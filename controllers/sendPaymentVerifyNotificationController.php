@@ -30,9 +30,8 @@ try {
     $acc = $conn->query("SELECT fname, lname FROM users WHERE userID = $accountantID")->fetch_assoc();
     $accName = trim($acc['fname'] . ' ' . $acc['lname']);
 
-    // Get operation manager and CEO
+    // Get operation manager
     $om = $conn->query("SELECT userID, email, fname, lname FROM users WHERE roleID = 4 LIMIT 1")->fetch_assoc();
-    $ceo = $conn->query("SELECT userID, email, fname, lname FROM users WHERE roleID = 6 LIMIT 1")->fetch_assoc();
 
     // --- Email to Operation Manager ---
     $subjectOM = "Payments Verified by Accountant for $month $year";
@@ -102,76 +101,6 @@ try {
     </html>
     ";
 
-    // --- Email to CEO ---
-    $subjectCEO = "Payments Awaiting Your Approval - $month $year";
-    $approvalLink = "https://tripbonus.worldsubsea.lk/views/ceoverification.php?month=" . urlencode($month) . "&year=" . $year;
-    $bodyCEO = "
-    <html>
-    <head>
-        <style>
-            body { font-family: Arial, sans-serif; line-height: 1.6; background-color: #f5f5f5; margin: 0; padding: 20px; }
-            .container { 
-                max-width: 600px; 
-                margin: 0 auto; 
-                background-color: white; 
-                border: 1px solid #e0e0e0; 
-                border-radius: 5px;
-                box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-            }
-            .header { 
-                background-color: #cce5ff; 
-                padding: 15px; 
-                text-align: center; 
-                border-bottom: 1px solid #e0e0e0;
-                color: #004085;
-            }
-            .content { 
-                padding: 20px; 
-            }
-            .button { 
-                display: inline-block; 
-                padding: 10px 20px; 
-                background-color: #2e59d9; 
-                color: white !important; 
-                text-decoration: none; 
-                border-radius: 5px; 
-                margin-top: 15px;
-                font-weight: bold;
-            }
-            .footer { 
-                margin-top: 20px; 
-                font-size: 12px; 
-                color: #6c757d; 
-                text-align: center; 
-                padding: 15px;
-                border-top: 1px solid #e0e0e0;
-                background-color: #f8f9fa;
-            }
-            p {
-                margin-bottom: 15px;
-            }
-        </style>
-    </head>
-    <body>
-        <div class='container'>
-            <div class='header'>
-                <h2>Monthly Diving Payments Awaiting Approval</h2>
-            </div>
-            <div class='content'>
-                <p>Dear {$ceo['fname']} {$ceo['lname']},</p>
-                <p>The payments for <strong>$month $year</strong> have been verified by the accountant and now require your approval.</p>
-                <div style='text-align: center; margin: 25px 0;'>
-                    <a href='$approvalLink' class='button'>Review & Approve Payments</a>
-                </div>
-                <p>Best regards,<br>WOSS Trip Bonus System</p>
-            </div>
-            <div class='footer'>
-                This is an automated notification. Please do not reply to this email.
-            </div>
-        </div>
-    </body>
-    </html>
-    ";
     // Send emails (reuse PHPMailer logic from your other controller)
     $mail = new PHPMailer\PHPMailer\PHPMailer(true);
     $mail->isSMTP();
@@ -200,24 +129,8 @@ try {
     $stmt->bind_param("iii", $data['publishedID'], $accountantID, $om['userID']);
     $stmt->execute();
 
-    // Send to CEO
-    $mail->clearAddresses();
-    $mail->addAddress($ceo['email'], $ceo['fname'] . ' ' . $ceo['lname']);
-    $mail->Subject = $subjectCEO;
-    $mail->Body = $bodyCEO;
-    try {
-        $mail->send();
-    } catch (Exception $e) {
-        file_put_contents(__DIR__ . '/mail_error.log', date('Y-m-d H:i:s') . ' - ' . $mail->ErrorInfo . PHP_EOL, FILE_APPEND);
-        throw $e;
-    }
-    // Log CEO notification
-    $stmt = $conn->prepare("INSERT INTO payment_notifications (publishedID, accountantID, recipientID, recipient_role, notification_type, email_sent, sent_at, reason, status) VALUES (?, ?, ?, 'ceo', 'verify', 1, NOW(), NULL, 1)");
-    $stmt->bind_param("iii", $data['publishedID'], $accountantID, $ceo['userID']);
-    $stmt->execute();
-
     $response['success'] = true;
-    $response['message'] = "Notifications sent to OM and CEO.";
+    $response['message'] = "Notification sent to OM.";
 } catch (Exception $e) {
     $response['message'] = $e->getMessage();
 }

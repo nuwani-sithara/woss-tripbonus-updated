@@ -22,3 +22,56 @@
     [year] => 2025
 )
 
+[25-Aug-2025 15:46:53 Europe/Berlin] Payment Status Controller Accessed: 2025-08-25 15:46:53
+[25-Aug-2025 15:46:53 Europe/Berlin] REQUEST METHOD: GET
+[25-Aug-2025 15:46:53 Europe/Berlin] POST DATA: Array
+(
+)
+
+[25-Aug-2025 15:46:53 Europe/Berlin] GET DATA: Array
+(
+    [month] => August
+    [year] => 2025
+)
+
+[25-Aug-2025 15:49:24 Europe/Berlin] Payment Status Controller Accessed: 2025-08-25 15:49:24
+[25-Aug-2025 15:49:24 Europe/Berlin] REQUEST METHOD: GET
+[25-Aug-2025 15:49:24 Europe/Berlin] POST DATA: Array
+(
+)
+
+[25-Aug-2025 15:49:24 Europe/Berlin] GET DATA: Array
+(
+    [month] => August
+    [year] => 2025
+)
+
+[25-Aug-2025 15:49:29 Europe/Berlin] Payment Status Controller Accessed: 2025-08-25 15:49:29
+[25-Aug-2025 15:49:29 Europe/Berlin] REQUEST METHOD: POST
+[25-Aug-2025 15:49:29 Europe/Berlin] POST DATA: Array
+(
+    [action] => republish
+    [month] => August
+    [year] => 2025
+)
+
+[25-Aug-2025 15:49:29 Europe/Berlin] GET DATA: Array
+(
+)
+
+[25-Aug-2025 19:19:29 Asia/Colombo] Republish request - Month: August, Year: 2025, UserID: 5
+[25-Aug-2025 19:19:29 Asia/Colombo] Published count: 1, Payment count: 6
+[25-Aug-2025 19:19:29 Asia/Colombo] Debug - Published record: {"publishedID":44,"publishedBy":5,"month":"August","year":2025,"publishedDate":"2025-08-25 19:15:46","published_status":3}
+[25-Aug-2025 19:19:29 Asia/Colombo] Debug - Payments count: 6
+[25-Aug-2025 15:49:43 Europe/Berlin] Payment Status Controller Accessed: 2025-08-25 15:49:43
+[25-Aug-2025 15:49:43 Europe/Berlin] REQUEST METHOD: GET
+[25-Aug-2025 15:49:43 Europe/Berlin] POST DATA: Array
+(
+)
+
+[25-Aug-2025 15:49:43 Europe/Berlin] GET DATA: Array
+(
+    [month] => August
+    [year] => 2025
+)
+

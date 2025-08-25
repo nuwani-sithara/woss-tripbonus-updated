@@ -39,9 +39,6 @@ switch ($user['roleID']) {
     case 5: // Accountant
         $sidebar = 'components/accountantSidebar.php';
         break;
-    case 6: // CEO
-        $sidebar = 'components/ceoSidebar.php';
-        break;
     case 7: // Director
         $sidebar = 'components/directorSidebar.php';
         break;

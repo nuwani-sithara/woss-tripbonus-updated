@@ -56,7 +56,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     echo '<th>Published Date</th>';
     echo '<th>Publisher</th>';
     echo '<th>Accountant Details</th>';
-    echo '<th>CEO Details</th>';
+    
     echo '<th>Director Details</th>';
     echo '<th>Action Type</th>';
     echo '<th>History Date</th>';
@@ -83,20 +83,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
             echo '</td>';
         }
         
-        // CEO Details
-        if ($row['ceo_status'] == 'Pending') {
-            echo '<td><span class="text-muted">Awaiting verification</span></td>';
-        } else {
-            $ceoStatusClass = $row['ceo_status'] == 'Verified' ? 'status-verified' : 'status-rejected';
-            echo '<td class="verifier-details">';
-            echo '<span class="badge ' . $ceoStatusClass . '">' . htmlspecialchars($row['ceo_status']) . '</span><br>';
-            echo '<strong>' . htmlspecialchars($row['ceo_name'] ?: 'Unknown') . '</strong><br>';
-            echo '<small>' . htmlspecialchars($row['ceo_date'] ?: 'N/A') . '</small>';
-            if ($row['ceo_status'] == 'Rejected' && $row['ceo_comment']) {
-                echo '<br><small class="text-danger"><strong>Reason:</strong> ' . htmlspecialchars($row['ceo_comment']) . '</small>';
-            }
-            echo '</td>';
-        }
+        
         
         // Director Details
         if ($row['director_status'] == 'Pending') {

@@ -270,12 +270,8 @@ function renderApprovalStatus(approvals) {
                 <div class="step-label ${approvals.accountant ? 'completed' : 'active'}">Accountant Review</div>
             </div>
             <div class="progress-step">
-                <div class="step-bubble ${approvals.ceo ? 'completed' : (approvals.accountant ? 'active' : '')}">2</div>
-                <div class="step-label ${approvals.ceo ? 'completed' : (approvals.accountant ? 'active' : '')}">CEO Approval</div>
-            </div>
-            <div class="progress-step">
-                <div class="step-bubble ${approvals.director ? 'completed' : (approvals.ceo ? 'active' : '')}">3</div>
-                <div class="step-label ${approvals.director ? 'completed' : (approvals.ceo ? 'active' : '')}">Director Approval</div>
+                <div class="step-bubble ${approvals.director ? 'completed' : (approvals.accountant ? 'active' : '')}">2</div>
+                <div class="step-label ${approvals.director ? 'completed' : (approvals.accountant ? 'active' : '')}">Director Approval</div>
             </div>
         </div>
     `;
@@ -311,27 +307,6 @@ function renderApprovalStatus(approvals) {
                         <td>
                             ${approvals.accountant ? 
                                 `<span class="approval-date">${formatDate(approvals.accountant.date)}</span>` : 
-                                '-'}
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>
-                            <i class="fas fa-user-secret approval-icon"></i>
-                            CEO Approval
-                        </td>
-                        <td>
-                            ${approvals.ceo ? 
-                                '<span class="approval-status status-approved"><i class="fas fa-check-circle"></i> Approved</span>' : 
-                                '<span class="approval-status status-pending"><i class="fas fa-clock"></i> Pending</span>'}
-                        </td>
-                        <td>
-                            ${approvals.ceo ? 
-                                `<span class="approver-name">${approvals.ceo.fname} ${approvals.ceo.lname}</span>` : 
-                                'Not approved yet'}
-                        </td>
-                        <td>
-                            ${approvals.ceo ? 
-                                `<span class="approval-date">${formatDate(approvals.ceo.date)}</span>` : 
                                 '-'}
                         </td>
                     </tr>

@@ -19,7 +19,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     // Get payments verified by accountant for this month/year
     $sql = "SELECT p.*, e.userID, u.fname, u.lname FROM payments p
             INNER JOIN paymentverify pv ON p.month = pv.month AND p.year = pv.year
-            INNER JOIN ceoverify cv ON p.month = cv.month AND p.year = cv.year
             LEFT JOIN employees e ON p.empID = e.empID
             LEFT JOIN users u ON e.userID = u.userID
             WHERE p.month = ? AND p.year = ?";
@@ -107,24 +106,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     $approverResult = $approverStmt->get_result();
     $approver = $approverResult->fetch_assoc();
 
-    // Get CEO approver details from ceoverify and users
-    $ceoSql = "SELECT cv.ceoVerifyBy, cv.ceoVerifyDate, u.fname, u.lname 
-               FROM ceoverify cv 
-               JOIN users u ON cv.ceoVerifyBy = u.userID 
-               WHERE cv.month = ? AND cv.year = ? LIMIT 1";
-    $ceoStmt = $conn->prepare($ceoSql);
-    $ceoStmt->bind_param('si', $month, $year);
-    $ceoStmt->execute();
-    $ceoResult = $ceoStmt->get_result();
-    $ceo = $ceoResult->fetch_assoc();
-
     echo json_encode([
         'payments' => $payments,
         'directorVerified' => $directorVerified,
         'directorData' => $directorData,
         'monthlyTotals' => $totals,
-        'approver' => $approver,
-        'ceo' => $ceo
+        'approver' => $approver
     ]);
     exit;
 }

@@ -91,7 +91,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
         if ($publishedCount > 0) {
             $historySql = "INSERT INTO payment_history (month, year, publishedBy, publishedDate, 
                             accountant_status, accountant_comment, accountant_date, accountant_name,
-                            ceo_status, ceo_comment, ceo_date, ceo_name,
                             director_status, director_comment, director_date, director_name,
                             history_date, action_type)
                             SELECT p.month, p.year, p.publishedBy, p.publishedDate,
@@ -104,14 +103,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                                    pv.paymentVerifyDate as accountant_date,
                                    CONCAT(IFNULL(u.fname,''), ' ', IFNULL(u.lname,'')) as accountant_name,
                                    CASE 
-                                       WHEN cv.approval_status = 3 THEN 'Rejected'
-                                       WHEN cv.approval_status = 1 THEN 'Verified'
-                                       ELSE 'Pending'
-                                   END as ceo_status,
-                                   cv.comment as ceo_comment,
-                                   cv.ceoVerifyDate as ceo_date,
-                                   CONCAT(IFNULL(cu.fname,''), ' ', IFNULL(cu.lname,'')) as ceo_name,
-                                   CASE 
                                        WHEN dv.approval_status = 3 THEN 'Rejected'
                                        WHEN dv.approval_status = 1 THEN 'Verified'
                                        ELSE 'Pending'
@@ -123,8 +114,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                             FROM published p 
                             LEFT JOIN paymentverify pv ON p.month = pv.month AND p.year = pv.year
                             LEFT JOIN users u ON pv.paymentVerifyBy = u.userID
-                            LEFT JOIN ceoverify cv ON p.month = cv.month AND p.year = cv.year
-                            LEFT JOIN users cu ON cv.ceoVerifyBy = cu.userID
                             LEFT JOIN directorverify dv ON p.month = dv.month AND p.year = dv.year
                             LEFT JOIN users du ON dv.directorVerifyBy = du.userID
                             WHERE p.month = ? AND p.year = ? AND p.publishedBy = ?";
@@ -206,7 +195,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
         $types .= "i";
     }
     
-    // Query published payments with verification status (accountant, CEO, and Director separately)
+    // Query published payments with verification status (accountant and Director separately)
     $sql = "SELECT p.*, 
             CASE 
                 WHEN pv.approval_status = 3 THEN 'Rejected'
@@ -214,29 +203,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
                 ELSE 'Pending'
             END as accountant_status,
             CASE 
-                WHEN cv.approval_status = 3 THEN 'Rejected'
-                WHEN cv.approval_status = 1 THEN 'Verified'
-                ELSE 'Pending'
-            END as ceo_status,
-            CASE 
                 WHEN dv.approval_status = 3 THEN 'Rejected'
                 WHEN dv.approval_status = 1 THEN 'Verified'
                 ELSE 'Pending'
             END as director_status,
             pv.comment as accountant_comment,
-            cv.comment as ceo_comment,
             dv.comment as director_comment,
             pv.paymentVerifyDate as accountant_date,
-            cv.ceoVerifyDate as ceo_date,
             dv.directorVerifyDate as director_date,
             CONCAT(IFNULL(u.fname,''), ' ', IFNULL(u.lname,'')) as accountant_name,
-            CONCAT(IFNULL(cu.fname,''), ' ', IFNULL(cu.lname,'')) as ceo_name,
             CONCAT(IFNULL(du.fname,''), ' ', IFNULL(du.lname,'')) as director_name
             FROM published p 
             LEFT JOIN paymentverify pv ON p.month = pv.month AND p.year = pv.year
             LEFT JOIN users u ON pv.paymentVerifyBy = u.userID
-            LEFT JOIN ceoverify cv ON p.month = cv.month AND p.year = cv.year
-            LEFT JOIN users cu ON cv.ceoVerifyBy = cu.userID
             LEFT JOIN directorverify dv ON p.month = dv.month AND p.year = dv.year
             LEFT JOIN users du ON dv.directorVerifyBy = du.userID
             $whereClause
@@ -258,7 +237,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     echo '<th>Month/Year</th>';
     echo '<th>Published Date</th>';
     echo '<th>Accountant Details</th>';
-    echo '<th>CEO Details</th>';
+    
     echo '<th>Director Details</th>';
     echo '<th>Status</th>';
     echo '<th>Actions</th>';
@@ -269,10 +248,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
         $overallStatus = 'Pending';
         $statusClass = 'status-pending';
         
-        if ($row['accountant_status'] == 'Rejected' || $row['ceo_status'] == 'Rejected' || $row['director_status'] == 'Rejected') {
+        if ($row['accountant_status'] == 'Rejected' || $row['director_status'] == 'Rejected') {
             $overallStatus = 'Rejected';
             $statusClass = 'status-rejected';
-        } elseif ($row['accountant_status'] == 'Verified' && $row['ceo_status'] == 'Verified' && $row['director_status'] == 'Verified') {
+        } elseif ($row['accountant_status'] == 'Verified' && $row['director_status'] == 'Verified') {
             $overallStatus = 'Verified';
             $statusClass = 'status-verified';
         }
@@ -298,22 +277,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
             echo '</td>';
         }
         
-        // CEO Details
-        if ($row['ceo_status'] == 'Pending') {
-            echo '<td><span class="text-muted">Awaiting verification</span></td>';
-        } else {
-            $ceoName = trim($row['ceo_name']) ?: 'Unknown';
-            $ceoDate = $row['ceo_date'] ?: 'N/A';
-            $ceoStatusClass = $row['ceo_status'] == 'Verified' ? 'status-verified' : 'status-rejected';
-            echo '<td class="verifier-details">';
-            echo '<span class="badge ' . $ceoStatusClass . '">' . htmlspecialchars($row['ceo_status']) . '</span><br>';
-            echo '<strong>' . htmlspecialchars($ceoName) . '</strong><br>';
-            echo '<small>' . htmlspecialchars($ceoDate) . '</small>';
-            if ($row['ceo_status'] == 'Rejected' && $row['ceo_comment']) {
-                echo '<br><small class="text-danger"><strong>Reason:</strong> ' . htmlspecialchars($row['ceo_comment']) . '</small>';
-            }
-            echo '</td>';
-        }
+        
         
         // Director Details
         if ($row['director_status'] == 'Pending') {
