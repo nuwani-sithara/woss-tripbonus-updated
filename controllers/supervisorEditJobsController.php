@@ -190,8 +190,9 @@ function getClarificationJobsForSupervisor($conn, $userID) {
     $jobIDsStr = implode(',', $jobIDs);
 
     // Find jobs with approval_status=2 (clarification)
+    // Only show clarifications where supervisor-in-charge (role_id = 13) is the requester
     $clarificationJobIDs = [];
-    $clarificationRes = $conn->query("SELECT jobID, approvalID FROM approvals WHERE jobID IN ($jobIDsStr) AND approval_status = 2 AND approval_stage = 'job_approval'");
+    $clarificationRes = $conn->query("SELECT jobID, approvalID FROM approvals WHERE jobID IN ($jobIDsStr) AND approval_status = 2 AND approval_stage = 'supervisor_in_charge_approval'");
     $approvalMap = [];
     while ($row = $clarificationRes->fetch_assoc()) {
         $clarificationJobIDs[] = $row['jobID'];
@@ -213,11 +214,16 @@ function getClarificationJobsForSupervisor($conn, $userID) {
 
 // Fetch clarification details for a jobID (returns all clarification rows)
 function getClarificationDetails($conn, $jobID) {
-    $clarRes = $conn->query("SELECT * FROM clarifications WHERE jobID = $jobID AND clarification_requesterID = 30 ORDER BY clarification_id DESC");
+    // Only show clarifications where supervisor-in-charge (role_id = 13) is the requester
+    $clarRes = $conn->query("SELECT c.* FROM clarifications c 
+                             JOIN users u ON c.clarification_requesterID = u.userID 
+                             WHERE c.jobID = $jobID 
+                             AND u.roleID = 13 
+                             ORDER BY c.clarification_id DESC");
     if ($clarRes && $clarRes->num_rows > 0) {
         $clarifications = [];
-        while ($row = $clarRes->fetch_assoc()) {
-            $clarifications[] = $row; // includes clarification_status
+        while ($clar = $clarRes->fetch_assoc()) {
+            $clarifications[] = $clar;
         }
         return $clarifications;
     }
@@ -239,23 +245,25 @@ function getPendingApprovalClarificationJobsForSupervisor($conn, $userID) {
     if (empty($jobIDs)) return [];
     $jobIDsStr = implode(',', $jobIDs);
 
-    // Find jobs with clarification_status = 2 (pending approval)
-    $pendingJobIDs = [];
-    $approvalMap = [];
-    $pendingRes = $conn->query("SELECT jobID, approvalID FROM clarifications WHERE jobID IN ($jobIDsStr) AND clarification_status = 1 AND clarification_requesterID = 30");
-    while ($row = $pendingRes->fetch_assoc()) {
-        $pendingJobIDs[] = $row['jobID'];
-        $approvalMap[$row['jobID']] = $row['approvalID'];
+    // Find jobs with clarification_status=1 (resolved, waiting for supervisor-in-charge approval)
+    // Only show clarifications where supervisor-in-charge (role_id = 13) is the requester
+    $pendingApprovalJobIDs = [];
+    $pendingApprovalRes = $conn->query("SELECT DISTINCT c.jobID FROM clarifications c 
+                                       JOIN users u ON c.clarification_requesterID = u.userID 
+                                       WHERE c.jobID IN ($jobIDsStr) 
+                                       AND c.clarification_status = 1 
+                                       AND u.roleID = 13");
+    while ($row = $pendingApprovalRes->fetch_assoc()) {
+        $pendingApprovalJobIDs[] = $row['jobID'];
     }
-    if (empty($pendingJobIDs)) return [];
-    $pendingJobIDsStr = implode(',', $pendingJobIDs);
+    if (empty($pendingApprovalJobIDs)) return [];
+    $pendingApprovalJobIDsStr = implode(',', $pendingApprovalJobIDs);
 
     // Fetch job details for pending approval clarification jobs
     $jobs = [];
-    $jobsRes = $conn->query("SELECT * FROM jobs WHERE jobID IN ($pendingJobIDsStr) AND jobCreatedBy = $userID");
+    $jobsRes = $conn->query("SELECT * FROM jobs WHERE jobID IN ($pendingApprovalJobIDsStr) AND jobCreatedBy = $userID");
     while ($job = $jobsRes->fetch_assoc()) {
         $jobDetail = getJobDetails($conn, $job['jobID']);
-        $jobDetail['approvalID'] = $approvalMap[$job['jobID']];
         $jobs[] = $jobDetail;
     }
     return $jobs;
@@ -283,6 +291,44 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['resolve_clarification
 
     header('Location: supervisoreditjobs.php');
     exit();
+}
+
+// Handle clarification resolution
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['resolve_clarification'], $_POST['clarification_resolved_comment'])) {
+    $jobID = intval($_POST['jobID']);
+    $clarificationID = intval($_POST['clarification_id']);
+    $resolutionComment = $_POST['clarification_resolved_comment'];
+    $userID = isset($_SESSION['userID']) ? $_SESSION['userID'] : null;
+    
+    if (!$userID) {
+        header("Location: ../index.php?error=access_denied");
+        exit;
+    }
+    
+    // Verify this is a valid clarification for this supervisor
+    $verifyClarification = $conn->prepare("SELECT c.* FROM clarifications c 
+                                          JOIN users u ON c.clarification_requesterID = u.userID 
+                                          WHERE c.clarification_id = ? 
+                                          AND c.jobID = ? 
+                                          AND u.roleID = 13 
+                                          AND c.clarification_status = 0");
+    $verifyClarification->bind_param("ii", $clarificationID, $jobID);
+    $verifyClarification->execute();
+    $clarificationResult = $verifyClarification->get_result();
+    
+    if ($clarificationResult->num_rows > 0) {
+        // Update the clarification with resolution - status becomes 1 (resolved, waiting for supervisor-in-charge approval)
+        $stmt = $conn->prepare("UPDATE clarifications SET clarification_resolved_comment = ?, clarification_status = 1 WHERE clarification_id = ?");
+        $stmt->bind_param("si", $resolutionComment, $clarificationID);
+        $stmt->execute();
+        
+        $_SESSION['success'] = "Clarification resolved successfully. Waiting for supervisor-in-charge approval.";
+    } else {
+        $_SESSION['error'] = "Invalid clarification or you don't have permission to resolve it.";
+    }
+    
+    header("Location: ../views/supervisoreditjobs.php");
+    exit;
 }
 
 // Handle form submission for editing jobs

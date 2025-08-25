@@ -229,6 +229,7 @@ function getJobsRejectedByOperationsManager($conn) {
 function getClarificationsToResolve($conn, $userID) {
     // Get clarifications that this supervisor-in-charge needs to resolve
     // These are clarifications requested by Operations Manager for jobs this user approved
+    // Only show clarifications where Operations Manager (role_id = 4) is the requester
     $sql = "SELECT c.*, j.*, a.approval_status, a.approval_stage
             FROM clarifications c
             JOIN jobs j ON c.jobID = j.jobID
@@ -236,6 +237,9 @@ function getClarificationsToResolve($conn, $userID) {
             WHERE c.clarification_resolverID = ? 
             AND c.clarification_status = 0
             AND a.approval_stage = 'job_approval'
+            AND c.clarification_requesterID IN (
+                SELECT userID FROM users WHERE roleID = 4
+            )
             ORDER BY c.clarification_id DESC";
     
     $stmt = $conn->prepare($sql);
@@ -254,6 +258,7 @@ function getClarificationsToResolve($conn, $userID) {
 function getPendingClarificationResponses($conn, $userID) {
     // Get clarifications requested by this supervisor-in-charge that are waiting for response
     // These are clarifications this user requested from supervisors
+    // Only show clarifications where supervisor-in-charge (role_id = 13) is the requester
     $sql = "SELECT c.*, j.*, a.approval_status, a.approval_stage
             FROM clarifications c
             JOIN jobs j ON c.jobID = j.jobID
@@ -261,6 +266,9 @@ function getPendingClarificationResponses($conn, $userID) {
             WHERE c.clarification_requesterID = ? 
             AND c.clarification_status = 0
             AND a.approval_stage = 'supervisor_in_charge_approval'
+            AND c.clarification_requesterID IN (
+                SELECT userID FROM users WHERE roleID = 13
+            )
             ORDER BY c.clarification_id DESC";
     
     $stmt = $conn->prepare($sql);
@@ -279,6 +287,7 @@ function getPendingClarificationResponses($conn, $userID) {
 function getResolvedClarificationsForApproval($conn, $userID) {
     // Get clarifications that have been resolved by supervisors and need Supervisor-in-Charge approval
     // These are clarifications this user requested that are now resolved and waiting for approval
+    // Only show clarifications where supervisor-in-charge (role_id = 13) is the requester
     $sql = "SELECT c.*, j.*, a.approval_status, a.approval_stage
             FROM clarifications c
             JOIN jobs j ON c.jobID = j.jobID
@@ -286,6 +295,9 @@ function getResolvedClarificationsForApproval($conn, $userID) {
             WHERE c.clarification_requesterID = ? 
             AND c.clarification_status = 1
             AND a.approval_stage = 'supervisor_in_charge_approval'
+            AND c.clarification_requesterID IN (
+                SELECT userID FROM users WHERE roleID = 13
+            )
             ORDER BY c.clarification_id DESC";
     
     $stmt = $conn->prepare($sql);
@@ -303,6 +315,7 @@ function getResolvedClarificationsForApproval($conn, $userID) {
 
 function getJobsWithPendingClarifications($conn, $userID) {
     // Get jobs that have pending clarifications (status = 0) that need to be resolved by supervisors
+    // Only show clarifications where supervisor-in-charge (role_id = 13) is the requester
     $sql = "SELECT j.*, c.*, a.approval_status, a.approval_stage
             FROM jobs j
             JOIN clarifications c ON j.jobID = c.jobID
@@ -310,6 +323,9 @@ function getJobsWithPendingClarifications($conn, $userID) {
             WHERE c.clarification_requesterID = ? 
             AND c.clarification_status = 0
             AND a.approval_stage = 'supervisor_in_charge_approval'
+            AND c.clarification_requesterID IN (
+                SELECT userID FROM users WHERE roleID = 13
+            )
             ORDER BY c.clarification_id DESC";
     
     $stmt = $conn->prepare($sql);
@@ -352,7 +368,7 @@ function getJobsWithPendingClarifications($conn, $userID) {
         $special_projects = [];
         $spRes = $conn->query("SELECT spProjectID FROM jobspecialprojects WHERE jobID = $jobID");
         while ($spRow = $spRes->fetch_assoc()) {
-            $sp = $conn->query("SELECT sp.*, v.vessel_name FROM specialproject sp LEFT JOIN vessels v ON sp.vesselID = sp.vesselID WHERE sp.spProjectID = {$spRow['spProjectID']}")->fetch_assoc();
+            $sp = $conn->query("SELECT sp.*, v.vessel_name FROM specialproject sp LEFT JOIN vessels v ON sp.vesselID = v.vesselID WHERE sp.spProjectID = {$spRow['spProjectID']}")->fetch_assoc();
             if ($sp) {
                 $special_projects[] = $sp;
             }

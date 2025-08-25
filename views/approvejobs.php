@@ -307,6 +307,9 @@ $ongoingJobs = array_filter($jobs, function($item) {
                 <?php if (!empty($jobsWithPendingClarificationApproval)): ?>
                 <div class="job-section">
                     <h5 class="fw-bold mb-3 text-primary"><i class="fas fa-question-circle me-2"></i>Pending Clarification Responses</h5>
+                    <div class="alert alert-info py-2 mb-3">
+                        <i class="fas fa-info-circle me-2"></i> These clarifications have been resolved by supervisor-in-charge and need your approval to proceed.
+                    </div>
                     <div class="row">
                         <?php 
                         // Group clarifications by jobID
@@ -333,75 +336,75 @@ $ongoingJobs = array_filter($jobs, function($item) {
                         <div class="col-md-12">
                             <div class="card job-card border-primary">
                                 <div class="card-body">
-                                                                         <div class="row">
-                                         <!-- Left Column - Job Details -->
-                                         <div class="col-md-4">
-                                             <div class="d-flex justify-content-between align-items-start mb-2">
-                                                 <h5 class="card-title mb-0 fw-bold">Job #<?= htmlspecialchars($jobID) ?></h5>
-                                                 <span class="badge bg-primary text-white status-badge">Response Pending</span>
-                                             </div>
-                                             
-                                             <div class="job-details-compact">
-                                                 <div class="detail-row">
-                                                     <span class="detail-label">Vessel:</span>
-                                                     <span class="detail-value"><?= htmlspecialchars($item['vessel_name'] ?? '-') ?></span>
-                                                 </div>
-                                                 <div class="detail-row">
-                                                     <span class="detail-label">Job Type:</span>
-                                                     <span class="detail-value"><?= htmlspecialchars($item['job_type'] ?? '-') ?></span>
-                                                 </div>
-                                             </div>
-                                         </div>
-                                         
-                                         <!-- Right Column - Clarification Table -->
-                                         <div class="col-md-8">
-                                             <h6 class="fw-semibold mb-2">Pending Clarification Requests:</h6>
-                                             <div class="clarification-table">
-                                                 <div class="clarification-header">
-                                                     <div class="clarification-col">Request ID</div>
-                                                     <div class="clarification-col">Request</div>
-                                                     <div class="clarification-col">Response</div>
-                                                 </div>
-                                                 <?php foreach ($clarifications as $index => $clarification): ?>
-                                                 <div class="clarification-row">
-                                                     <div class="clarification-col">
-                                                         <span class="badge bg-primary"><?= $clarification['clarification_id'] ?></span>
-                                                     </div>
-                                                     <div class="clarification-col">
-                                                         <?= htmlspecialchars($clarification['clarification_request_comment']) ?>
-                                                     </div>
-                                                     <div class="clarification-col">
-                                                         <?php if (!empty($clarification['clarification_resolved_comment'])): ?>
-                                                             <span class="text-success"><?= htmlspecialchars($clarification['clarification_resolved_comment']) ?></span>
-                                                         <?php else: ?>
-                                                             <span class="text-muted">Pending Response</span>
-                                                         <?php endif; ?>
-                                                     </div>
-                                                 </div>
-                                                 <?php endforeach; ?>
-                                             </div>
-                                         </div>
-                                     </div>
+                                    <div class="row">
+                                        <!-- Left Column - Job Details -->
+                                        <div class="col-md-4">
+                                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                                <h5 class="card-title mb-0 fw-bold">Job #<?= htmlspecialchars($jobID) ?></h5>
+                                                <span class="badge bg-primary text-white status-badge">Response Pending</span>
+                                            </div>
+                                            
+                                            <div class="job-details-compact">
+                                                <div class="detail-row">
+                                                    <span class="detail-label">Vessel:</span>
+                                                    <span class="detail-value"><?= htmlspecialchars($item['vessel_name'] ?? '-') ?></span>
+                                                </div>
+                                                <div class="detail-row">
+                                                    <span class="detail-label">Job Type:</span>
+                                                    <span class="detail-value"><?= htmlspecialchars($item['job_type'] ?? '-') ?></span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- Right Column - Clarification Table -->
+                                        <div class="col-md-8">
+                                            <h6 class="fw-semibold mb-2">Pending Clarification Requests:</h6>
+                                            <div class="clarification-table">
+                                                <div class="clarification-header">
+                                                    <div class="clarification-col">Request ID</div>
+                                                    <div class="clarification-col">Request</div>
+                                                    <div class="clarification-col">Response</div>
+                                                </div>
+                                                <?php foreach ($clarifications as $index => $clarification): ?>
+                                                <div class="clarification-row">
+                                                    <div class="clarification-col">
+                                                        <span class="badge bg-primary"><?= $clarification['clarification_id'] ?></span>
+                                                    </div>
+                                                    <div class="clarification-col">
+                                                        <?= htmlspecialchars($clarification['clarification_request_comment']) ?>
+                                                    </div>
+                                                    <div class="clarification-col">
+                                                        <?php if (!empty($clarification['clarification_resolved_comment'])): ?>
+                                                            <span class="text-success"><?= htmlspecialchars($clarification['clarification_resolved_comment']) ?></span>
+                                                        <?php else: ?>
+                                                            <span class="text-muted">Pending Response</span>
+                                                        <?php endif; ?>
+                                                    </div>
+                                                </div>
+                                                <?php endforeach; ?>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
-                                                                 <div class="card-footer bg-white border-top-0">
-                                     <div class="d-flex justify-content-between align-items-center">
-                                         <!-- See More Details Button -->
-                                         <a href="jobdetails.php?jobID=<?= $jobID ?>" class="btn btn-info btn-sm">
-                                             <i class="fas fa-eye me-1"></i> See More Details
-                                         </a>
-                                         
-                                         <form method="post" action="../controllers/approveJobsController.php" class="d-flex gap-2">
-                                             <input type="hidden" name="clarification_pending_id" value="<?= $clarifications[0]['clarification_id'] ?>">
-                                             <input type="hidden" name="clarification_action" value="">
-                                             <button type="button" name="clarification_action_btn" value="1" class="btn btn-success btn-sm action-btn">
-                                                 <i class="fas fa-check me-1"></i> Approve
-                                             </button>
-                                             <button type="button" name="clarification_action_btn" value="3" class="btn btn-danger btn-sm action-btn">
-                                                 <i class="fas fa-times me-1"></i> Reject
-                                             </button>
-                                         </form>
-                                     </div>
-                                 </div>
+                                <div class="card-footer bg-white border-top-0">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <!-- See More Details Button -->
+                                        <a href="jobdetails.php?jobID=<?= $jobID ?>" class="btn btn-info btn-sm">
+                                            <i class="fas fa-eye me-1"></i> See More Details
+                                        </a>
+                                        
+                                        <form method="post" action="../controllers/approveJobsController.php" class="d-flex gap-2">
+                                            <input type="hidden" name="clarification_pending_id" value="<?= $clarifications[0]['clarification_id'] ?>">
+                                            <input type="hidden" name="clarification_action" value="">
+                                            <button type="button" name="clarification_action_btn" value="1" class="btn btn-success btn-sm action-btn">
+                                                <i class="fas fa-check me-1"></i> Approve Resolution
+                                            </button>
+                                            <button type="button" name="clarification_action_btn" value="3" class="btn btn-danger btn-sm action-btn">
+                                                <i class="fas fa-times me-1"></i> Reject Resolution
+                                            </button>
+                                        </form>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                         <?php endforeach; ?>
@@ -412,7 +415,10 @@ $ongoingJobs = array_filter($jobs, function($item) {
                 <!-- Clarification Jobs Section -->
                 <?php if (!empty($jobsWithClarifications)): ?>
                 <div class="job-section">
-                    <h5 class="fw-bold mb-3 text-warning"><i class="fas fa-exclamation-circle me-2"></i>Jobs with Clarifications</h5>
+                    <h5 class="fw-bold mb-3 text-warning"><i class="fas fa-exclamation-circle me-2"></i>Jobs with Pending Clarifications</h5>
+                    <div class="alert alert-warning py-2 mb-3">
+                        <i class="fas fa-info-circle me-2"></i> These jobs have clarification requests that are waiting for supervisor-in-charge response. Jobs cannot proceed until clarifications are resolved.
+                    </div>
                     <div class="row">
                         <?php 
                         // Group clarifications by jobID
@@ -439,61 +445,61 @@ $ongoingJobs = array_filter($jobs, function($item) {
                         <div class="col-md-12">
                             <div class="card job-card border-warning">
                                 <div class="card-body">
-                                                                         <div class="row">
-                                         <!-- Left Column - Job Details -->
-                                         <div class="col-md-4">
-                                             <div class="d-flex justify-content-between align-items-start mb-2">
-                                                 <h5 class="card-title mb-0 fw-bold">Job #<?= htmlspecialchars($jobID) ?></h5>
-                                                 <span class="badge bg-warning text-dark status-badge">Clarification Needed</span>
-                                             </div>
-                                             
-                                             <div class="job-details-compact">
-                                                 <div class="detail-row">
-                                                     <span class="detail-label">Vessel:</span>
-                                                     <span class="detail-value"><?= htmlspecialchars($item['vessel_name'] ?? '-') ?></span>
-                                                 </div>
-                                                 <div class="detail-row">
-                                                     <span class="detail-label">Job Type:</span>
-                                                     <span class="detail-value"><?= htmlspecialchars($item['job_type'] ?? '-') ?></span>
-                                                 </div>
-                                             </div>
-                                         </div>
-                                         
-                                         <!-- Right Column - Clarification Table -->
-                                         <div class="col-md-8">
-                                             <h6 class="fw-semibold mb-2">Clarification Requests:</h6>
-                                             <div class="clarification-table">
-                                                 <div class="clarification-header">
-                                                     <div class="clarification-col">Request ID</div>
-                                                     <div class="clarification-col">Request</div>
-                                                     <div class="clarification-col">Status</div>
-                                                 </div>
-                                                 <?php foreach ($clarifications as $index => $clarification): ?>
-                                                 <div class="clarification-row">
-                                                     <div class="clarification-col">
-                                                         <span class="badge bg-warning text-dark"><?= $clarification['clarification_id'] ?></span>
-                                                     </div>
-                                                     <div class="clarification-col">
-                                                         <?= htmlspecialchars($clarification['clarification_request_comment']) ?>
-                                                     </div>
-                                                     <div class="clarification-col">
-                                                         <span class="badge bg-warning text-dark">Clarification Needed</span>
-                                                     </div>
-                                                 </div>
-                                                 <?php endforeach; ?>
-                                             </div>
-                                         </div>
-                                     </div>
+                                    <div class="row">
+                                        <!-- Left Column - Job Details -->
+                                        <div class="col-md-4">
+                                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                                <h5 class="card-title mb-0 fw-bold">Job #<?= htmlspecialchars($jobID) ?></h5>
+                                                <span class="badge bg-warning text-dark status-badge">Clarification Needed</span>
+                                            </div>
+                                            
+                                            <div class="job-details-compact">
+                                                <div class="detail-row">
+                                                    <span class="detail-label">Vessel:</span>
+                                                    <span class="detail-value"><?= htmlspecialchars($item['vessel_name'] ?? '-') ?></span>
+                                                </div>
+                                                <div class="detail-row">
+                                                    <span class="detail-label">Job Type:</span>
+                                                    <span class="detail-value"><?= htmlspecialchars($item['job_type'] ?? '-') ?></span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- Right Column - Clarification Table -->
+                                        <div class="col-md-8">
+                                            <h6 class="fw-semibold mb-2">Clarification Requests:</h6>
+                                            <div class="clarification-table">
+                                                <div class="clarification-header">
+                                                    <div class="clarification-col">Request ID</div>
+                                                    <div class="clarification-col">Request</div>
+                                                    <div class="clarification-col">Status</div>
+                                                </div>
+                                                <?php foreach ($clarifications as $index => $clarification): ?>
+                                                <div class="clarification-row">
+                                                    <div class="clarification-col">
+                                                        <span class="badge bg-warning text-dark"><?= $clarification['clarification_id'] ?></span>
+                                                    </div>
+                                                    <div class="clarification-col">
+                                                        <?= htmlspecialchars($clarification['clarification_request_comment']) ?>
+                                                    </div>
+                                                    <div class="clarification-col">
+                                                        <span class="badge bg-warning text-dark">Waiting for Supervisor-in-Charge Response</span>
+                                                    </div>
+                                                </div>
+                                                <?php endforeach; ?>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                                 
-                                                                 <!-- See More Details Button -->
-                                 <div class="card-footer bg-white border-top-0">
-                                     <div class="d-flex justify-content-start">
-                                         <a href="jobdetails.php?jobID=<?= $jobID ?>" class="btn btn-info btn-sm">
-                                             <i class="fas fa-eye me-1"></i> See More Details
-                                         </a>
-                                     </div>
-                                 </div>
+                                <!-- See More Details Button -->
+                                <div class="card-footer bg-white border-top-0">
+                                    <div class="d-flex justify-content-start">
+                                        <a href="jobdetails.php?jobID=<?= $jobID ?>" class="btn btn-info btn-sm">
+                                            <i class="fas fa-eye me-1"></i> See More Details
+                                        </a>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                         <?php endforeach; ?>
@@ -505,22 +511,22 @@ $ongoingJobs = array_filter($jobs, function($item) {
                 
                 <?php if (!empty($pendingJobs)): ?>
                 <div class="job-section">
-                    <!-- <h5 class="fw-bold mb-3"><i class="fas fa-tasks me-2"></i>Pending Job Approvals</h5> -->
+                    <h5 class="fw-bold mb-3"><i class="fas fa-tasks me-2"></i>Pending Job Approvals</h5>
                     <div class="row">
                         <?php foreach ($pendingJobs as $item): 
                             $job = $item['job'];
-                            // Check if this job has any pending clarifications (status = 0)
+                            // Check if this job has any pending clarifications (status = 0 or 1)
                             $hasPendingClarifications = false;
                             if (!empty($jobsWithClarifications)) {
                                 foreach ($jobsWithClarifications as $clarifyItem) {
                                     if ($clarifyItem['clarification']['jobID'] == $job['jobID'] && 
-                                        $clarifyItem['clarification']['clarification_status'] == 0) {
+                                        in_array($clarifyItem['clarification']['clarification_status'], [0, 1])) {
                                         $hasPendingClarifications = true;
                                         break;
                                     }
                                 }
                             }
-                            // Skip jobs that have pending clarifications (status = 0)
+                            // Skip jobs that have pending clarifications (status = 0 or 1)
                             if ($hasPendingClarifications) {
                                 continue;
                             }
@@ -543,7 +549,7 @@ $ongoingJobs = array_filter($jobs, function($item) {
                                                 <?php if (empty($job['end_date'])): ?>
                                                     <span class="badge bg-info status-badge">Ongoing</span>
                                                 <?php else: ?>
-                                                    <span class="badge bg-primary status-badge">Pending</span>
+                                                    <span class="badge bg-primary status-badge">Pending Approval</span>
                                                 <?php endif; ?>
                                             </div>
                                             
@@ -722,12 +728,12 @@ $ongoingJobs = array_filter($jobs, function($item) {
                                         </form>
                                     <?php endif; ?>
                                     
-                                                                         <!-- See More Details Button -->
-                                     <div class="d-flex justify-content-start mt-2">
-                                         <a href="jobdetails.php?jobID=<?= $job['jobID'] ?>" class="btn btn-info btn-sm">
-                                             <i class="fas fa-eye me-1"></i> See More Details
-                                         </a>
-                                     </div>
+                                    <!-- See More Details Button -->
+                                    <div class="d-flex justify-content-start mt-2">
+                                        <a href="jobdetails.php?jobID=<?= $job['jobID'] ?>" class="btn btn-info btn-sm">
+                                            <i class="fas fa-eye me-1"></i> See More Details
+                                        </a>
+                                    </div>
                                 </div>
                                 <?php endif; ?>
                             </div>
@@ -739,7 +745,7 @@ $ongoingJobs = array_filter($jobs, function($item) {
                 <div class="alert alert-success text-center py-4 my-4">
                     <i class="fas fa-check-circle fa-3x mb-3 text-success"></i>
                     <h4 class="fw-bold">No Pending Approvals</h4>
-                    <p class="text-muted">All jobs have been reviewed and approved.</p>
+                    <p class="text-muted">All jobs have been reviewed and approved, or are waiting for clarification resolution.</p>
                 </div>
                 <?php endif; ?>
                 

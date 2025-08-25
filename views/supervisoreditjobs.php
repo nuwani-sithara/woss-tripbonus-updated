@@ -563,7 +563,7 @@ $paginatedJobs = array_slice(array_values($filteredJobs), $start, $jobsPerPage);
                                                         </div>
                                                         <?php elseif ($status === 'Pending Approval'): ?>
                                                         <div class="alert alert-info mt-2 mb-0 p-1" role="alert" style="font-size:0.92rem;">
-                                                            Clarification submitted. Pending approval from the job approver.
+                                                            Clarification submitted. Pending approval from the supervisor-in-charge.
                                                         </div>
                                                         <?php endif; ?>
                                                         
@@ -574,11 +574,15 @@ $paginatedJobs = array_slice(array_values($filteredJobs), $start, $jobsPerPage);
                                                         <?php if ($status === 'Clarification Needed' || $status === 'Pending Approval'): ?>
                                                             <?php 
                                                             // Get all clarifications for this job
-                                                            $clars = $conn->query("SELECT * FROM clarifications WHERE jobID = ".$item['job']['jobID']." ORDER BY clarification_id DESC");
+                                                            $clars = $conn->query("SELECT c.* FROM clarifications c 
+                                                                                 JOIN users u ON c.clarification_requesterID = u.userID 
+                                                                                 WHERE c.jobID = ".$item['job']['jobID']." 
+                                                                                 AND u.roleID = 13 
+                                                                                 ORDER BY c.clarification_id DESC");
                                                             if ($clars && $clars->num_rows > 0): ?>
                                                                 <?php while ($clar = $clars->fetch_assoc()): ?>
                                                                     <div class="clarification-item mt-2">
-                                                                        <p class="mb-1"><strong>Clarification Request:</strong></p>
+                                                                        <p class="mb-1"><strong>Clarification Request from Supervisor-in-Charge:</strong></p>
                                                                         <p class="text-danger font-weight-bold"><?= htmlspecialchars($clar['clarification_request_comment']) ?></p>
                                                                         
                                                                         <?php if ($clar['clarification_status'] == 0): ?>
@@ -588,10 +592,17 @@ $paginatedJobs = array_slice(array_values($filteredJobs), $start, $jobsPerPage);
                                                                                 data-toggle="modal" data-target="#resolveClarificationModal">
                                                                                 <i class="fas fa-check-circle mr-1"></i> Resolve Clarification
                                                                             </button>
-                                                                        <?php elseif ($clar['clarification_status'] == 2 && !empty($clar['clarification_resolved_comment'])): ?>
+                                                                        <?php elseif ($clar['clarification_status'] == 1): ?>
                                                                             <div class="mt-2">
                                                                                 <p class="mb-1"><strong>Your Resolution:</strong></p>
                                                                                 <p class="text-success font-weight-bold"><?= htmlspecialchars($clar['clarification_resolved_comment']) ?></p>
+                                                                                <span class="badge badge-info">Waiting for Supervisor-in-Charge Approval</span>
+                                                                            </div>
+                                                                        <?php elseif ($clar['clarification_status'] == 2): ?>
+                                                                            <div class="mt-2">
+                                                                                <p class="mb-1"><strong>Your Resolution:</strong></p>
+                                                                                <p class="text-success font-weight-bold"><?= htmlspecialchars($clar['clarification_resolved_comment']) ?></p>
+                                                                                <span class="badge badge-success">Resolution Approved</span>
                                                                             </div>
                                                                         <?php endif; ?>
                                                                     </div>
@@ -815,7 +826,7 @@ $paginatedJobs = array_slice(array_values($filteredJobs), $start, $jobsPerPage);
           <input type="hidden" id="clar_clarificationID" name="clarification_id" value="">
           <div class="form-group">
             <label for="clarification_resolved_comment">Resolution Comment</label>
-            <textarea class="form-control" id="clarification_resolved_comment" name="clarification_resolved_comment" rows="4" required></textarea>
+            <textarea class="form-control" id="clarification_resolved_comment" name="clarification_resolved_comment" rows="4" required placeholder="Provide your clarification response..."></textarea>
           </div>
         </div>
         <div class="modal-footer">

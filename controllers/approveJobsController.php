@@ -4,7 +4,7 @@ require_once(__DIR__ . '/../config/dbConnect.php');
 
 function getJobsForApproval($conn) {
     // Get jobs that need operations manager approval
-    // Exclude jobs with pending clarifications (status = 2)
+    // Exclude jobs with pending clarifications (status = 0 or 1) - they need resolution first
     $sql = "SELECT j.*, a.approval_status, a.approval_stage
             FROM jobs j
             JOIN approvals a ON j.jobID = a.jobID 
@@ -20,6 +20,7 @@ function getJobsForApproval($conn) {
             ORDER BY j.start_date DESC";
     
     $result = $conn->query($sql);
+    $jobs = [];
     
     if ($result) {
         while ($row = $result->fetch_assoc()) {
@@ -109,12 +110,16 @@ function getJobsForApproval($conn) {
 
 function getJobsWithClarifications($conn) {
     // Get jobs that have clarifications waiting for supervisor-in-charge resolution
+    // Only show clarifications where Operations Manager (role_id = 4) is the requester
     $sql = "SELECT c.*, j.*, a.approval_status, a.approval_stage
             FROM clarifications c
             JOIN jobs j ON c.jobID = j.jobID
             JOIN approvals a ON c.approvalID = a.approvalID
             WHERE c.clarification_status = 0
             AND a.approval_stage = 'job_approval'
+            AND c.clarification_requesterID IN (
+                SELECT userID FROM users WHERE roleID = 4
+            )
             ORDER BY c.clarification_id DESC";
     
     $result = $conn->query($sql);
@@ -233,17 +238,19 @@ function getJobsWithClarifications($conn) {
 
 function getJobsWithPendingClarificationApproval($conn, $userID) {
     // Get clarifications that have been resolved by supervisor-in-charge and need OM approval
+    // Only show clarifications where Operations Manager (role_id = 4) is the requester
     $sql = "SELECT c.*, j.*, a.approval_status, a.approval_stage
             FROM clarifications c
             JOIN jobs j ON c.jobID = j.jobID
             JOIN approvals a ON c.approvalID = a.approvalID
-            WHERE c.clarification_requesterID = ? 
+            WHERE c.clarification_requesterID IN (
+                SELECT userID FROM users WHERE roleID = 4
+            )
             AND c.clarification_status = 1
             AND a.approval_stage = 'job_approval'
             ORDER BY c.clarification_id DESC";
     
     $stmt = $conn->prepare($sql);
-    $stmt->bind_param("i", $userID);
     $stmt->execute();
     $result = $stmt->get_result();
     $jobsByJobID = [];
@@ -347,6 +354,7 @@ function getJobsWithPendingClarificationApproval($conn, $userID) {
             $result[] = [
                 'clarification' => $clarification,
                 'boat' => $jobData['boat'],
+                'job_creator' => $jobData['job_creator'],
                 'employees' => $jobData['employees'],
                 'port' => $jobData['port'],
                 'special_projects' => $jobData['special_projects'],
@@ -484,7 +492,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['job_attendanceID'], $
     
     // Get jobID from trips table
     $getJobID = $conn->prepare("SELECT jobID FROM trips WHERE tripID = ?");
-    if (!$getJobID) throw new Exception("Prepare failed: " . $conn->error);
+    if (!$getJobID) throw new Exception("Prepare failed: " . $getTripID->error);
     $getJobID->bind_param("i", $tripID);
     if (!$getJobID->execute()) throw new Exception("Execute failed: " . $getJobID->error);
     $getJobID->bind_result($jobID);
@@ -511,6 +519,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['job_attendanceID'], $
         $comment = $_POST['clarification_comment'];
         
         // Get the supervisor-in-charge who approved this job (they will resolve the clarification)
+        // Since this is Operations Manager (role_id = 4), clarification goes to supervisor-in-charge
         $supervisorInChargeQuery = $conn->prepare("SELECT approval_by FROM approvals WHERE jobID = ? AND approval_stage = 'supervisor_in_charge_approval' AND approval_status = 1 ORDER BY approval_date DESC LIMIT 1");
         $supervisorInChargeQuery->bind_param("i", $jobID);
         $supervisorInChargeQuery->execute();
