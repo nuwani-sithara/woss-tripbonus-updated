@@ -4,15 +4,21 @@ require_once(__DIR__ . '/../config/dbConnect.php');
 
 function getJobsForApproval($conn) {
     // Get jobs that need operations manager approval
-    // These are jobs that have been approved by supervisor-in-charge but not yet approved by operations manager
+    // Exclude jobs with pending clarifications (status = 2)
     $sql = "SELECT j.*, a.approval_status, a.approval_stage
             FROM jobs j
             JOIN approvals a ON j.jobID = a.jobID 
             WHERE a.approval_stage = 'job_approval' 
             AND a.approval_status = 0
+            AND NOT EXISTS (
+                SELECT 1 FROM clarifications c 
+                JOIN approvals a2 ON c.approvalID = a2.approvalID 
+                WHERE c.jobID = j.jobID 
+                AND a2.approval_stage = 'job_approval'
+                AND c.clarification_status IN (0, 1)
+            )
             ORDER BY j.start_date DESC";
     
-    $jobs = [];
     $result = $conn->query($sql);
     
     if ($result) {
@@ -102,11 +108,15 @@ function getJobsForApproval($conn) {
 }
 
 function getJobsWithClarifications($conn) {
-    $sql = "SELECT c.*, j.*, a.approval_status
+    // Get jobs that have clarifications waiting for supervisor-in-charge resolution
+    $sql = "SELECT c.*, j.*, a.approval_status, a.approval_stage
             FROM clarifications c
             JOIN jobs j ON c.jobID = j.jobID
             JOIN approvals a ON c.approvalID = a.approvalID
-            WHERE c.clarification_status = 0";
+            WHERE c.clarification_status = 0
+            AND a.approval_stage = 'job_approval'
+            ORDER BY c.clarification_id DESC";
+    
     $result = $conn->query($sql);
     $jobsByJobID = [];
     while ($row = $result->fetch_assoc()) {
@@ -222,12 +232,16 @@ function getJobsWithClarifications($conn) {
 }
 
 function getJobsWithPendingClarificationApproval($conn, $userID) {
-    $sql = "SELECT c.*, j.*, a.approval_status
+    // Get clarifications that have been resolved by supervisor-in-charge and need OM approval
+    $sql = "SELECT c.*, j.*, a.approval_status, a.approval_stage
             FROM clarifications c
             JOIN jobs j ON c.jobID = j.jobID
             JOIN approvals a ON c.approvalID = a.approvalID
-            WHERE c.clarification_status = 2
-            AND c.clarification_requesterID = ?";
+            WHERE c.clarification_requesterID = ? 
+            AND c.clarification_status = 1
+            AND a.approval_stage = 'job_approval'
+            ORDER BY c.clarification_id DESC";
+    
     $stmt = $conn->prepare($sql);
     $stmt->bind_param("i", $userID);
     $stmt->execute();
@@ -533,15 +547,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['clarification_pending
         exit;
     }
     // Get jobID and approvalID from clarifications table
-    $getClar = $conn->prepare("SELECT jobID, approvalID FROM clarifications WHERE clarification_id = ?");
+    $getClar = $conn->prepare("SELECT jobID, approvalID FROM clarifications WHERE clarification_id = ? AND clarification_requesterID = ? AND clarification_status = 1");
     if (!$getClar) throw new Exception("Prepare failed: " . $conn->error);
-    $getClar->bind_param("i", $clarification_id);
+    $getClar->bind_param("ii", $clarification_id, $userID);
     if (!$getClar->execute()) throw new Exception("Execute failed: " . $getClar->error);
     $getClar->bind_result($jobID, $approvalID);
     if (!$getClar->fetch()) throw new Exception("Clarification record not found");
     $getClar->close();
     // Update clarifications table: set clarification_status = 1 (resolved)
-    $stmtClar = $conn->prepare("UPDATE clarifications SET clarification_status = 1 WHERE clarification_id = ?");
+    $stmtClar = $conn->prepare("UPDATE clarifications SET clarification_status = 2 WHERE clarification_id = ?");
     if (!$stmtClar) throw new Exception("Prepare failed: " . $conn->error);
     $stmtClar->bind_param("i", $clarification_id);
     if (!$stmtClar->execute()) throw new Exception("Execute failed: " . $stmtClar->error);

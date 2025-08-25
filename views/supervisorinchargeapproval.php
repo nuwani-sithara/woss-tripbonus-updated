@@ -634,6 +634,14 @@ $message = isset($_GET['message']) ? $_GET['message'] : '';
                                                 <div class="trip-card">
                                                     <div class="d-flex justify-content-between align-items-start mb-1">
                                                         <strong><?= htmlspecialchars($tripItem['trip']['trip_date']) ?></strong>
+                                                        <?php if (isset($tripItem['attendance']['attendance_status'])): ?>
+                                                            <?php
+                                                                $status = $tripItem['attendance']['attendance_status'];
+                                                                $statusText = $status == 1 ? 'Verified' : ($status == 3 ? 'Rejected' : 'Pending');
+                                                                $statusClass = $status == 1 ? 'bg-success text-white' : ($status == 3 ? 'bg-danger text-white' : 'bg-warning text-dark');
+                                                            ?>
+                                                            <span class="badge <?= $statusClass ?> status-badge"><?= $statusText ?></span>
+                                                        <?php endif; ?>
                                                     </div>
                                                     
                                                     <?php if (!empty($tripItem['employees'])): ?>
@@ -796,6 +804,14 @@ $message = isset($_GET['message']) ? $_GET['message'] : '';
                                                 <div class="trip-card">
                                                     <div class="d-flex justify-content-between align-items-start mb-1">
                                                         <strong><?= htmlspecialchars($tripItem['trip']['trip_date']) ?></strong>
+                                                        <?php if (isset($tripItem['attendance']['attendance_status'])): ?>
+                                                            <?php
+                                                                $status = $tripItem['attendance']['attendance_status'];
+                                                                $statusText = $status == 1 ? 'Verified' : ($status == 3 ? 'Rejected' : 'Pending');
+                                                                $statusClass = $status == 1 ? 'bg-success text-white' : ($status == 3 ? 'bg-danger text-white' : 'bg-warning text-dark');
+                                                            ?>
+                                                            <span class="badge <?= $statusClass ?> status-badge"><?= $statusText ?></span>
+                                                        <?php endif; ?>
                                                     </div>
                                                     
                                                     <?php if (!empty($tripItem['employees'])): ?>
@@ -818,28 +834,58 @@ $message = isset($_GET['message']) ? $_GET['message'] : '';
                                     </div>
                                 </div>
                                 
-                                <div class="card-footer">
-                                    <div class="d-flex justify-content-between align-items-center">
-                                        <div>
-                                            <a href="jobdetails.php?jobID=<?= $job['jobID'] ?>" class="btn btn-info btn-sm">
-                                                <i class="fas fa-eye me-1"></i> View Details
-                                            </a>
+                                <!-- <?php
+                                $firstAttendanceID = null;
+                                foreach ($trips as $tripItem) {
+                                    if (!empty($tripItem['attendance']['job_attendanceID'])) {
+                                        $firstAttendanceID = $tripItem['attendance']['job_attendanceID'];
+                                        break;
+                                    }
+                                }
+                                ?> -->
+                                
+                                    <div class="card-footer">
+                                    <?php if (empty($job['end_date'])): ?>
+                                        <!-- Ongoing Job - Buttons Disabled -->
+                                        <div class="d-flex justify-content-end gap-2">
+                                            <button type="button" class="btn btn-success btn-sm action-btn" disabled>
+                                                <i class="fas fa-check me-1"></i> Approve
+                                            </button>
+                                            <button type="button" class="btn btn-warning btn-sm action-btn" disabled>
+                                                <i class="fas fa-question me-1"></i> Clarify
+                                            </button>
+                                            <button type="button" class="btn btn-danger btn-sm action-btn" disabled>
+                                                <i class="fas fa-times me-1"></i> Reject
+                                            </button>
                                         </div>
-                                        <div class="d-flex gap-2">
-                                            <form method="post" action="../controllers/supervisorInChargeController.php" class="d-flex gap-2">
-                                                <input type="hidden" name="jobID" value="<?= $job['jobID'] ?>">
-                                                <input type="hidden" name="action" value="">
-                                                <button type="button" name="action_btn" value="1" class="btn btn-success btn-sm action-btn">
-                                                    <i class="fas fa-check me-1"></i> Approve
-                                                </button>
-                                                <button type="button" class="btn btn-warning btn-sm action-btn btn-clarify">
-                                                    <i class="fas fa-question me-1"></i> Clarify
-                                                </button>
-                                                <button type="button" name="action_btn" value="3" class="btn btn-danger btn-sm action-btn">
-                                                    <i class="fas fa-times me-1"></i> Reject
-                                                </button>
-                                            </form>
+                                        <div class="text-center mt-2">
+                                            <span class="badge bg-info text-white">
+                                                <i class="fas fa-clock me-1"></i> Ongoing Job
+                                            </span>
+                                            <small class="text-muted d-block mt-1">Job must be completed (end date added) before approval</small>
                                         </div>
+                                    <?php else: ?>
+                                        <!-- Completed Job - Buttons Enabled -->
+                                        <form method="post" action="../controllers/supervisorInChargeController.php" class="d-flex justify-content-end gap-2">
+                                            <input type="hidden" name="jobID" value="<?= $job['jobID'] ?>">
+                                            <input type="hidden" name="action" value="">
+                                            <button type="button" name="action_btn" value="1" class="btn btn-success btn-sm action-btn">
+                                                <i class="fas fa-check me-1"></i> Approve
+                                            </button>
+                                            <button type="button" class="btn btn-warning btn-sm action-btn btn-clarify">
+                                                <i class="fas fa-question me-1"></i> Clarify
+                                            </button>
+                                            <button type="button" name="action_btn" value="3" class="btn btn-danger btn-sm action-btn">
+                                                <i class="fas fa-times me-1"></i> Reject
+                                            </button>
+                                        </form>
+                                    <?php endif; ?>
+                                    
+                                    <!-- See More Details Button -->
+                                    <div class="d-flex justify-content-start mt-2">
+                                        <a href="jobdetails.php?jobID=<?= $job['jobID'] ?>" class="btn btn-info btn-sm">
+                                            <i class="fas fa-eye me-1"></i> See More Details
+                                        </a>
                                     </div>
                                 </div>
                             </div>

@@ -191,7 +191,7 @@ function getClarificationJobsForSupervisor($conn, $userID) {
 
     // Find jobs with approval_status=2 (clarification)
     $clarificationJobIDs = [];
-    $clarificationRes = $conn->query("SELECT jobID, approvalID FROM approvals WHERE jobID IN ($jobIDsStr) AND approval_status = 2");
+    $clarificationRes = $conn->query("SELECT jobID, approvalID FROM approvals WHERE jobID IN ($jobIDsStr) AND approval_status = 2 AND approval_stage = 'job_approval'");
     $approvalMap = [];
     while ($row = $clarificationRes->fetch_assoc()) {
         $clarificationJobIDs[] = $row['jobID'];
@@ -213,7 +213,7 @@ function getClarificationJobsForSupervisor($conn, $userID) {
 
 // Fetch clarification details for a jobID (returns all clarification rows)
 function getClarificationDetails($conn, $jobID) {
-    $clarRes = $conn->query("SELECT * FROM clarifications WHERE jobID = $jobID ORDER BY clarification_id DESC");
+    $clarRes = $conn->query("SELECT * FROM clarifications WHERE jobID = $jobID AND clarification_requesterID = 30 ORDER BY clarification_id DESC");
     if ($clarRes && $clarRes->num_rows > 0) {
         $clarifications = [];
         while ($row = $clarRes->fetch_assoc()) {
@@ -242,7 +242,7 @@ function getPendingApprovalClarificationJobsForSupervisor($conn, $userID) {
     // Find jobs with clarification_status = 2 (pending approval)
     $pendingJobIDs = [];
     $approvalMap = [];
-    $pendingRes = $conn->query("SELECT jobID, approvalID FROM clarifications WHERE jobID IN ($jobIDsStr) AND clarification_status = 1");
+    $pendingRes = $conn->query("SELECT jobID, approvalID FROM clarifications WHERE jobID IN ($jobIDsStr) AND clarification_status = 1 AND clarification_requesterID = 30");
     while ($row = $pendingRes->fetch_assoc()) {
         $pendingJobIDs[] = $row['jobID'];
         $approvalMap[$row['jobID']] = $row['approvalID'];

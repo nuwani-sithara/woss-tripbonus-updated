@@ -302,7 +302,7 @@ function getResolvedClarificationsForApproval($conn, $userID) {
 }
 
 function getJobsWithPendingClarifications($conn, $userID) {
-    // Get jobs that have pending clarifications (status = 2) that need to be resolved by supervisors
+    // Get jobs that have pending clarifications (status = 0) that need to be resolved by supervisors
     $sql = "SELECT j.*, c.*, a.approval_status, a.approval_stage
             FROM jobs j
             JOIN clarifications c ON j.jobID = c.jobID
@@ -527,7 +527,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['clarification_id'], $
         exit;
     }
     
-    // Update the clarification with resolution
+    // Update the clarification with resolution - status becomes 1 (resolved, waiting for OM approval)
     $stmt = $conn->prepare("UPDATE clarifications SET clarification_resolved_comment = ?, clarification_status = 1 WHERE clarification_id = ? AND clarification_resolverID = ?");
     $stmt->bind_param("sii", $resolutionComment, $clarificationID, $userID);
     $stmt->execute();
@@ -563,7 +563,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['clarification_approva
             $stmt->bind_param("i", $clarificationID);
             $stmt->execute();
             
-            // Update the approval status to pending (0) so the job can proceed
+            // Update the approval status to 0 (pending) so the job can proceed
             $stmt = $conn->prepare("UPDATE approvals SET approval_status = 0 WHERE approvalID = ?");
             $stmt->bind_param("i", $approvalID);
             $stmt->execute();
