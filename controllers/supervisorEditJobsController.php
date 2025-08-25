@@ -242,7 +242,7 @@ function getPendingApprovalClarificationJobsForSupervisor($conn, $userID) {
     // Find jobs with clarification_status = 2 (pending approval)
     $pendingJobIDs = [];
     $approvalMap = [];
-    $pendingRes = $conn->query("SELECT jobID, approvalID FROM clarifications WHERE jobID IN ($jobIDsStr) AND clarification_status = 2");
+    $pendingRes = $conn->query("SELECT jobID, approvalID FROM clarifications WHERE jobID IN ($jobIDsStr) AND clarification_status = 1");
     while ($row = $pendingRes->fetch_assoc()) {
         $pendingJobIDs[] = $row['jobID'];
         $approvalMap[$row['jobID']] = $row['approvalID'];
@@ -272,7 +272,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['resolve_clarification
     $update = $conn->query("UPDATE clarifications SET 
         clarification_resolverID = $resolverID,
         clarification_resolved_comment = '$resolvedComment',
-        clarification_status = 2
+        clarification_status = 1
         WHERE clarification_id = $clarificationID AND jobID = $jobID");
 
     if ($update) {

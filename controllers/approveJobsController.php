@@ -3,89 +3,100 @@ session_start();
 require_once(__DIR__ . '/../config/dbConnect.php');
 
 function getJobsForApproval($conn) {
-    // Get all jobs that need approval (one per jobID) - include both completed and ongoing jobs
+    // Get jobs that need operations manager approval
+    // These are jobs that have been approved by supervisor-in-charge but not yet approved by operations manager
+    $sql = "SELECT j.*, a.approval_status, a.approval_stage
+            FROM jobs j
+            JOIN approvals a ON j.jobID = a.jobID 
+            WHERE a.approval_stage = 'job_approval' 
+            AND a.approval_status = 0
+            ORDER BY j.start_date DESC";
+    
     $jobs = [];
-    $jobsRes = $conn->query("SELECT * FROM jobs"); // Get all jobs
-    while ($job = $jobsRes->fetch_assoc()) {
-        $jobID = $job['jobID'];
-        // Get all trips for this job
-        $trips = [];
-        $tripsRes = $conn->query("SELECT * FROM trips WHERE jobID = $jobID ORDER BY trip_date");
-        while ($trip = $tripsRes->fetch_assoc()) {
-            $tripID = $trip['tripID'];
-            // Get attendance for this trip
-            $attendance = $conn->query("SELECT * FROM job_attendance WHERE tripID = $tripID")->fetch_assoc();
-            // Get employees for this trip
-            $employees = [];
-            $empRes = $conn->query("SELECT e.empID, u.fname, u.lname FROM jobassignments ja JOIN employees e ON ja.empID = e.empID JOIN users u ON e.userID = u.userID WHERE ja.tripID = $tripID");
-            while ($emp = $empRes->fetch_assoc()) {
-                $employees[] = $emp;
-            }
-            $trips[] = [
-                'trip' => $trip,
-                'attendance' => $attendance,
-                'employees' => $employees,
-            ];
-        }
-        // Job creator (fname, lname)
-        $job_creator = null;
-        if (isset($job['jobCreatedBy'])) {
-            $creatorID = intval($job['jobCreatedBy']);
-            $creator = $conn->query("SELECT fname, lname FROM users WHERE userID = $creatorID")->fetch_assoc();
-            if ($creator) {
-                $job_creator = [
-                    'fname' => $creator['fname'],
-                    'lname' => $creator['lname'],
+    $result = $conn->query($sql);
+    
+    if ($result) {
+        while ($row = $result->fetch_assoc()) {
+            $jobID = $row['jobID'];
+            // Get all trips for this job
+            $trips = [];
+            $tripsRes = $conn->query("SELECT * FROM trips WHERE jobID = $jobID ORDER BY trip_date");
+            while ($trip = $tripsRes->fetch_assoc()) {
+                $tripID = $trip['tripID'];
+                // Get attendance for this trip
+                $attendance = $conn->query("SELECT * FROM job_attendance WHERE tripID = $tripID")->fetch_assoc();
+                // Get employees for this trip
+                $employees = [];
+                $empRes = $conn->query("SELECT e.empID, u.fname, u.lname FROM jobassignments ja JOIN employees e ON ja.empID = e.empID JOIN users u ON e.userID = u.userID WHERE ja.tripID = $tripID");
+                while ($emp = $empRes->fetch_assoc()) {
+                    $employees[] = $emp;
+                }
+                $trips[] = [
+                    'trip' => $trip,
+                    'attendance' => $attendance,
+                    'employees' => $employees,
                 ];
             }
-        }
-        // Boat
-        $boat = null;
-        $ba = $conn->query("SELECT boatID FROM boatassignments WHERE jobID = $jobID")->fetch_assoc();
-        if ($ba) {
-            $boat = $conn->query("SELECT * FROM boats WHERE boatID = {$ba['boatID']}")->fetch_assoc();
-        }
-        // Port
-        $port = null;
-        $pa = $conn->query("SELECT portID FROM portassignments WHERE jobID = $jobID")->fetch_assoc();
-        if ($pa) {
-            $port = $conn->query("SELECT * FROM ports WHERE portID = {$pa['portID']}")->fetch_assoc();
-        }
-        // Special projects
-        $special_projects = [];
-        $spRes = $conn->query("SELECT spProjectID FROM jobspecialprojects WHERE jobID = $jobID");
-        while ($spRow = $spRes->fetch_assoc()) {
-            $sp = $conn->query("SELECT sp.*, v.vessel_name FROM specialproject sp LEFT JOIN vessels v ON sp.vesselID = v.vesselID WHERE sp.spProjectID = {$spRow['spProjectID']}")->fetch_assoc();
-            if ($sp) {
-                $special_projects[] = $sp;
+            // Job creator (fname, lname)
+            $job_creator = null;
+            if (isset($row['jobCreatedBy'])) {
+                $creatorID = intval($row['jobCreatedBy']);
+                $creator = $conn->query("SELECT fname, lname FROM users WHERE userID = $creatorID")->fetch_assoc();
+                if ($creator) {
+                    $job_creator = [
+                        'fname' => $creator['fname'],
+                        'lname' => $creator['lname'],
+                    ];
+                }
             }
-        }
-        // Vessel name
-        $vessel_name = null;
-        if (isset($job['vesselID'])) {
-            $vessel = $conn->query("SELECT vessel_name FROM vessels WHERE vesselID = {$job['vesselID']}")->fetch_assoc();
-            if ($vessel) {
-                $vessel_name = $vessel['vessel_name'];
+            // Boat
+            $boat = null;
+            $ba = $conn->query("SELECT boatID FROM boatassignments WHERE jobID = $jobID")->fetch_assoc();
+            if ($ba) {
+                $boat = $conn->query("SELECT * FROM boats WHERE boatID = {$ba['boatID']}")->fetch_assoc();
             }
-        }
-        // Job type
-        $job_type = null;
-        if (isset($job['jobtypeID'])) {
-            $jt = $conn->query("SELECT type_name FROM jobtype WHERE jobtypeID = {$job['jobtypeID']}")->fetch_assoc();
-            if ($jt) {
-                $job_type = $jt['type_name'];
+            // Port
+            $port = null;
+            $pa = $conn->query("SELECT portID FROM portassignments WHERE jobID = $jobID")->fetch_assoc();
+            if ($pa) {
+                $port = $conn->query("SELECT * FROM ports WHERE portID = {$pa['portID']}")->fetch_assoc();
             }
+            // Special projects
+            $special_projects = [];
+            $spRes = $conn->query("SELECT spProjectID FROM jobspecialprojects WHERE jobID = $jobID");
+            while ($spRow = $spRes->fetch_assoc()) {
+                $sp = $conn->query("SELECT sp.*, v.vessel_name FROM specialproject sp LEFT JOIN vessels v ON sp.vesselID = sp.vesselID WHERE sp.spProjectID = {$spRow['spProjectID']}")->fetch_assoc();
+                if ($sp) {
+                    $special_projects[] = $sp;
+                }
+            }
+            // Vessel name
+            $vessel_name = null;
+            if (isset($row['vesselID'])) {
+                $vessel = $conn->query("SELECT vessel_name FROM vessels WHERE vesselID = {$row['vesselID']}")->fetch_assoc();
+                if ($vessel) {
+                    $vessel_name = $vessel['vessel_name'];
+                }
+            }
+            // Job type
+            $job_type = null;
+            if (isset($row['jobtypeID'])) {
+                $jt = $conn->query("SELECT type_name FROM jobtype WHERE jobtypeID = {$row['jobtypeID']}")->fetch_assoc();
+                if ($jt) {
+                    $job_type = $jt['type_name'];
+                }
+            }
+            $jobs[] = [
+                'job' => $row,
+                'trips' => $trips,
+                'boat' => $boat,
+                'port' => $port,
+                'special_projects' => $special_projects,
+                'vessel_name' => $vessel_name,
+                'job_type' => $job_type,
+                'job_creator' => $job_creator,
+            ];
         }
-        $jobs[] = [
-            'job' => $job,
-            'trips' => $trips,
-            'boat' => $boat,
-            'port' => $port,
-            'special_projects' => $special_projects,
-            'vessel_name' => $vessel_name,
-            'job_type' => $job_type,
-            'job_creator' => $job_creator,
-        ];
     }
     return $jobs;
 }
@@ -210,13 +221,17 @@ function getJobsWithClarifications($conn) {
     return $result;
 }
 
-function getJobsWithPendingClarificationApproval($conn) {
+function getJobsWithPendingClarificationApproval($conn, $userID) {
     $sql = "SELECT c.*, j.*, a.approval_status
             FROM clarifications c
             JOIN jobs j ON c.jobID = j.jobID
             JOIN approvals a ON c.approvalID = a.approvalID
-            WHERE c.clarification_status = 2";
-    $result = $conn->query($sql);
+            WHERE c.clarification_status = 2
+            AND c.clarification_requesterID = ?";
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param("i", $userID);
+    $stmt->execute();
+    $result = $stmt->get_result();
     $jobsByJobID = [];
     while ($row = $result->fetch_assoc()) {
         $jobID = $row['jobID'];
@@ -480,16 +495,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['job_attendanceID'], $
     // If this is a clarification request, insert into clarification table
     if ($action == 2 && isset($_POST['clarification_comment'])) {
         $comment = $_POST['clarification_comment'];
+        
+        // Get the supervisor-in-charge who approved this job (they will resolve the clarification)
+        $supervisorInChargeQuery = $conn->prepare("SELECT approval_by FROM approvals WHERE jobID = ? AND approval_stage = 'supervisor_in_charge_approval' AND approval_status = 1 ORDER BY approval_date DESC LIMIT 1");
+        $supervisorInChargeQuery->bind_param("i", $jobID);
+        $supervisorInChargeQuery->execute();
+        $supervisorInChargeResult = $supervisorInChargeQuery->get_result();
+        $supervisorInChargeRow = $supervisorInChargeResult->fetch_assoc();
+        $resolverID = $supervisorInChargeRow['approval_by']; // Supervisor-in-Charge will resolve
+        
         $stmtClarify = $conn->prepare("INSERT INTO clarifications (
             jobID, 
             approvalID, 
             clarification_requesterID, 
             clarification_request_comment, 
+            clarification_resolverID,
             clarification_status
-        ) VALUES (?, ?, ?, ?, 0)");
+        ) VALUES (?, ?, ?, ?, ?, 0)");
         
         if (!$stmtClarify) throw new Exception("Prepare failed: " . $conn->error);
-        $stmtClarify->bind_param("iiis", $jobID, $approvalID, $userID, $comment);
+        $stmtClarify->bind_param("iiisi", $jobID, $approvalID, $userID, $comment, $resolverID);
         if (!$stmtClarify->execute()) throw new Exception("Execute failed: " . $stmtClarify->error);
         $stmtClarify->close();
     }
@@ -542,4 +567,7 @@ foreach ($attendanceVerifiedJobs as $avJob) {
     }
 }
 $jobsWithClarifications = getJobsWithClarifications($conn);
-$jobsWithPendingClarificationApproval = getJobsWithPendingClarificationApproval($conn);
+
+// Get userID from session for the pending clarification approval function
+$userID = isset($_SESSION['userID']) ? $_SESSION['userID'] : null;
+$jobsWithPendingClarificationApproval = getJobsWithPendingClarificationApproval($conn, $userID);

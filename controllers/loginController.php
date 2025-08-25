@@ -65,6 +65,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             case 7: 
                 header("Location: ../views/directordashboard.php");
                 break;
+            case 13: 
+                header("Location: ../views/supervisorinchargedashboard.php");
+                break;
             default:
                 header("Location: ../index.php");
                 break;
