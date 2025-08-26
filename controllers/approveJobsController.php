@@ -462,6 +462,7 @@ function getAttendanceVerifiedJobsForApproval($conn) {
                 'vessel_name' => $vessel_name,
                 'job_type' => $job_type,
                 'job_creator' => $job_creator,
+                'trips' => [], // Add this line to maintain consistent structure
             ];
         }
     }

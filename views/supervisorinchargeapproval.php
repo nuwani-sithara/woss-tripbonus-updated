@@ -858,12 +858,12 @@ $message = isset($_GET['message']) ? $_GET['message'] : '';
                                                 <i class="fas fa-times me-1"></i> Reject
                                             </button>
                                         </div>
-                                        <div class="text-center mt-2">
+                                        <!-- <div class="text-center mt-2">
                                             <span class="badge bg-info text-white">
                                                 <i class="fas fa-clock me-1"></i> Ongoing Job
                                             </span>
                                             <small class="text-muted d-block mt-1">Job must be completed (end date added) before approval</small>
-                                        </div>
+                                        </div> -->
                                     <?php else: ?>
                                         <!-- Completed Job - Buttons Enabled -->
                                         <form method="post" action="../controllers/supervisorInChargeController.php" class="d-flex justify-content-end gap-2">

@@ -33,6 +33,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     $empIDs = array_unique($empIDs);
     $empIDsStr = implode(',', array_map('intval', $empIDs));
     $monthNum = date('n', strtotime($month . ' 1'));
+    
     // Job count per empID
     $jobCounts = [];
     if ($empIDsStr) {
@@ -54,24 +55,75 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
         }
         $stmtJob->close();
     }
-    // Standby count per empID
+    
+    // Standby count per empID - USING THE SAME LOGIC AS PAYMENT CALCULATION
     $standbyCounts = [];
     if ($empIDsStr) {
-        $standbyCountSql = "SELECT sa.empID, COUNT(*) as standby_count
-            FROM standbyassignments sa
-            JOIN standby_attendance s ON sa.standby_attendanceID = s.standby_attendanceID
-            WHERE MONTH(s.date) = ? AND YEAR(s.date) = ?
-              AND sa.empID IN ($empIDsStr)
-            GROUP BY sa.empID";
+        // Get all standbyassignments joined with standby_attendance for the selected month/year
+        $standbyCountSql = "SELECT sa.EAID, sa.empID, sa.standby_attendanceID, sa.status, sa.standby_count, s.date as checkInDate
+                FROM standbyassignments sa
+                JOIN standby_attendance s ON sa.standby_attendanceID = s.standby_attendanceID
+                WHERE MONTH(s.date) = ? AND YEAR(s.date) = ?
+                AND sa.empID IN ($empIDsStr)";
+        
         $stmtStandby = $conn->prepare($standbyCountSql);
         $stmtStandby->bind_param('ii', $monthNum, $year);
         $stmtStandby->execute();
         $resStandby = $stmtStandby->get_result();
+        
         while ($row = $resStandby->fetch_assoc()) {
-            $standbyCounts[$row['empID']] = $row['standby_count'];
+            $empID = $row['empID'];
+            $standbyAttendanceID = $row['standby_attendanceID'];
+            $status = $row['status'];
+            $standbyCount = (int)$row['standby_count'];
+            $checkInDate = $row['checkInDate'];
+            $count = 0;
+            
+            if ($status == 0) {
+                // Checked out: use stored standby_count
+                $count = $standbyCount;
+            } else {
+                // Checked in: calculate standby count as days spent in office before first job assignment
+                // Get the earliest trip date for this employee and standby_attendanceID
+                $firstTripSql = "SELECT MIN(DISTINCT ja.date) as first_trip_date
+                                 FROM jobassignments jass
+                                 JOIN job_attendance ja ON jass.tripID = ja.tripID
+                                 WHERE jass.empID = ? AND ja.standby_attendanceID = ?
+                                 AND ja.date IS NOT NULL";
+                $firstTripStmt = $conn->prepare($firstTripSql);
+                if ($firstTripStmt) {
+                    $firstTripStmt->bind_param("ii", $empID, $standbyAttendanceID);
+                    if ($firstTripStmt->execute()) {
+                        $firstTripResult = $firstTripStmt->get_result();
+                        if ($firstTripResult) {
+                            $firstTripRow = $firstTripResult->fetch_assoc();
+                            if ($firstTripRow && $firstTripRow['first_trip_date']) {
+                                $checkInDateTime = new DateTime($checkInDate);
+                                $firstTripDateTime = new DateTime($firstTripRow['first_trip_date']);
+                                $interval = $checkInDateTime->diff($firstTripDateTime);
+                                $count = $interval->days; // Days spent waiting in office
+                            } else {
+                                // No trips assigned yet, count from check-in to today
+                                $checkInDateTime = new DateTime($checkInDate);
+                                $today = new DateTime();
+                                $interval = $checkInDateTime->diff($today);
+                                $count = $interval->days;
+                            }
+                        }
+                        $firstTripResult->free();
+                    }
+                    $firstTripStmt->close();
+                }
+            }
+            
+            if (!isset($standbyCounts[$empID])) {
+                $standbyCounts[$empID] = 0;
+            }
+            $standbyCounts[$empID] += $count;
         }
         $stmtStandby->close();
     }
+    
     // Add counts to each payment row
     foreach ($payments as &$payment) {
         $empID = $payment['empID'];

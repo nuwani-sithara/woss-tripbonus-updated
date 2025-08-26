@@ -6,6 +6,77 @@ if (!isset($_SESSION['userID']) || !isset($_SESSION['roleID']) || $_SESSION['rol
     http_response_code(403);
     exit('Access denied');
 }
+
+// Function to get standby counts (same as in payment calculation)
+function getStandbyCounts($conn, $month, $year) {
+    $allCounts = [];
+    $logFile = 'standby_log.txt';
+    $logHandle = fopen($logFile, 'a');
+    if (!$logHandle) die("Unable to open log file.");
+
+    // Get all standbyassignments joined with standby_attendance for the selected month/year
+    $sql = "SELECT sa.EAID, sa.empID, sa.standby_attendanceID, sa.status, sa.standby_count, s.date as checkInDate
+            FROM standbyassignments sa
+            JOIN standby_attendance s ON sa.standby_attendanceID = s.standby_attendanceID
+            WHERE MONTH(s.date) = ? AND YEAR(s.date) = ?";
+    $stmt = $conn->prepare($sql);
+    if (!$stmt) { fwrite($logHandle, "Prepare failed: " . $conn->error . "\n"); fclose($logHandle); die(); }
+    if (!$stmt->bind_param("ii", $month, $year)) { fwrite($logHandle, "Bind failed: " . $stmt->error . "\n"); fclose($logHandle); die(); }
+    if (!$stmt->execute()) { fwrite($logHandle, "Execute failed: " . $stmt->error . "\n"); fclose($logHandle); die(); }
+    $result = $stmt->get_result();
+    if (!$result) { fwrite($logHandle, "Get result failed: " . $stmt->error . "\n"); fclose($logHandle); die(); }
+
+    while ($row = $result->fetch_assoc()) {
+        $empID = $row['empID'];
+        $standbyAttendanceID = $row['standby_attendanceID'];
+        $status = $row['status'];
+        $standbyCount = (int)$row['standby_count'];
+        $checkInDate = $row['checkInDate'];
+        $count = 0;
+        if ($status == 0) {
+            // Checked out: use stored standby_count
+            $count = $standbyCount;
+        } else {
+            // Checked in: calculate standby count as days spent in office before first job assignment
+            // Get the earliest trip date for this employee and standby_attendanceID
+            $firstTripSql = "SELECT MIN(DISTINCT ja.date) as first_trip_date
+                             FROM jobassignments jass
+                             JOIN job_attendance ja ON jass.tripID = ja.tripID
+                             WHERE jass.empID = ? AND ja.standby_attendanceID = ?
+                             AND ja.date IS NOT NULL";
+            $firstTripStmt = $conn->prepare($firstTripSql);
+            if ($firstTripStmt) {
+                $firstTripStmt->bind_param("ii", $empID, $standbyAttendanceID);
+                if ($firstTripStmt->execute()) {
+                    $firstTripResult = $firstTripStmt->get_result();
+                    if ($firstTripResult) {
+                        $firstTripRow = $firstTripResult->fetch_assoc();
+                        if ($firstTripRow && $firstTripRow['first_trip_date']) {
+                            $checkInDateTime = new DateTime($checkInDate);
+                            $firstTripDateTime = new DateTime($firstTripRow['first_trip_date']);
+                            $interval = $checkInDateTime->diff($firstTripDateTime);
+                            $count = $interval->days; // Days spent waiting in office
+                        } else {
+                            // No trips assigned yet, count from check-in to today
+                            $checkInDateTime = new DateTime($checkInDate);
+                            $today = new DateTime();
+                            $interval = $checkInDateTime->diff($today);
+                            $count = $interval->days;
+                        }
+                    }
+                    $firstTripResult->free();
+                }
+                $firstTripStmt->close();
+            }
+        }
+        if (!isset($allCounts[$empID])) $allCounts[$empID] = 0;
+        $allCounts[$empID] += $count;
+        fwrite($logHandle, "empID: $empID | standby_attendanceID: $standbyAttendanceID | status: $status | count: $count\n");
+    }
+    fclose($logHandle);
+    $stmt->close();
+    return [ 'all' => $allCounts ];
+}
 if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['action']) && $_GET['action'] === 'export') {
     $month = isset($_GET['month']) ? $_GET['month'] : date('F');
     $year = isset($_GET['year']) ? intval($_GET['year']) : date('Y');
@@ -222,10 +293,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['action']) && $_GET['act
         echo "Invalid file type.";
         exit();
     }
-}
-else if ($_SERVER['REQUEST_METHOD'] === 'GET') {
+} elseif ($_SERVER['REQUEST_METHOD'] === 'GET') {
     $month = isset($_GET['month']) ? $_GET['month'] : date('F');
     $year = isset($_GET['year']) ? intval($_GET['year']) : date('Y');
+    
+    // Convert month name to number
+    $monthNum = date('n', strtotime($month . ' 1'));
+    
     // Check if already verified or rejected
     $verifyCheckSql = "SELECT * FROM paymentverify WHERE month = ? AND year = ?";
     $verifyStmt = $conn->prepare($verifyCheckSql);
@@ -234,6 +308,7 @@ else if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     $verifyResult = $verifyStmt->get_result();
     $isVerified = $verifyResult->num_rows > 0;
     $verifyInfo = $verifyResult->fetch_assoc();
+    
     if ($isVerified) {
         $statusText = 'verified';
         $badgeClass = 'bg-success';
@@ -258,6 +333,7 @@ else if ($_SERVER['REQUEST_METHOD'] === 'GET') {
         $buttonHtml .= '</div>';
     }
     echo '<!--VERIFIED_STATUS-->';
+    
     // Calculate totals
     $totalsSql = "SELECT 
         SUM(jobAllowance) as totalJobAllowance,
@@ -272,6 +348,7 @@ else if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     $totalsStmt->execute();
     $totalsResult = $totalsStmt->get_result();
     $totals = $totalsResult->fetch_assoc();
+    
     echo '<div id="monthlyTotals" class="mb-3">';
     echo '<div class="card card-body bg-light">';
     echo '<h5 class="mb-2">Monthly Totals</h5>';
@@ -288,12 +365,14 @@ else if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     echo '</div>';
     echo '</div>';
     $totalsStmt->close();
+    
     // Now output the table
     $paymentsSql = "SELECT p.*, u.fname, u.lname, e.empID FROM payments p LEFT JOIN employees e ON p.empID = e.empID LEFT JOIN users u ON e.userID = u.userID WHERE p.month = ? AND p.year = ?";
     $stmt = $conn->prepare($paymentsSql);
     $stmt->bind_param('si', $month, $year);
     $stmt->execute();
     $result = $stmt->get_result();
+    
     // --- Fetch job counts and standby counts for all employees in this month/year ---
     $empIDs = [];
     $paymentsRows = [];
@@ -302,11 +381,11 @@ else if ($_SERVER['REQUEST_METHOD'] === 'GET') {
         $paymentsRows[] = $row;
     }
     $empIDs = array_unique($empIDs);
-    $empIDsStr = implode(',', array_map('intval', $empIDs));
-    $monthNum = date('n', strtotime($month . ' 1'));
+    
     // Job count per empID
     $jobCounts = [];
-    if ($empIDsStr) {
+    if (!empty($empIDs)) {
+        $empIDsStr = implode(',', array_map('intval', $empIDs));
         $jobCountSql = "SELECT ja.empID, COUNT(DISTINCT j.jobID) as job_count
             FROM approvals a
             JOIN jobs j ON a.jobID = j.jobID
@@ -325,25 +404,13 @@ else if ($_SERVER['REQUEST_METHOD'] === 'GET') {
         }
         $stmtJob->close();
     }
-    // Standby count per empID
-    $standbyCounts = [];
-    if ($empIDsStr) {
-        $standbyCountSql = "SELECT sa.empID, COUNT(*) as standby_count
-            FROM standbyassignments sa
-            JOIN standby_attendance s ON sa.standby_attendanceID = s.standby_attendanceID
-            WHERE MONTH(s.date) = ? AND YEAR(s.date) = ?
-              AND sa.empID IN ($empIDsStr)
-            GROUP BY sa.empID";
-        $stmtStandby = $conn->prepare($standbyCountSql);
-        $stmtStandby->bind_param('ii', $monthNum, $year);
-        $stmtStandby->execute();
-        $resStandby = $stmtStandby->get_result();
-        while ($row = $resStandby->fetch_assoc()) {
-            $standbyCounts[$row['empID']] = $row['standby_count'];
-        }
-        $stmtStandby->close();
-    }
+    
+    // Standby count per empID - USING THE CORRECT CALCULATION
+    $standbyCountsData = getStandbyCounts($conn, $monthNum, $year);
+    $standbyCounts = $standbyCountsData['all'];
+    
     echo '<div class="table-responsive"><table class="table table-bordered table-hover"><thead><tr><th>Employee</th><th>Job Count</th><th>Standby Attendance Count</th><th>Job Allowance</th><th>Job Meal</th><th>Standby Attendance</th><th>Standby Meal</th><th>Report Prep</th><th>Total Diving</th><th>Date</th></tr></thead><tbody>';
+    
     foreach ($paymentsRows as $row) {
         $empID = $row['empID'];
         echo '<tr>';
@@ -357,13 +424,9 @@ else if ($_SERVER['REQUEST_METHOD'] === 'GET') {
         echo '<td>' . number_format($row['reportPreparationAllowance'], 2) . '</td>';
         echo '<td>' . number_format($row['totalDivingAllowance'], 2) . '</td>';
         echo '<td>' . htmlspecialchars($row['date_time']) . '</td>';
-        // if ($isVerified) {
-        //     echo '<td><span class="badge bg-success">Verified</span></td>';
-        // } else {
-        //     echo '<td><span class="badge bg-warning text-dark">Pending</span></td>';
-        // }
         echo '</tr>';
     }
+    
     // Add totals row in table footer
     echo '</tbody><tfoot><tr style="font-weight:bold;background:#e9ecef;"><td>Monthly Total</td><td></td><td></td>'
     .'<td>' . number_format($totals['totalJobAllowance'], 2) . '</td>'
@@ -383,6 +446,7 @@ else if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     $verifyStmt->close();
     exit();
 }
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'verify') {
     $month = $_POST['month'];
     $year = intval($_POST['year']);
