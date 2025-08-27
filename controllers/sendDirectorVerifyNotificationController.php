@@ -92,7 +92,7 @@ try {
                 <p>Dear {$om['fname']} {$om['lname']},</p>
                 <p>The payments for <strong>$month $year</strong> have been <strong>verified</strong> by Director: <strong>$directorName</strong> on $verifyDate.</p>
                 <p>Please review if needed.</p>
-                <p>Best regards,<br>WOSS Trip Bonus System</p>
+                <p>Best regards,<br>SubseaOps</p>
             </div>
             <div class='footer'>
                 This is an automated notification. Please do not reply to this email.
@@ -104,7 +104,7 @@ try {
 
     // --- Email to Accountant ---
     $subjectAcc = "Payments Awaiting Payroll Processing - $month $year";
-    $payrollLink = "https://tripbonus.worldsubsea.lk/views/exportpayrollreport.php?month=" . urlencode($month) . "&year=" . $year;
+    $payrollLink = "https://subseaops.worldsubsea.lk/views/exportpayrollreport.php?month=" . urlencode($month) . "&year=" . $year;
     $bodyAcc = "
     <html>
     <head>
@@ -163,7 +163,7 @@ try {
                 <div style='text-align: center; margin: 25px 0;'>
                     <a href='$payrollLink' class='button'>Review & Send Payroll List</a>
                 </div>
-                <p>Best regards,<br>WOSS Trip Bonus System</p>
+                <p>Best regards,<br>SubseaOps</p>
             </div>
             <div class='footer'>
                 This is an automated notification. Please do not reply to this email.
@@ -181,7 +181,7 @@ try {
     $mail->Password = 'Com38518';
     $mail->SMTPSecure = PHPMailer\PHPMailer\PHPMailer::ENCRYPTION_STARTTLS;
     $mail->Port = 587;
-    $mail->setFrom('tripbonus@worldsubsea.lk', 'WOSS Trip Bonus System');
+    $mail->setFrom('subseaops@worldsubsea.lk', 'SubseaOps');
     $mail->isHTML(true);
 
     // Send to OM

@@ -54,7 +54,7 @@ try {
 
     // Prepare email content
     $subject = "Monthly Diving Payments Approval Required - " . $month . " " . $year;
-    $approvalLink = "https://tripbonus.worldsubsea.lk/views/paymentverification.php?month=" . urlencode($month) . "&year=" . $year;
+    $approvalLink = "https://subseaops.worldsubsea.lk/views/paymentverification.php?month=" . urlencode($month) . "&year=" . $year;
     
     $emailBody = "
     <html>
@@ -115,7 +115,7 @@ try {
                     <a href='$approvalLink' class='button'>Review Payments</a>
                 </div>
                 <p>If you have any questions or need additional information, please contact the Operations Manager.</p>
-                <p>Best regards,<br>WOSS Trip Bonus System</p>
+                <p>Best regards,<br>SubseaOps</p>
             </div>
             <div class='footer'>
                 This is an automated notification. Please do not reply to this email.
@@ -146,7 +146,7 @@ try {
         $mail->Timeout = 30; // Increase timeout
         
         // Recipients
-        $mail->setFrom('tripbonus@worldsubsea.lk', 'WOSS Trip Bonus System');
+        $mail->setFrom('subseaops@worldsubsea.lk', 'SubseaOps');
         $mail->addAddress($accountantEmail, $accountantName);
         
         // Content

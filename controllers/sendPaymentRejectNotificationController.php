@@ -33,7 +33,7 @@ try {
 
     // Email to OM
     $subject = "Payments Rejected by Accountant for $month $year";
-    $link = "https://tripbonus.worldsubsea.lk/views/paymentstatus.php?month=" . urlencode($month) . "&year=" . $year;
+    $link = "https://subseaops.worldsubsea.lk/views/paymentstatus.php?month=" . urlencode($month) . "&year=" . $year;
     $body = "
     <html>
     <head>
@@ -101,7 +101,7 @@ try {
                 <div style='text-align: center; margin: 25px 0;'>
                     <a href='$link' class='button'>View Details</a>
                 </div>
-                <p>Best regards,<br>WOSS Trip Bonus System</p>
+                <p>Best regards,<br>SubseaOps</p>
             </div>
             <div class='footer'>
                 This is an automated notification. Please do not reply to this email.
@@ -119,7 +119,7 @@ try {
     $mail->Password = 'Com38518';
     $mail->SMTPSecure = PHPMailer\PHPMailer\PHPMailer::ENCRYPTION_STARTTLS;
     $mail->Port = 587;
-    $mail->setFrom('tripbonus@worldsubsea.lk', 'WOSS Trip Bonus System');
+    $mail->setFrom('subseaops@worldsubsea.lk', 'SubseaOps');
     $mail->isHTML(true);
 
     $mail->addAddress($om['email'], $om['fname'] . ' ' . $om['lname']);
