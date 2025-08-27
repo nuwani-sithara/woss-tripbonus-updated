@@ -114,7 +114,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     $standbyCounts = $standbyCountsData['all'];
     
     // Query payment data
-    $paymentsSql = "SELECT p.*, u.fname, u.lname, e.empID 
+    $paymentsSql = "SELECT p.*, u.eno, u.fname, u.lname, e.empID 
                    FROM payments p 
                    LEFT JOIN employees e ON p.empID = e.empID 
                    LEFT JOIN users u ON e.userID = u.userID 
@@ -175,6 +175,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     echo '<table class="table table-bordered table-hover">';
     echo '<thead class="table-light">';
     echo '<tr>
+            <th>Employee No</th>
             <th>Employee Name</th>
             <th>Job Count</th>
             <th>Job Start Date</th>
@@ -196,6 +197,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
         $dates = isset($jobDates[$empID]) ? $jobDates[$empID] : ['start_date' => 'N/A', 'end_date' => 'N/A'];
         
         echo '<tr>';
+        echo '<td>' . htmlspecialchars($row['eno']) . '</td>';
         echo '<td>' . htmlspecialchars($row['fname'] . ' ' . $row['lname']) . '</td>';
         echo '<td>' . ($jobCounts[$empID] ?? 0) . '</td>';
         echo '<td>' . ($dates['start_date'] != 'N/A' ? date('Y-m-d', strtotime($dates['start_date'])) : 'N/A') . '</td>';

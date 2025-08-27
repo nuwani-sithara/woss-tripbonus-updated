@@ -4,6 +4,7 @@ header('Content-Type: application/json');
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $email = $_POST['email'] ?? null;
+    $eno = $_POST['eno'] ?? null; // Get eno value
     $username = $_POST['username'] ?? null;
     $fname = $_POST['fname'] ?? null;
     $lname = $_POST['lname'] ?? null;
@@ -13,6 +14,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     // Make password optional only for drivers (roleID 2)
     $isDriver = ($roleID == 2);
+
+    // Convert empty eno to NULL for database
+    if (empty($eno)) {
+        $eno = null;
+    }
     
     if (!$email || !$username || !$fname || !$lname || !$roleID || (!$isDriver && !$password)) {
         echo json_encode(['success' => false, 'message' => 'Missing required fields.']);
@@ -53,8 +59,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $conn->begin_transaction();
     try {
         // Insert into users
-        $stmt = $conn->prepare('INSERT INTO users (email, username, password, fname, lname, roleID, rateID, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, NOW())');
-        $stmt->bind_param('sssssis', $email, $username, $password, $fname, $lname, $roleID, $rateID);
+        $stmt = $conn->prepare('INSERT INTO users (email, eno, username, password, fname, lname, roleID, rateID, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, NOW())');
+        $stmt->bind_param('sssssis', $email, $eno, $username, $password, $fname, $lname, $roleID, $rateID);
         if (!$stmt->execute()) {
             throw new Exception('Error creating user: ' . $stmt->error);
         }
@@ -101,6 +107,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $created_at = date('Y-m-d H:i:s');
         $user = [
             'userID' => $userID,
+            'eno' => $eno,
             'email' => $email,
             'username' => $username,
             'fname' => $fname,

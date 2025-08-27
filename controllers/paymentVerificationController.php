@@ -142,11 +142,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['action']) && $_GET['act
     }
 
     $filename = "Payment_Report_{$month}_{$year}." . $fileType;
-    $headers = ['Employee', 'Job Count', 'Standby Attendance Count', 'Job Allowance', 'Job Meal', 'Standby Attendance', 'Standby Meal', 'Report Prep', 'Total Diving', 'Date'];
+    $headers = ['Employee No', 'Employee', 'Job Count', 'Standby Attendance Count', 'Job Allowance', 'Job Meal', 'Standby Attendance', 'Standby Meal', 'Report Prep', 'Total Diving', 'Date'];
     $rows = [];
     foreach ($paymentsRows as $row) {
         $empID = $row['empID'];
         $rows[] = [
+            $row['eno'],
             $row['fname'] . ' ' . $row['lname'],
             $jobCounts[$empID] ?? 0,
             $standbyCounts[$empID] ?? 0,
@@ -367,7 +368,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['action']) && $_GET['act
     $totalsStmt->close();
     
     // Now output the table
-    $paymentsSql = "SELECT p.*, u.fname, u.lname, e.empID FROM payments p LEFT JOIN employees e ON p.empID = e.empID LEFT JOIN users u ON e.userID = u.userID WHERE p.month = ? AND p.year = ?";
+    $paymentsSql = "SELECT p.*, u.eno, u.fname, u.lname, e.empID FROM payments p LEFT JOIN employees e ON p.empID = e.empID LEFT JOIN users u ON e.userID = u.userID WHERE p.month = ? AND p.year = ?";
     $stmt = $conn->prepare($paymentsSql);
     $stmt->bind_param('si', $month, $year);
     $stmt->execute();
@@ -409,11 +410,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['action']) && $_GET['act
     $standbyCountsData = getStandbyCounts($conn, $monthNum, $year);
     $standbyCounts = $standbyCountsData['all'];
     
-    echo '<div class="table-responsive"><table class="table table-bordered table-hover"><thead><tr><th>Employee</th><th>Job Count</th><th>Standby Attendance Count</th><th>Job Allowance</th><th>Job Meal</th><th>Standby Attendance</th><th>Standby Meal</th><th>Report Prep</th><th>Total Diving</th><th>Date</th></tr></thead><tbody>';
+    echo '<div class="table-responsive"><table class="table table-bordered table-hover"><thead><tr><th>Employee No</th><th>Employee</th><th>Job Count</th><th>Standby Attendance Count</th><th>Job Allowance</th><th>Job Meal</th><th>Standby Attendance</th><th>Standby Meal</th><th>Report Prep</th><th>Total Diving</th><th>Date</th></tr></thead><tbody>';
     
     foreach ($paymentsRows as $row) {
         $empID = $row['empID'];
         echo '<tr>';
+        echo '<td>' . htmlspecialchars($row['eno']) . '</td>';
         echo '<td>' . htmlspecialchars($row['fname'] . ' ' . $row['lname']) . '</td>';
         echo '<td>' . ($jobCounts[$empID] ?? 0) . '</td>';
         echo '<td>' . ($standbyCounts[$empID] ?? 0) . '</td>';

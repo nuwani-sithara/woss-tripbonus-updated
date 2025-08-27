@@ -266,6 +266,10 @@ $employeesCount = getEmployeesCount();
                           <div class="modal-body">
                             <form id="addUserForm">
                               <div class="form-group">
+                                  <label for="addEno">Employee Number (Optional)</label>
+                                  <input type="text" class="form-control" id="addEno" name="eno">
+                              </div>
+                              <div class="form-group">
                                 <label for="addEmail">Email</label>
                                 <input type="email" class="form-control" id="addEmail" name="email" required>
                               </div>
@@ -334,6 +338,7 @@ $employeesCount = getEmployeesCount();
                         <thead>
                           <tr>
                             <th>User ID</th>
+                            <th>Employee No</th> <!-- New column -->
                             <th>Email</th>
                             <th>Username</th>
                             <th>First Name</th>
@@ -350,6 +355,7 @@ $employeesCount = getEmployeesCount();
                             foreach ($users as $user) {
                               echo '<tr>';
                               echo '<td>' . htmlspecialchars($user['userID']) . '</td>';
+                              echo '<td>' . htmlspecialchars($user['eno'] ?? '') . '</td>'; // New column
                               echo '<td>' . htmlspecialchars($user['email']) . '</td>';
                               echo '<td>' . htmlspecialchars($user['username']) . '</td>';
                               echo '<td>' . htmlspecialchars($user['fname']) . '</td>';
@@ -379,6 +385,11 @@ $employeesCount = getEmployeesCount();
                           <div class="modal-body">
                             <form id="editUserForm">
                               <input type="hidden" id="editUserID" name="userID">
+                              <!-- Inside the editUserForm -->
+                              <div class="form-group">
+                                  <label for="editEno">Employee Number</label>
+                                  <input type="text" class="form-control" id="editEno" name="eno">
+                              </div>
                               <div class="form-group">
                                 <label for="editEmail">Email</label>
                                 <input type="email" class="form-control" id="editEmail" name="email" required>
@@ -460,19 +471,20 @@ $employeesCount = getEmployeesCount();
         $('#user-table').DataTable({
           pageLength: 10
         });
-
-        // Edit button click
+        // Get all user data
         $(document).on('click', '.btn-edit', function () {
           var row = $(this).closest('tr');
           var userID = $(this).data('userid');
-          var email = row.find('td:eq(1)').text();
-          var username = row.find('td:eq(2)').text();
-          var fname = row.find('td:eq(3)').text();
-          var lname = row.find('td:eq(4)').text();
-          var roleID = row.find('td:eq(5)').text();
-          var rateID = row.find('td:eq(6)').data('rateid');
+          var eno = row.find('td:eq(1)').text(); // Get eno value
+          var email = row.find('td:eq(2)').text();
+          var username = row.find('td:eq(3)').text();
+          var fname = row.find('td:eq(4)').text();
+          var lname = row.find('td:eq(5)').text();
+          var roleID = row.find('td:eq(6)').text();
+          var rateID = row.find('td:eq(7)').data('rateid');
 
           $('#editUserID').val(userID);
+          $('#editEno').val(eno); // Set eno value
           $('#editEmail').val(email);
           $('#editUsername').val(username);
           $('#editFname').val(fname);
@@ -493,6 +505,7 @@ $employeesCount = getEmployeesCount();
           $.post('../controllers/editUserController.php', formData, function (response) {
             if (response.success) {
               // Update table row
+              row.find('td:eq(0)').text($('#editUserID').val());
               row.find('td:eq(1)').text($('#editEmail').val());
               row.find('td:eq(2)').text($('#editUsername').val());
               row.find('td:eq(3)').text($('#editFname').val());
@@ -563,6 +576,7 @@ $employeesCount = getEmployeesCount();
               var user = response.user;
               var newRow = '<tr>' +
                 '<td>' + user.userID + '</td>' +
+                '<td>' + (user.eno || '') + '</td>' + // New column
                 '<td>' + user.email + '</td>' +
                 '<td>' + user.username + '</td>' +
                 '<td>' + user.fname + '</td>' +

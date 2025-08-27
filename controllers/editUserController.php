@@ -4,6 +4,7 @@ header('Content-Type: application/json');
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $userID = $_POST['userID'] ?? null;
+    $eno = $_POST['eno'] ?? null; // Get eno value
     $email = $_POST['email'] ?? null;
     $username = $_POST['username'] ?? null;
     $fname = $_POST['fname'] ?? null;
@@ -17,15 +18,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         exit;
     }
 
+    // Convert empty eno to NULL for database
+    if (empty($eno)) {
+        $eno = null;
+    }
+
     // Convert empty rateID to NULL for database
     if (empty($rateID)) {
         $rateID = null;
     }
 
     // Prepare base query
-    $query = 'UPDATE users SET email=?, username=?, fname=?, lname=?, roleID=?, rateID=?';
-    $params = [$email, $username, $fname, $lname, $roleID, $rateID];
-    $types = 'sssssi';
+    $query = 'UPDATE users SET email=?, eno=?, username=?, fname=?, lname=?, roleID=?, rateID=?';
+    $params = [$email, $eno, $username, $fname, $lname, $roleID, $rateID];
+    $types = 'ssssssi';
 
     // Add password to query if provided
     if (!empty($password)) {

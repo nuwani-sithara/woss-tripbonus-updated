@@ -17,7 +17,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     $directorData = $directorResult->fetch_assoc();
 
     // Get payments verified by accountant for this month/year
-    $sql = "SELECT p.*, e.userID, u.fname, u.lname FROM payments p
+    $sql = "SELECT p.*, e.userID, u.fname, u.lname, u.eno FROM payments p
             INNER JOIN paymentverify pv ON p.month = pv.month AND p.year = pv.year
             LEFT JOIN employees e ON p.empID = e.empID
             LEFT JOIN users u ON e.userID = u.userID

@@ -170,6 +170,7 @@ $currentYear = date('Y');
                                     <tr>
                                         <!-- <th>Payment ID</th>
                                         <th>Employee ID</th> -->
+                                        <th>Employee No</th>
                                         <th>Employee Name</th>
                                         <th>Job Count</th>
                                         <th>Standby Attendance Count</th>
@@ -230,6 +231,7 @@ function fetchPayments(month, year) {
                 data.payments.forEach(payment => {
                     tbody.innerHTML += `
                         <tr>
+                            <td>${(payment.eno || '')}</td>
                             <td>${(payment.fname || '') + ' ' + (payment.lname || '')}</td>
                             <td>${payment.jobCount || 0}</td>
                             <td>${payment.standbyCount || 0}</td>
