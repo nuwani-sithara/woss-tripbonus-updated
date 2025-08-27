@@ -57,6 +57,82 @@ $jobType_result = mysqli_query($conn, "SELECT jobtypeID, type_name FROM jobtype"
     <link rel="stylesheet" href="../assets/css/plugins.min.css" />
     <link rel="stylesheet" href="../assets/css/kaiadmin.min.css" />
     <link rel="stylesheet" href="../assets/css/demo.css" />
+    <style>
+        .form-section {
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 25px;
+            border-left: 4px solid #2c7be5;
+        }
+        .form-section-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #2c7be5;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+        }
+        .form-section-title i {
+            margin-right: 10px;
+        }
+        .card {
+            box-shadow: 0 4px 24px 0 rgba(0,0,0,.08);
+            border: none;
+            border-radius: 10px;
+        }
+        .card-header {
+            background-color: #fff;
+            border-bottom: 1px solid #edf2f9;
+            padding: 20px 25px;
+        }
+        .card-title {
+            font-weight: 600;
+            color: #1e2a35;
+            font-size: 18px;
+        }
+        .card-body {
+            padding: 25px;
+        }
+        .card-action {
+            padding: 20px 25px;
+            background-color: #f8f9fa;
+            border-top: 1px solid #edf2f9;
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            font-weight: 500;
+            margin-bottom: 8px;
+            color: #344050;
+        }
+        .form-control {
+            border-radius: 6px;
+            padding: 10px 15px;
+            border: 1px solid #d8e2ef;
+            transition: all 0.3s;
+        }
+        .form-control:focus {
+            border-color: #2c7be5;
+            box-shadow: 0 0 0 0.2rem rgba(44, 123, 229, 0.25);
+        }
+        .job-key-preview {
+            background-color: #edf2f9;
+            padding: 10px 15px;
+            border-radius: 6px;
+            margin-top: 5px;
+            font-weight: 500;
+        }
+        .required-field::after {
+            content: "*";
+            color: #e63757;
+            margin-left: 3px;
+        }
+    </style>
 </head>
 <body>
     <div class="wrapper">
@@ -95,119 +171,128 @@ $jobType_result = mysqli_query($conn, "SELECT jobtypeID, type_name FROM jobtype"
             <div class="container">
                 <div class="page-inner">
                     <div class="page-header">
-                        <h3 class="fw-bold mb-3">Job Creation Form</h3>
+                        <h3 class="fw-bold mb-3">Job Creation</h3>
+                        <br/>
+                        <!-- <p class="text-muted">Create a new job by filling out the form below</p> -->
                     </div>
                     <div class="row">
                         <div class="col-md-12">
                             <div class="card">
                                 <div class="card-header">
-                                    <div class="card-title">Fill This Form To Create A New Job</div>
+                                    <div class="card-title">Job Information</div>
                                 </div>
                                 <form method="POST" action="../controllers/createJobController.php" class="space-y-6" enctype="multipart/form-data">
                                     <div class="card-body">
-                                        <div class="row">
-                                            <div class="col-md-6">
-                                                <div class="form-group">
-                                                    <label for="startDate">Start Date</label>
-                                                    <input type="date" class="form-control" id="startDate" name="startDate" required>
-                                                </div>
-
-                                                <div class="form-group">
-                                                    <label for="jobNumber">Job Number</label>
-                                                    <input type="text" class="form-control" id="jobNumber" name="jobNumber" required 
-                                                        placeholder="Enter job number (e.g., 1028)">
-                                                </div>
-                                                
-                                                <div class="form-group" id="vesselNameGroup">
-                                                    <label for="vesselName">Vessel Name</label>
-                                                    <select class="form-control" id="vesselName" name="vesselID" required>
-                                                        <option value="">Select Vessel</option>
-                                                        <?php while ($vessel = mysqli_fetch_assoc($vessel_result)) { ?>
-                                                            <option value="<?php echo $vessel['vesselID']; ?>"><?php echo $vessel['vessel_name']; ?></option>
-                                                        <?php } ?>
-                                                    </select>
-                                                </div>
+                                        <div class="form-section">
+                                            <div class="form-section-title">
+                                                <i class="icon-calendar"></i> Job Details
                                             </div>
-                                            
-                                            <div class="col-md-6">
-                                                <div class="form-group">
-                                                    <label for="jobType">Job Type</label>
-                                                    <select class="form-control" id="jobType" name="jobTypeID" required>
-                                                        <option value="">Select Job Type</option>
-                                                        <?php while ($jobType = mysqli_fetch_assoc($jobType_result)) { ?>
-                                                            <option value="<?php echo $jobType['jobtypeID']; ?>"><?php echo $jobType['type_name']; ?></option>
-                                                        <?php } ?>
-                                                    </select>
-                                                </div>
-
-                                                <div class="form-group" id="boatNameGroup">
-                                                    <label for="boatName">Boat Name</label>
-                                                    <select class="form-control" id="boatName" name="boatID" required>
-                                                        <option value="">Select Boat</option>
-                                                        <?php while ($boat = mysqli_fetch_assoc($boat_result)) { ?>
-                                                            <option value="<?php echo $boat['boatID']; ?>"><?php echo $boat['boat_name']; ?></option>
-                                                        <?php } ?>
-                                                    </select>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        
-                                        <div class="row">
-                                            <div class="col-md-6" id="portNameGroup">
-                                                <div class="form-group">
-                                                    <label for="portName">Port Name</label>
-                                                    <select class="form-control" id="portName" name="portID" required>
-                                                        <option value="">Select Port</option>
-                                                        <?php while ($port = mysqli_fetch_assoc($port_result)) { ?>
-                                                            <option value="<?php echo $port['portID']; ?>"><?php echo $port['portname']; ?></option>
-                                                        <?php } ?>
-                                                    </select>
-                                                </div>
-                                            </div>
-                                            
-                                            <div class="col-md-6">
-                                                <div class="form-group">
-                                                    <label for="comment">Comments</label>
-                                                    <textarea class="form-control" id="comment" name="comment" rows="3"></textarea>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        
-                                        <!-- <div class="form-group">
-                                            <label for="isSpecialProject">
-                                                <input type="checkbox" id="isSpecialProject" name="isSpecialProject" value="1" />
-                                                Is this a Special Project?
-                                            </label>
-                                        </div>
-
-                                        <div id="specialProjectForm" style="display: none;">
                                             <div class="row">
                                                 <div class="col-md-6">
                                                     <div class="form-group">
-                                                        <label for="name">Project Name</label>
-                                                        <input type="text" class="form-control" id="name" name="name" placeholder="Enter Special Project Name">
-                                                    </div>
-                                                    <div class="form-group">
-                                                        <label for="vessel">Vessel (Special Project)</label>
-                                                        <input type="text" class="form-control" id="vessel" name="vessel" placeholder="Enter Vessel Name for Special Project">
+                                                        <label for="startDate" class="required-field">Start Date</label>
+                                                        <input type="date" class="form-control" id="startDate" name="startDate" required>
                                                     </div>
                                                 </div>
                                                 <div class="col-md-6">
                                                     <div class="form-group">
-                                                        <label for="date">Date (Special Project)</label>
-                                                        <input type="date" class="form-control" id="date" name="date" placeholder="Select Date for Special Project">
-                                                    </div>
-                                                    <div class="form-group">
-                                                        <label for="evidence">Evidence (PDF, XLSX, Word, Mail Trailer)</label>
-                                                        <input type="file" class="form-control" id="evidence" name="evidence" accept=".pdf, .xlsx, .xls, .doc, .docx, .eml, .msg">
+                                                        <label for="jobType" class="required-field">Job Type</label>
+                                                        <select class="form-control" id="jobType" name="jobTypeID" required>
+                                                            <option value="">Select Job Type</option>
+                                                            <?php 
+                                                            // Reset pointer for job type result
+                                                            mysqli_data_seek($jobType_result, 0);
+                                                            while ($jobType = mysqli_fetch_assoc($jobType_result)) { ?>
+                                                                <option value="<?php echo $jobType['jobtypeID']; ?>"><?php echo $jobType['type_name']; ?></option>
+                                                            <?php } ?>
+                                                        </select>
                                                     </div>
                                                 </div>
                                             </div>
-                                        </div> -->
+                                            
+                                            <div class="row">
+                                                <div class="col-md-6">
+                                                    <div class="form-group">
+                                                        <label for="jobNumber" class="required-field">Job Number</label>
+                                                        <input type="text" class="form-control" id="jobNumber" name="jobNumber" required 
+                                                            placeholder="Enter job number (e.g., 1028)">
+                                                        <div class="form-text">Job Key Preview: <span id="jobKeyPreview" class="job-key-preview">Job key will appear here</span></div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <div class="form-group">
+                                                        <label for="comment">Comments</label>
+                                                        <textarea class="form-control" id="comment" name="comment" rows="3" placeholder="Additional notes about this job"></textarea>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="form-section">
+                                            <div class="form-section-title">
+                                                <i class="icon-anchor"></i> Vessel & Boat Information
+                                            </div>
+                                            <div class="row">
+                                                <div class="col-md-6" id="vesselNameGroup">
+                                                    <div class="form-group">
+                                                        <label for="vesselName" class="required-field">Vessel Name</label>
+                                                        <select class="form-control" id="vesselName" name="vesselID" required>
+                                                            <option value="">Select Vessel</option>
+                                                            <?php 
+                                                            // Reset pointer for vessel result
+                                                            mysqli_data_seek($vessel_result, 0);
+                                                            while ($vessel = mysqli_fetch_assoc($vessel_result)) { ?>
+                                                                <option value="<?php echo $vessel['vesselID']; ?>"><?php echo $vessel['vessel_name']; ?></option>
+                                                            <?php } ?>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-6" id="boatNameGroup">
+                                                    <div class="form-group">
+                                                        <label for="boatName" class="required-field">Boat Name</label>
+                                                        <select class="form-control" id="boatName" name="boatID" required>
+                                                            <option value="">Select Boat</option>
+                                                            <?php 
+                                                            // Reset pointer for boat result
+                                                            mysqli_data_seek($boat_result, 0);
+                                                            while ($boat = mysqli_fetch_assoc($boat_result)) { ?>
+                                                                <option value="<?php echo $boat['boatID']; ?>"><?php echo $boat['boat_name']; ?></option>
+                                                            <?php } ?>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="form-section">
+                                            <div class="form-section-title">
+                                                <i class="icon-location-pin"></i> Port Information
+                                            </div>
+                                            <div class="row">
+                                                <div class="col-md-6" id="portNameGroup">
+                                                    <div class="form-group">
+                                                        <label for="portName" class="required-field">Port Name</label>
+                                                        <select class="form-control" id="portName" name="portID" required>
+                                                            <option value="">Select Port</option>
+                                                            <?php 
+                                                            // Reset pointer for port result
+                                                            mysqli_data_seek($port_result, 0);
+                                                            while ($port = mysqli_fetch_assoc($port_result)) { ?>
+                                                                <option value="<?php echo $port['portID']; ?>"><?php echo $port['portname']; ?></option>
+                                                            <?php } ?>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
                                     </div>
                                     <div class="card-action">
-                                        <button class="btn btn-success" name="create_job" type="submit">Create Job</button>
-                                        <button class="btn btn-danger" type="reset">Cancel</button>
+                                        <button class="btn btn-success" name="create_job" type="submit">
+                                            <i class="icon-check"></i> Create Job
+                                        </button>
+                                        <button class="btn btn-outline-danger" type="reset">
+                                            <i class="icon-close"></i> Cancel
+                                        </button>
                                     </div>
                                 </form>
                             </div>
@@ -226,15 +311,6 @@ $jobType_result = mysqli_query($conn, "SELECT jobtypeID, type_name FROM jobtype"
     
     <script>
         $(document).ready(function() {
-            // Toggle special project form
-            $('#isSpecialProject').change(function() {
-                if($(this).is(':checked')) {
-                    $('#specialProjectForm').slideDown();
-                } else {
-                    $('#specialProjectForm').slideUp();
-                }
-            });
-
             // Handle job type change to hide/show fields for General job type
             $('#jobType').change(function() {
                 var selectedJobType = $(this).val();
@@ -261,10 +337,7 @@ $jobType_result = mysqli_query($conn, "SELECT jobtypeID, type_name FROM jobtype"
                     $('#portName').attr('required', 'required');
                 }
             });
-        });
 
-        // Add this script to the page
-        $(document).ready(function() {
             function updateJobKeyPreview() {
                 var jobNumber = $('#jobNumber').val();
                 var boatName = $('#boatName option:selected').text();
@@ -277,9 +350,6 @@ $jobType_result = mysqli_query($conn, "SELECT jobtypeID, type_name FROM jobtype"
             }
             
             $('#jobNumber, #boatName').on('input change', updateJobKeyPreview);
-            
-            // Add a preview element to the form (place it after the job number field)
-            $('#jobNumber').after('<div class="form-text">Job Key Preview: <span id="jobKeyPreview" class="fw-bold">Job key will appear here</span></div>');
         });
     </script>
 </body>
