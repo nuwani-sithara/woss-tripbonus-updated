@@ -111,6 +111,12 @@ $jobType_result = mysqli_query($conn, "SELECT jobtypeID, type_name FROM jobtype"
                                                     <label for="startDate">Start Date</label>
                                                     <input type="date" class="form-control" id="startDate" name="startDate" required>
                                                 </div>
+
+                                                <div class="form-group">
+                                                    <label for="jobNumber">Job Number</label>
+                                                    <input type="text" class="form-control" id="jobNumber" name="jobNumber" required 
+                                                        placeholder="Enter job number (e.g., 1028)">
+                                                </div>
                                                 
                                                 <div class="form-group" id="vesselNameGroup">
                                                     <label for="vesselName">Vessel Name</label>
@@ -255,6 +261,25 @@ $jobType_result = mysqli_query($conn, "SELECT jobtypeID, type_name FROM jobtype"
                     $('#portName').attr('required', 'required');
                 }
             });
+        });
+
+        // Add this script to the page
+        $(document).ready(function() {
+            function updateJobKeyPreview() {
+                var jobNumber = $('#jobNumber').val();
+                var boatName = $('#boatName option:selected').text();
+                
+                if (jobNumber && boatName && boatName !== 'Select Boat') {
+                    $('#jobKeyPreview').text('WOSS -' + jobNumber + ' ' + boatName);
+                } else {
+                    $('#jobKeyPreview').text('Job key will appear here');
+                }
+            }
+            
+            $('#jobNumber, #boatName').on('input change', updateJobKeyPreview);
+            
+            // Add a preview element to the form (place it after the job number field)
+            $('#jobNumber').after('<div class="form-text">Job Key Preview: <span id="jobKeyPreview" class="fw-bold">Job key will appear here</span></div>');
         });
     </script>
 </body>

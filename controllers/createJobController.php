@@ -10,8 +10,26 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['create_job'])) {
         $vesselID = !empty($_POST['vesselID']) ? (int)$_POST['vesselID'] : null;
         $boatID = !empty($_POST['boatID']) ? (int)$_POST['boatID'] : null;
         $portID = !empty($_POST['portID']) ? (int)$_POST['portID'] : null;
+        $jobNumber = $_POST['jobNumber'] ?? '';
         $isSpecialProject = isset($_POST['isSpecialProject']) && $_POST['isSpecialProject'] == '1';
         $userID = $_SESSION['userID'];
+
+        // Get boat name for the job key
+        $boatName = "";
+        if ($boatID !== null) {
+            $boatQuery = $conn->prepare("SELECT boat_name FROM boats WHERE boatID = ?");
+            $boatQuery->bind_param("i", $boatID);
+            $boatQuery->execute();
+            $boatResult = $boatQuery->get_result();
+            if ($boatResult->num_rows > 0) {
+                $boat = $boatResult->fetch_assoc();
+                $boatName = $boat['boat_name'];
+            }
+            $boatQuery->close();
+        }
+
+        // Generate job key
+        $jobKey = "WOSS -" . $jobNumber . " " . $boatName;
 
         // For General job type, create or get a "General" vessel
         if ($jobTypeID == 6 && $vesselID === null) {
@@ -30,9 +48,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['create_job'])) {
         // Start transaction
         $conn->begin_transaction();
 
-        // Insert job (without end_date)
-        $jobInsert = $conn->prepare("INSERT INTO jobs (start_date, comment, jobtypeID, vesselID, jobCreatedBy) VALUES (?, ?, ?, ?, ?)");
-        $jobInsert->bind_param("ssiii", $startDate, $comment, $jobTypeID, $vesselID, $userID);
+        // Insert job (without end_date) with job key
+        $jobInsert = $conn->prepare("INSERT INTO jobs (start_date, comment, jobtypeID, vesselID, jobCreatedBy, jobkey) VALUES (?, ?, ?, ?, ?, ?)");
+        $jobInsert->bind_param("ssiiis", $startDate, $comment, $jobTypeID, $vesselID, $userID, $jobKey);
         $jobInsert->execute();
         $jobID = $conn->insert_id;
         $jobInsert->close();
