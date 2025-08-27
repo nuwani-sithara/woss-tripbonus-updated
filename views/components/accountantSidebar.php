@@ -53,6 +53,12 @@ $current_page = basename($_SERVER['PHP_SELF']);
             <p>Payroll Export</p>
           </a>
         </li>
+        <li class="nav-item <?php if($current_page == 'accountantjoballowancebreakdown.php') echo 'active'; ?>">
+          <a href="../views/accountantjoballowancebreakdown.php">
+            <i class="fas fa-calendar-alt"></i>
+            <p>Job Allowance Reoprt</p>
+          </a>
+        </li>
       </ul>
     </div>
   </div>

@@ -178,7 +178,8 @@ $currentYear = date('Y');
                                             <span id="loadingSpinner" class="loading" style="display:none;"></span>
                                         </button>
                                     </div>
-                                </form>
+                                    
+                                                                    </form>
                                 <br/>
                                 <div id="summarySection" class="mb-4"></div>
                                 <div id="results" class="mt-4"></div>
@@ -186,7 +187,14 @@ $currentYear = date('Y');
                         </div>
                     </div>
                 </div>
+                <div class="col-md-2 d-grid">
+                    <button type="button" class="btn btn-info mt-2" id="viewPaymentsBtn">
+                        <i class="fas fa-table me-2"></i>
+                            View Payments
+                    </button>
+                </div>
             </div>
+            
         </div>
         <?php include 'components/footer.php'; ?>
     </div>
@@ -563,6 +571,15 @@ function showLoader() {
 function hideLoader() {
     document.getElementById('loadingOverlay').style.display = 'none';
 }
+
+// Add this script to your publish page
+document.getElementById('viewPaymentsBtn').addEventListener('click', function() {
+    const month = document.getElementById('month').value;
+    const year = document.getElementById('year').value;
+    const monthName = getMonthName(month);
+    
+    window.location.href = `viewMonthlyPayments.php?month=${monthName}&year=${year}`;
+});
 </script>
 </body>
 </html>

@@ -15,7 +15,7 @@ $displayName = !empty($userFullName) ? $userFullName : $userName;
   <div class="container-fluid">
     <!-- System Title on the left -->
     <div class="navbar-brand d-none d-lg-flex align-items-center">
-      <h4 class="mb-0 text-gray fw-bold">WORLD SUBSEA TRIP BONUS SYSTEM</h4>
+      <h4 class="mb-0 text-gray fw-bold">SUBSEA OPS</h4>
     </div>
 
     <ul class="navbar-nav topbar-nav ms-md-auto align-items-center">
