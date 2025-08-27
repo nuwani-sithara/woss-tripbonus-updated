@@ -20,7 +20,7 @@ $currentYear = date('Y');
     />
     <link
       rel="icon"
-      href="../assets/img/logo_white.png"
+      href="../assets/img/app-logo1.png"
       type="image/x-icon"
     />
 
@@ -104,7 +104,7 @@ $currentYear = date('Y');
             <div class="main-header-logo">
                 <div class="logo-header" data-background-color="dark">
                     <a href="../index.html" class="logo">
-                        <img src="../assets/img/Logo_white.png" alt="navbar brand" class="navbar-brand" height="20" />
+                        <img src="../assets/img/app-logo1.png" alt="navbar brand" class="navbar-brand" height="20" />
                     </a>
                     <div class="nav-toggle">
                         <button class="btn btn-toggle toggle-sidebar"><i class="gg-menu-right"></i></button>

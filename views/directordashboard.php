@@ -155,7 +155,7 @@ if ($res && ($row = $res->fetch_assoc())) $pendingCount = $row['cnt'];
     />
     <link
       rel="icon"
-      href="../assets/img/logo_white.png"
+      href="../assets/img/app-logo1.png"
       type="image/x-icon"
     />
 
@@ -311,7 +311,7 @@ if ($res && ($row = $res->fetch_assoc())) $pendingCount = $row['cnt'];
             <div class="logo-header" data-background-color="dark">
               <a href="../views/directordashboard.php" class="logo">
                 <img
-                  src="../assets/img/logo_white.png"
+                  src="../assets/img/app-logo1.png"
                   alt="navbar brand"
                   class="navbar-brand"
                   height="20"

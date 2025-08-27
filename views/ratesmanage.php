@@ -30,7 +30,7 @@ $conn->close();
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <title>Rates Management - WOSS Trip Bonus System</title>
     <meta content="width=device-width, initial-scale=1.0, shrink-to-fit=no" name="viewport"/>
-    <link rel="icon" href="../assets/img/logo_white.png" type="image/x-icon"/>
+    <link rel="icon" href="../assets/img/app-logo1.png" type="image/x-icon"/>
     <!-- Fonts and icons -->
     <script src="../assets/js/plugin/webfont/webfont.min.js"></script>
     <script>
@@ -64,7 +64,7 @@ $conn->close();
             <div class="main-header-logo">
                 <div class="logo-header" data-background-color="dark">
                     <a href="../index.html" class="logo">
-                        <img src="../assets/img/Logo_white.png" alt="navbar brand" class="navbar-brand" height="20"/>
+                        <img src="../assets/img/app-logo1.png" alt="navbar brand" class="navbar-brand" height="20"/>
                     </a>
                     <div class="nav-toggle">
                         <button class="btn btn-toggle toggle-sidebar"><i class="gg-menu-right"></i></button>

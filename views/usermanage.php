@@ -42,7 +42,7 @@ $employeesCount = getEmployeesCount();
     />
     <link
       rel="icon"
-      href="../assets/img/logo_white.png"
+      href="../assets/img/app-logo1.png"
       type="image/x-icon"
     />
 
@@ -85,7 +85,7 @@ $employeesCount = getEmployeesCount();
             <div class="logo-header" data-background-color="dark">
               <a href="../index.html" class="logo">
               <img
-                    src="../assets/img/Logo_white.png"
+                    src="../assets/img/app-logo1.png"
                     alt="navbar brand"
                     class="navbar-brand"
                     height="20"

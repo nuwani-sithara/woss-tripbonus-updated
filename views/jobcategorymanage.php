@@ -15,7 +15,7 @@ if (!isset($_SESSION['userID']) || !isset($_SESSION['roleID']) || $_SESSION['rol
     <meta content="width=device-width, initial-scale=1.0, shrink-to-fit=no" name="viewport" />
     <link
       rel="icon"
-      href="../assets/img/logo_white.png"
+      href="../assets/img/app-logo1.png"
       type="image/x-icon"
     />
     <!-- Fonts and icons -->
@@ -54,7 +54,7 @@ if (!isset($_SESSION['userID']) || !isset($_SESSION['roleID']) || $_SESSION['rol
               <div class="logo-header" data-background-color="dark">
                 <a href="../index.html" class="logo">
                   <img
-                    src="../assets/img/Logo_white.png"
+                    src="../assets/img/app-logo1.png"
                     alt="navbar brand"
                     class="navbar-brand"
                     height="20"

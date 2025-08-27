@@ -12,10 +12,10 @@ $current_page = basename($_SERVER['PHP_SELF']);
     <div class="logo-header" data-background-color="dark">
       <a href="../views/attendanceverify.php" class="logo">
         <img
-          src="../assets/img/logo_white.png"
+          src="../assets/img/app-logo.png"
           alt="navbar brand"
           class="navbar-brand"
-          height="50"
+          height="120"
         />
       </a>
       <div class="nav-toggle">

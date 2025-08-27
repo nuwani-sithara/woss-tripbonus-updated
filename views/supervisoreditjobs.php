@@ -89,7 +89,7 @@ $paginatedJobs = array_slice(array_values($filteredJobs), $start, $jobsPerPage);
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <title>Supervisor - Edit Jobs</title>
     <meta content="width=device-width, initial-scale=1.0, shrink-to-fit=no" name="viewport" />
-    <link rel="icon" href="../assets/img/logo_white.png" type="image/x-icon" />
+    <link rel="icon" href="../assets/img/app-logo1.png" type="image/x-icon" />
 
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
@@ -328,7 +328,7 @@ $paginatedJobs = array_slice(array_values($filteredJobs), $start, $jobsPerPage);
               <div class="logo-header" data-background-color="dark">
                 <a href="../index.html" class="logo">
                   <img
-                    src="../assets/img/Logo_white.png"
+                    src="../assets/img/app-logo1.png"
                     alt="navbar brand"
                     class="navbar-brand"
                     height="20"

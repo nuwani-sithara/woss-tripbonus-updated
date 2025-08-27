@@ -6,7 +6,7 @@
   <nav class="pull-left">
   </nav>
   <div class="copyright">
-    <a href="#"> WOSS Trip Bonus System - 2025 - Version v1.0</a>
+    <a href="#"> SubseaOps System - 2025 - Version v1.0</a>
   </div>
   <div>
     Developed by

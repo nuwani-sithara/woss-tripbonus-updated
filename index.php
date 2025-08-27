@@ -9,7 +9,7 @@ unset($_SESSION['login_error']);
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <title>Login - WOSS Trip Bonus System</title>
     <meta content="width=device-width, initial-scale=1.0, shrink-to-fit=no" name="viewport" />
-    <link rel="icon" href="assets/img/logo_white.png" type="image/x-icon" />
+    <link rel="icon" href="assets/img/app-logo1.png" type="image/x-icon" />
 
     <!-- Fonts and icons -->
     <script src="assets/js/plugin/webfont/webfont.min.js"></script>
@@ -79,7 +79,7 @@ unset($_SESSION['login_error']);
       }
       
       .login-illustration img {
-        max-width: 280px;
+        max-width: 380px;
         margin-bottom: 30px;
       }
       
@@ -261,9 +261,9 @@ unset($_SESSION['login_error']);
   </script>
   <div class="login-container">
     <div class="login-illustration">
-      <img src="assets/img/logo_white.png" alt="WOSS Logo">
+      <img src="assets/img/app-logo.png" alt="WOSS Logo">
       <h2>Welcome Back</h2>
-      <p>Access your WOSS Trip Bonus System account to manage your trips and bonuses.</p>
+      <p>Access your SubseaOps account to manage your trips and bonuses.</p>
     </div>
     <div class="login-card">
       <!-- <div class="login-logo">
@@ -298,7 +298,7 @@ unset($_SESSION['login_error']);
   </div>
   <div class="login-footer">
     <!-- &copy; <?php echo date("Y"); ?> WOSS Trip Bonus System. All rights reserved. -->
-    WOSS Trip Bonus System - 2025 - Version v1.0
+    SubseaOps - 2025 - Version v1.0
   </div>
 </body>
 </html>
