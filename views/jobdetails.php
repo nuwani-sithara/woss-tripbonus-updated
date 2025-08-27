@@ -278,6 +278,8 @@ include '../controllers/jobDetailsController.php';
             include 'components/sidebar.php';
         } elseif ($_SESSION['roleID'] == 4) {
             include 'components/adminSidebar.php';
+        } elseif ($_SESSION['roleID'] == 13) {
+            include 'components/supervisorInChargeSidebar.php';
         }
         ?>
         

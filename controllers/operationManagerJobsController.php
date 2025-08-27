@@ -23,7 +23,7 @@ function getJobsForOperationManager($conn, $search = '') {
         
         // Status logic
         $status = 'Ongoing';
-        $statusClass = 'success';
+        $statusClass = 'primary';
         $statusIcon = 'fas fa-play-circle';
         if (!empty($job['end_date'])) {
             $approvalSql = "SELECT approval_status FROM approvals WHERE jobID = $jobID AND approval_stage = 'job_approval' ORDER BY approvalID DESC LIMIT 1";

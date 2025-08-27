@@ -138,7 +138,7 @@ if (count($trips) === 1 && isset($trips[0]['employee_count']) && intval($trips[0
 <html lang="en">
 <head>
 <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <title>Manage Job Days - WOSS Trip Bonus System</title>
+    <title>Manage Job Days - SubseaOps</title>
     <meta content="width=device-width, initial-scale=1.0, shrink-to-fit=no" name="viewport" />
     <link rel="icon" href="../assets/img/app-logo1.png" type="image/x-icon" />
     <!-- Fonts and icons -->

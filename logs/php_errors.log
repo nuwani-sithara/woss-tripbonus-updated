@@ -75,3 +75,39 @@
     [year] => 2025
 )
 
+[27-Aug-2025 17:34:55 Europe/Berlin] Payment Status Controller Accessed: 2025-08-27 17:34:55
+[27-Aug-2025 17:34:55 Europe/Berlin] REQUEST METHOD: GET
+[27-Aug-2025 17:34:55 Europe/Berlin] POST DATA: Array
+(
+)
+
+[27-Aug-2025 17:34:55 Europe/Berlin] GET DATA: Array
+(
+    [month] => August
+    [year] => 2025
+)
+
+[27-Aug-2025 17:35:09 Europe/Berlin] Payment Status Controller Accessed: 2025-08-27 17:35:09
+[27-Aug-2025 17:35:09 Europe/Berlin] REQUEST METHOD: GET
+[27-Aug-2025 17:35:09 Europe/Berlin] POST DATA: Array
+(
+)
+
+[27-Aug-2025 17:35:09 Europe/Berlin] GET DATA: Array
+(
+    [month] => August
+    [year] => 2025
+)
+
+[27-Aug-2025 17:35:17 Europe/Berlin] Payment Status Controller Accessed: 2025-08-27 17:35:17
+[27-Aug-2025 17:35:17 Europe/Berlin] REQUEST METHOD: GET
+[27-Aug-2025 17:35:17 Europe/Berlin] POST DATA: Array
+(
+)
+
+[27-Aug-2025 17:35:17 Europe/Berlin] GET DATA: Array
+(
+    [month] => August
+    [year] => 2025
+)
+

@@ -19,7 +19,7 @@ if (!isset($_SESSION['userID']) ||
 <html lang="en">
   <head>
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <title>Standby Attendance | Admin Dashboard</title>
+    <title>Standby Attendance - SubseaOps</title>
     <meta
       content="width=device-width, initial-scale=1.0, shrink-to-fit=no"
       name="viewport"

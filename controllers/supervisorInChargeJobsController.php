@@ -23,7 +23,7 @@ function getJobsForSupervisorInCharge($conn, $search = '') {
 
         // Status logic for Supervisor-in-Charge view
         $status = 'Ongoing';
-        $statusClass = 'success';
+        $statusClass = 'primary';
         $statusIcon = 'fas fa-play-circle';
 
         if (!empty($job['end_date'])) {

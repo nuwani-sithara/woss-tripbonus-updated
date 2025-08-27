@@ -14,7 +14,7 @@ if (!isset($jobs)) $jobs = [];
 <html lang="en">
   <head>
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <title>Manage Jobs - WOSS Trip Bonus</title>
+    <title>Manage Jobs - SubseaOps</title>
     <meta content="width=device-width, initial-scale=1.0, shrink-to-fit=no" name="viewport" />
     <link rel="icon" href="../assets/img/app-logo1.png" type="image/x-icon" />
     <!-- Fonts and icons -->

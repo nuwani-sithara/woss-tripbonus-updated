@@ -11,7 +11,7 @@ if (!isset($_SESSION['userID']) || !isset($_SESSION['roleID']) || $_SESSION['rol
 <html lang="en">
   <head>
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <title>Job Category Management - Kaiadmin Bootstrap 5 Admin Dashboard</title>
+    <title>Job Category Management - SubseaOps</title>
     <meta content="width=device-width, initial-scale=1.0, shrink-to-fit=no" name="viewport" />
     <link
       rel="icon"

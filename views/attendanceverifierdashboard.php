@@ -25,7 +25,7 @@ if (!$conn) {
 <html lang="en">
   <head>
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <title>WOSS Trip Bonus System - Attendance Verifier Dashboard</title>
+    <title>Attendance Verifier Dashboard - SubseaOps</title>
     <meta
       content="width=device-width, initial-scale=1.0, shrink-to-fit=no"
       name="viewport"

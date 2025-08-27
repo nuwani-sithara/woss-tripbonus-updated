@@ -598,6 +598,47 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['clarification_approva
     exit;
 }
 
+function getJobDetailsForClarification($jobID) {
+    global $conn;
+    
+    $jobDetails = [
+        'vessel_name' => null,
+        'job_type' => null,
+        'job_creator' => null
+    ];
+    
+    if (!$jobID) {
+        return $jobDetails;
+    }
+    
+    // Get basic job information
+    $sql = "SELECT j.*, v.vessel_name, jt.type_name as job_type, u.fname, u.lname 
+            FROM jobs j 
+            LEFT JOIN vessels v ON j.vesselID = v.vesselID 
+            LEFT JOIN jobtype jt ON j.jobtypeID = jt.jobtypeID 
+            LEFT JOIN users u ON j.jobCreatedBy = u.userID 
+            WHERE j.jobID = ?";
+    
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param("i", $jobID);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    
+    if ($result && $row = $result->fetch_assoc()) {
+        $jobDetails['vessel_name'] = $row['vessel_name'] ?? null;
+        $jobDetails['job_type'] = $row['job_type'] ?? null;
+        
+        if ($row['fname'] && $row['lname']) {
+            $jobDetails['job_creator'] = [
+                'fname' => $row['fname'],
+                'lname' => $row['lname']
+            ];
+        }
+    }
+    
+    return $jobDetails;
+}
+
 $jobs = getJobsForSupervisorInChargeApproval($conn);
 $rejectedJobs = getJobsRejectedByOperationsManager($conn);
 $clarificationsToResolve = getClarificationsToResolve($conn, $_SESSION['userID']);

@@ -29,7 +29,7 @@ $jobType_result = mysqli_query($conn, "SELECT jobtypeID, type_name FROM jobtype"
 <html lang="en">
 <head>
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <title>WOSS - Create New Job</title>
+    <title>Create New Job - SubseaOps</title>
     <meta content="width=device-width, initial-scale=1.0, shrink-to-fit=no" name="viewport" />
     <link rel="icon" href="../assets/img/app-logo1.png" type="image/x-icon" />
     <!-- Fonts and icons -->

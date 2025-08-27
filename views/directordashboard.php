@@ -24,7 +24,7 @@ if (!$conn) {
 // Fetch role-wise user counts
 $userCounts = [];
 $roleNames = [];
-$excludedRoles = ['Operations Officer', 'Operations Manager', 'Accountant', 'Director'];
+$excludedRoles = ['Operations Officer', 'Operations Manager', 'Accountant', 'Director', 'CEO', 'Supervisor-In-Charge'];
 $sql = "SELECT u.roleID, r.role_name, COUNT(*) as user_count FROM users u JOIN roles r ON u.roleID = r.roleID GROUP BY u.roleID";
 $res = $conn->query($sql);
 if ($res) {
@@ -73,7 +73,7 @@ if ($res) {
         
         // Determine status
         $status = 'Ongoing';
-        $statusClass = 'success';
+        $statusClass = 'primary';
         $statusIcon = 'fas fa-play-circle';
         
         if (!empty($row['end_date'])) {
@@ -148,7 +148,7 @@ if ($res && ($row = $res->fetch_assoc())) $pendingCount = $row['cnt'];
 <html lang="en">
   <head>
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <title>Director Dashboard - WOSS Trip Bonus System</title>
+    <title>Director Dashboard - SubseaOps</title>
     <meta
       content="width=device-width, initial-scale=1.0, shrink-to-fit=no"
       name="viewport"

@@ -17,7 +17,7 @@ $currentYear = date('Y');
 <html lang="en">
 <head>
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <title>Publish and Finalize Monthly Job | Admin Portal</title>
+    <title>Publish and Finalize Monthly Job - SubseaOps</title>
     <meta content="width=device-width, initial-scale=1.0, shrink-to-fit=no" name="viewport" />
     <link rel="icon" href="../assets/img/app-logo1.png" type="image/x-icon" />
     <!-- Fonts and icons -->

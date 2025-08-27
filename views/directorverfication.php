@@ -13,7 +13,7 @@ $currentYear = date('Y');
 <html lang="en">
 <head>
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <title>Director Payment Verification | WOSS Trip Bonus System</title>
+    <title>Director Payment Verification | SubseaOps</title>
     <meta
       content="width=device-width, initial-scale=1.0, shrink-to-fit=no"
       name="viewport"

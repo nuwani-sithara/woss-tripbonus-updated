@@ -77,7 +77,7 @@ $totalCount = $totalResult ? $totalResult->fetch_assoc()['count'] : 0;
 <html lang="en">
 <head>
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <title>Supervisor-in-Charge Dashboard</title>
+    <title>Supervisor-in-Charge Dashboard - SubseaOps</title>
     <meta content="width=device-width, initial-scale=1.0, shrink-to-fit=no" name="viewport" />
     <link rel="icon" href="../assets/img/app-logo1.png" type="image/x-icon" />
 
@@ -159,12 +159,13 @@ $totalCount = $totalResult ? $totalResult->fetch_assoc()['count'] : 0;
         <div class="container">
             <div class="page-inner">
                 <div class="page-header">
-                    <h4 class="fw-bold mb-0">Welcome, <?= htmlspecialchars($_SESSION['fname'] . ' ' . $_SESSION['lname']) ?>!</h4>
-                    <p class="text-muted">Supervisor-in-Charge Dashboard</p>
+                    <h4 class="text-muted">Supervisor-in-Charge Dashboard</h4>
+                    <!-- <p class="fw-bold mb-0">Welcome, <?= htmlspecialchars($_SESSION['fname'] . ' ' . $_SESSION['lname']) ?>!</p> -->
+                    
                 </div>
                 
                 <!-- Statistics Cards -->
-                <div class="row">
+                <!-- <div class="row">
                     <div class="col-md-2">
                         <div class="card card-stats card-round">
                             <div class="card-body">
@@ -279,7 +280,7 @@ $totalCount = $totalResult ? $totalResult->fetch_assoc()['count'] : 0;
                             </div>
                         </div>
                     </div>
-                </div>
+                </div> -->
                 
                 <!-- Quick Actions -->
                 <div class="row mt-4">
