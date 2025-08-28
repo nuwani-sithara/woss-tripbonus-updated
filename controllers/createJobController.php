@@ -11,25 +11,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['create_job'])) {
         $boatID = !empty($_POST['boatID']) ? (int)$_POST['boatID'] : null;
         $portID = !empty($_POST['portID']) ? (int)$_POST['portID'] : null;
         $jobNumber = $_POST['jobNumber'] ?? '';
+        $jobKey = $_POST['jobKey'] ?? '';
         $isSpecialProject = isset($_POST['isSpecialProject']) && $_POST['isSpecialProject'] == '1';
         $userID = $_SESSION['userID'];
-
-        // Get boat name for the job key
-        $boatName = "";
-        if ($boatID !== null) {
-            $boatQuery = $conn->prepare("SELECT boat_name FROM boats WHERE boatID = ?");
-            $boatQuery->bind_param("i", $boatID);
-            $boatQuery->execute();
-            $boatResult = $boatQuery->get_result();
-            if ($boatResult->num_rows > 0) {
-                $boat = $boatResult->fetch_assoc();
-                $boatName = $boat['boat_name'];
-            }
-            $boatQuery->close();
-        }
-
-        // Generate job key
-        $jobKey = "WOSS -" . $jobNumber . " " . $boatName;
 
         // For General job type, create or get a "General" vessel
         if ($jobTypeID == 6 && $vesselID === null) {

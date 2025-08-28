@@ -19,6 +19,13 @@ if (!$conn) {
     die("Database connection failed: " . mysqli_connect_error());
 }
 
+// Get the next job number
+$nextJobNumber = 1000; // Default starting number
+$maxJobQuery = mysqli_query($conn, "SELECT MAX(CAST(SUBSTRING_INDEX(SUBSTRING_INDEX(jobkey, '-', -1), ' ', 1) AS UNSIGNED)) as max_num FROM jobs WHERE jobkey IS NOT NULL AND jobkey != ''");
+if ($maxJobQuery && $maxJobResult = mysqli_fetch_assoc($maxJobQuery)) {
+    $nextJobNumber = $maxJobResult['max_num'] + 1;
+}
+
 $vessel_result = mysqli_query($conn, "SELECT vesselID, vessel_name FROM vessels");
 $boat_result = mysqli_query($conn, "SELECT boatID, boat_name FROM boats");
 $port_result = mysqli_query($conn, "SELECT portID, portname FROM ports");
@@ -58,79 +65,92 @@ $jobType_result = mysqli_query($conn, "SELECT jobtypeID, type_name FROM jobtype"
     <link rel="stylesheet" href="../assets/css/kaiadmin.min.css" />
     <link rel="stylesheet" href="../assets/css/demo.css" />
     <style>
-        .form-section {
+        .compact-form .form-section {
             background-color: #f8f9fa;
-            border-radius: 8px;
-            padding: 20px;
-            margin-bottom: 25px;
-            border-left: 4px solid #2c7be5;
+            border-radius: 6px;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-left: 3px solid #2c7be5;
         }
-        .form-section-title {
-            font-size: 16px;
+        .compact-form .form-section-title {
+            font-size: 14px;
             font-weight: 600;
             color: #2c7be5;
-            margin-bottom: 15px;
+            margin-bottom: 12px;
             display: flex;
             align-items: center;
         }
-        .form-section-title i {
-            margin-right: 10px;
+        .compact-form .form-section-title i {
+            margin-right: 8px;
+            font-size: 16px;
         }
-        .card {
-            box-shadow: 0 4px 24px 0 rgba(0,0,0,.08);
+        .compact-form .card {
+            box-shadow: 0 2px 12px 0 rgba(0,0,0,.06);
             border: none;
-            border-radius: 10px;
+            border-radius: 8px;
         }
-        .card-header {
-            background-color: #fff;
-            border-bottom: 1px solid #edf2f9;
-            padding: 20px 25px;
+        .compact-form .card-header {
+            padding: 15px 20px;
         }
-        .card-title {
+        .compact-form .card-title {
             font-weight: 600;
             color: #1e2a35;
-            font-size: 18px;
+            font-size: 16px;
+            margin: 0;
         }
-        .card-body {
-            padding: 25px;
+        .compact-form .card-body {
+            padding: 20px;
         }
-        .card-action {
-            padding: 20px 25px;
-            background-color: #f8f9fa;
-            border-top: 1px solid #edf2f9;
+        .compact-form .card-action {
+            padding: 15px 20px;
             display: flex;
             justify-content: flex-end;
-            gap: 10px;
+            gap: 8px;
         }
-        .form-group {
-            margin-bottom: 20px;
+        .compact-form .form-group {
+            margin-bottom: 15px;
         }
-        label {
+        .compact-form label {
             font-weight: 500;
-            margin-bottom: 8px;
+            margin-bottom: 6px;
             color: #344050;
+            font-size: 13px;
         }
-        .form-control {
-            border-radius: 6px;
-            padding: 10px 15px;
-            border: 1px solid #d8e2ef;
-            transition: all 0.3s;
+        .compact-form .form-control {
+            border-radius: 5px;
+            padding: 8px 12px;
+            font-size: 14px;
+            height: calc(1.8em + 0.75rem + 2px);
         }
-        .form-control:focus {
-            border-color: #2c7be5;
-            box-shadow: 0 0 0 0.2rem rgba(44, 123, 229, 0.25);
-        }
-        .job-key-preview {
+        .compact-form .job-key-preview {
             background-color: #edf2f9;
-            padding: 10px 15px;
-            border-radius: 6px;
+            padding: 8px 12px;
+            border-radius: 5px;
             margin-top: 5px;
             font-weight: 500;
+            font-size: 13px;
         }
-        .required-field::after {
+        .compact-form .required-field::after {
             content: "*";
             color: #e63757;
             margin-left: 3px;
+        }
+        .compact-form .form-text {
+            font-size: 12px;
+            margin-top: 4px;
+        }
+        .compact-form .btn {
+            padding: 8px 16px;
+            font-size: 14px;
+        }
+        .compact-form .page-header {
+            margin-bottom: 20px;
+        }
+        .compact-form .page-inner {
+            padding-top: 15px;
+        }
+        .page-header h3 {
+            margin-bottom: 1rem; /* adjust spacing */
         }
     </style>
 </head>
@@ -171,13 +191,13 @@ $jobType_result = mysqli_query($conn, "SELECT jobtypeID, type_name FROM jobtype"
             <div class="container">
                 <div class="page-inner">
                     <div class="page-header">
-                        <h3 class="fw-bold mb-3">Job Creation</h3>
-                        <br/>
-                        <!-- <p class="text-muted">Create a new job by filling out the form below</p> -->
+                        <h3 class="fw-bold mb-2">Job Creation</h3>
                     </div>
+                                            <!-- <p class="text-muted mb-0">Create a new job with a unique identifier</p> -->
+
                     <div class="row">
                         <div class="col-md-12">
-                            <div class="card">
+                            <div class="card compact-form">
                                 <div class="card-header">
                                     <div class="card-title">Job Information</div>
                                 </div>
@@ -215,14 +235,15 @@ $jobType_result = mysqli_query($conn, "SELECT jobtypeID, type_name FROM jobtype"
                                                     <div class="form-group">
                                                         <label for="jobNumber" class="required-field">Job Number</label>
                                                         <input type="text" class="form-control" id="jobNumber" name="jobNumber" required 
-                                                            placeholder="Enter job number (e.g., 1028)">
-                                                        <div class="form-text">Job Key Preview: <span id="jobKeyPreview" class="job-key-preview">Job key will appear here</span></div>
+                                                            value="<?php echo $nextJobNumber; ?>" readonly>
+                                                        <div class="form-text">Job Key Preview: <span id="jobKeyPreview" class="job-key-preview">WOSS -<?php echo $nextJobNumber; ?> [boat name]</span></div>
+                                                        <input type="hidden" id="jobKey" name="jobKey" value="">
                                                     </div>
                                                 </div>
                                                 <div class="col-md-6">
                                                     <div class="form-group">
                                                         <label for="comment">Comments</label>
-                                                        <textarea class="form-control" id="comment" name="comment" rows="3" placeholder="Additional notes about this job"></textarea>
+                                                        <textarea class="form-control" id="comment" name="comment" rows="2" placeholder="Additional notes about this job"></textarea>
                                                     </div>
                                                 </div>
                                             </div>
@@ -290,9 +311,9 @@ $jobType_result = mysqli_query($conn, "SELECT jobtypeID, type_name FROM jobtype"
                                         <button class="btn btn-success" name="create_job" type="submit">
                                             <i class="icon-check"></i> Create Job
                                         </button>
-                                        <button class="btn btn-outline-danger" type="reset">
+                                        <a href="jobs.php" class="btn btn-outline-danger">
                                             <i class="icon-close"></i> Cancel
-                                        </button>
+                                        </a>
                                     </div>
                                 </form>
                             </div>
@@ -336,20 +357,32 @@ $jobType_result = mysqli_query($conn, "SELECT jobtypeID, type_name FROM jobtype"
                     $('#boatName').attr('required', 'required');
                     $('#portName').attr('required', 'required');
                 }
+                
+                updateJobKeyPreview();
             });
 
             function updateJobKeyPreview() {
                 var jobNumber = $('#jobNumber').val();
                 var boatName = $('#boatName option:selected').text();
+                var selectedJobType = $('#jobType').val();
                 
-                if (jobNumber && boatName && boatName !== 'Select Boat') {
+                if (selectedJobType == '6') {
+                    // For General job type, don't include boat name
+                    $('#jobKeyPreview').text('WOSS -' + jobNumber);
+                    $('#jobKey').val('WOSS -' + jobNumber);
+                } else if (jobNumber && boatName && boatName !== 'Select Boat') {
                     $('#jobKeyPreview').text('WOSS -' + jobNumber + ' ' + boatName);
+                    $('#jobKey').val('WOSS -' + jobNumber + ' ' + boatName);
                 } else {
-                    $('#jobKeyPreview').text('Job key will appear here');
+                    $('#jobKeyPreview').text('WOSS -' + jobNumber + ' [boat name]');
+                    $('#jobKey').val('');
                 }
             }
             
-            $('#jobNumber, #boatName').on('input change', updateJobKeyPreview);
+            $('#boatName').on('change', updateJobKeyPreview);
+            
+            // Initialize the job key preview on page load
+            updateJobKeyPreview();
         });
     </script>
 </body>
