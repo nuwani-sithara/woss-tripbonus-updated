@@ -3,9 +3,9 @@
 date_default_timezone_set('Asia/Colombo');
 
 $servername = "localhost";
-$username = "root";
-$password = "";
-$dbname = "woss_tripbonus";
+$username = "subseacp_usr";
+$password = "-OOaO[?uv65Fz0kE";
+$dbname = "subseacp_dbs";
 
 $conn = new mysqli($servername, $username, $password, $dbname);
 
