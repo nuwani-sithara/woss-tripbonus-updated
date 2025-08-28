@@ -68,10 +68,23 @@ if ($resCount && $row = $resCount->fetch_assoc()) {
     $totalCount = (int)$row['total'];
 }
 
+// --- 3. Fetch current month jobs count ---
+$currentMonthCount = 0;
+$sqlMonth = "SELECT COUNT(*) as month_total 
+             FROM jobs 
+             WHERE jobCreatedBy = $loggedUserID
+             AND YEAR(start_date) = YEAR(CURDATE())
+             AND MONTH(start_date) = MONTH(CURDATE())";
+$resMonth = $conn->query($sqlMonth);
+if ($resMonth && $row = $resMonth->fetch_assoc()) {
+    $currentMonthCount = (int)$row['month_total'];
+}
+
 // --- Final Response ---
 echo json_encode([
     "success" => true,
     "data" => $latestJobs,
     "returned_count" => count($latestJobs), // only latest 10
-    "total_count" => $totalCount            // ALL jobs created by user
+    "total_count" => $totalCount,           // ALL jobs created by user
+    "current_month_count" => $currentMonthCount // Jobs created this month
 ]);
