@@ -239,10 +239,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Trigger email notification
     if ($approval_status === 1) {
         // Director verified
-        $notifyUrl = 'https://tripbonus.worldsubsea.lk/controllers/sendDirectorVerifyNotificationController.php';
+        $notifyUrl = 'https://subseaops.worldsubsea.lk/controllers/sendDirectorVerifyNotificationController.php';
     } else {
         // Director rejected
-        $notifyUrl = 'https://tripbonus.worldsubsea.lk/controllers/sendDirectorRejectNotificationController.php';
+        $notifyUrl = 'https://subseaops.worldsubsea.lk/controllers/sendDirectorRejectNotificationController.php';
     }
     $notifyData = [
         'directorVerifyID' => $directorVerifyID,

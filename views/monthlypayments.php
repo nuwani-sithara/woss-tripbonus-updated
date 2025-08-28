@@ -578,7 +578,7 @@ document.getElementById('viewPaymentsBtn').addEventListener('click', function() 
     const year = document.getElementById('year').value;
     const monthName = getMonthName(month);
     
-    window.location.href = `viewMonthlyPayments.php?month=${monthName}&year=${year}`;
+    window.location.href = `viewmonthlypayments.php?month=${monthName}&year=${year}`;
 });
 </script>
 </body>

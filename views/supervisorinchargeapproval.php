@@ -457,11 +457,11 @@ $message = isset($_GET['message']) ? $_GET['message'] : '';
                                                         <?php endif; ?>
                                                     </div>
                                                 </div>
-                                                <div class="text-end">
+                                                <!-- <div class="text-end">
                                                     <a href="jobdetails.php?jobID=<?= $job['jobID'] ?>" class="btn btn-info btn-xs">
                                                         <i class="fas fa-eye me-1"></i> Details
                                                     </a>
-                                                </div>
+                                                </div> -->
                                             </div>
                                             
                                             <?php if ($special_projects): ?>
@@ -654,11 +654,11 @@ $message = isset($_GET['message']) ? $_GET['message'] : '';
                                                         <?php endif; ?>
                                                     </div>
                                                 </div>
-                                                <div class="text-end">
+                                                <!-- <div class="text-end">
                                                     <a href="jobdetails.php?jobID=<?= $job['jobID'] ?>" class="btn btn-info btn-xs">
                                                         <i class="fas fa-eye me-1"></i> Details
                                                     </a>
-                                                </div>
+                                                </div> -->
                                             </div>
                                             
                                             <?php if ($special_projects): ?>
@@ -731,9 +731,9 @@ $message = isset($_GET['message']) ? $_GET['message'] : '';
                                             <small class="text-muted">Rejected on: <?= htmlspecialchars($item['approval_date']) ?></small>
                                         </div>
                                         <div class="d-flex gap-1">
-                                            <a href="jobdetails.php?jobID=<?= $job['jobID'] ?>" class="btn btn-info btn-sm">
+                                            <!-- <a href="jobdetails.php?jobID=<?= $job['jobID'] ?>" class="btn btn-info btn-sm">
                                                 <i class="fas fa-eye me-1"></i> Details
-                                            </a>
+                                            </a> -->
                                             <form method="post" action="../controllers/supervisorInChargeController.php" class="d-inline">
                                                 <input type="hidden" name="review_jobID" value="<?= $job['jobID'] ?>">
                                                 <button type="submit" name="review_action" value="modify" class="btn btn-warning btn-sm">
@@ -825,11 +825,11 @@ $message = isset($_GET['message']) ? $_GET['message'] : '';
                                                         <?php endif; ?>
                                                     </div>
                                                 </div>
-                                                <div class="text-end">
+                                                <!-- <div class="text-end">
                                                     <a href="jobdetails.php?jobID=<?= $job['jobID'] ?>" class="btn btn-info btn-xs">
                                                         <i class="fas fa-eye me-1"></i> Details
                                                     </a>
-                                                </div>
+                                                </div> -->
                                             </div>
                                             
                                             <?php if ($special_projects): ?>

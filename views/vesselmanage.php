@@ -7,9 +7,9 @@ if (!isset($_SESSION['userID']) || !isset($_SESSION['roleID']) || $_SESSION['rol
 }
 // DB connection for fetching vessels
 $host = "localhost";
-$user = "tripwosscp_usr";
-$password = "aQDOUs-e#3He(xtz";
-$database = "tripwosscp_dbs";
+$user = "subseacp_usr";
+$password = "-OOaO[?uv65Fz0kE";
+$database = "subseacp_dbs";
 $conn = new mysqli($host, $user, $password, $database);
 if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
