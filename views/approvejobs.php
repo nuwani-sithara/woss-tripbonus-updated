@@ -426,11 +426,10 @@ $ongoingJobs = array_filter($jobs, function($item) {
                                         
                                         <form method="post" action="../controllers/approveJobsController.php" class="d-flex gap-1">
                                             <input type="hidden" name="clarification_pending_id" value="<?= $clarifications[0]['clarification_id'] ?>">
-                                            <input type="hidden" name="clarification_action" value="">
-                                            <button type="button" name="clarification_action_btn" value="1" class="btn btn-success btn-sm compact-action-btn">
+                                            <button type="submit" name="clarification_action" value="1" class="btn btn-success btn-sm compact-action-btn">
                                                 <i class="fas fa-check me-1"></i> Approve
                                             </button>
-                                            <button type="button" name="clarification_action_btn" value="3" class="btn btn-danger btn-sm compact-action-btn">
+                                            <button type="submit" name="clarification_action" value="3" class="btn btn-danger btn-sm compact-action-btn">
                                                 <i class="fas fa-times me-1"></i> Reject
                                             </button>
                                         </form>

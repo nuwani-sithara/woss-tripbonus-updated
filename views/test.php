@@ -1,480 +1,1193 @@
 <?php
-include '../controllers/jobDetailsController.php';
+require_once("../controllers/approveJobsController.php");
+
+// session_start();
+include '../config/dbConnect.php';
+
+// Debug information
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
+
+// Check if user is logged in and has role_id = 1
+if (!isset($_SESSION['userID']) || 
+    !isset($_SESSION['roleID']) || 
+    $_SESSION['roleID'] != 4) {
+    header("Location: ../index.php?error=access_denied");
+    exit();
+}
+
+// Define pending and ongoing jobs arrays
+$pendingJobs = array_filter($jobs, function($item) {
+    global $conn;
+    $jobID = $item['job']['jobID'];
+    
+    // Skip ongoing jobs (jobs without end_date)
+    if (empty($item['job']['end_date'])) {
+        return false;
+    }
+    
+    $approvalRes = $conn->query("SELECT approval_status FROM approvals WHERE jobID = $jobID AND approval_stage = 'job_approval' ORDER BY approvalID DESC LIMIT 1");
+    if ($approvalRes && $approvalRow = $approvalRes->fetch_assoc()) {
+        return $approvalRow['approval_status'] != 1 && $approvalRow['approval_status'] != 3;
+    }
+    return true;
+});
+
+$ongoingJobs = array_filter($jobs, function($item) {
+    return empty($item['job']['end_date']);
+});
 ?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <title>Job Details - <?= htmlspecialchars($jobDetails['job']['vessel_name'] ?? 'Job #' . $jobDetails['job']['jobID']) ?></title>
+    <title>Job Approvals - SubseaOps</title>
     <meta content="width=device-width, initial-scale=1.0, shrink-to-fit=no" name="viewport" />
-    <link rel="icon" href="../assets/img/Logo_white.png" type="image/x-icon" />
+    <link rel="icon" href="../assets/img/app-logo1.png" type="image/x-icon" />
 
     <!-- Fonts and icons -->
     <script src="../assets/js/plugin/webfont/webfont.min.js"></script>
     <script>
-        WebFont.load({
-            google: { families: ["Public Sans:300,400,500,600,700"] },
-            custom: {
-                families: [
-                    "Font Awesome 5 Solid",
-                    "Font Awesome 5 Regular",
-                    "Font Awesome 5 Brands",
-                    "simple-line-icons",
-                ],
-                urls: ["../assets/css/fonts.min.css"],
-            },
-            active: function () {
-                sessionStorage.fonts = true;
-            },
-        });
+      WebFont.load({
+        google: { families: ["Public Sans:300,400,500,600,700"] },
+        custom: {
+          families: [
+            "Font Awesome 5 Solid",
+            "Font Awesome 5 Regular",
+            "Font Awesome 5 Brands",
+            "simple-line-icons",
+          ],
+          urls: ["../assets/css/fonts.min.css"],
+        },
+        active: function () {
+          sessionStorage.fonts = true;
+        },
+      });
     </script>
 
     <!-- CSS Files -->
     <link rel="stylesheet" href="../assets/css/bootstrap.min.css" />
     <link rel="stylesheet" href="../assets/css/plugins.min.css" />
     <link rel="stylesheet" href="../assets/css/kaiadmin.min.css" />
-    <link rel="stylesheet" href="../assets/css/demo.css" />
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
-
     <style>
-        :root {
-            --border-color: #e0e0e0;
-            --card-shadow: 0 1px 3px rgba(0,0,0,0.05);
-            --primary-color: #4361ee;
-            --success-color: #28a745;
-            --warning-color: #ffc107;
-            --danger-color: #dc3545;
-            --info-color: #17a2b8;
+      .job-card {
+        transition: all 0.2s ease;
+        border-left: 4px solid #dee2e6;
+        margin-bottom: 1.5rem;
+        border-radius: 8px;
+      }
+      .job-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        border-left-color: #0d6efd;
+      }
+      .job-header {
+        padding-bottom: 0.75rem;
+        margin-bottom: 0.75rem;
+      }
+      .job-meta {
+        font-size: 0.85rem;
+        color: #6c757d;
+      }
+      .employee-badge {
+        font-size: 0.8rem;
+        margin-right: 0.3rem;
+        margin-bottom: 0.3rem;
+        padding: 0.25rem 0.5rem;
+      }
+      .evidence-link {
+        font-size: 0.85rem;
+      }
+      .action-btn {
+        min-width: 90px;
+        font-size: 0.85rem;
+        padding: 0.4rem 0.65rem;
+      }
+      .status-badge {
+        font-size: 0.75rem;
+        padding: 0.3rem 0.6rem;
+      }
+      .job-duration {
+        background-color: #f8f9fa;
+        border-radius: 6px;
+        padding: 0.5rem 0.75rem;
+      }
+      .special-project-item {
+        border-left: 2px solid #0d6efd;
+        padding-left: 0.5rem;
+        margin-bottom: 0.5rem;
+        font-size: 0.9rem;
+      }
+      .card-body {
+        padding: 1.25rem;
+      }
+      .card-footer {
+        padding: 1rem;
+        background-color: #f8fafc;
+        border-top: 1px solid rgba(0,0,0,0.05);
+      }
+      .info-icon {
+        width: 20px;
+        margin-right: 0.5rem;
+      }
+      .trip-card {
+        border: 1px solid #e9ecef;
+        border-radius: 6px;
+        padding: 0.75rem;
+        margin-bottom: 0.75rem;
+        background-color: #fff;
+      }
+      .trip-card:hover {
+        background-color: #f8f9fa;
+      }
+      .compact-form .form-control {
+        padding: 0.375rem 0.75rem;
+        font-size: 0.9rem;
+      }
+      .compact-form label {
+        font-size: 0.85rem;
+        margin-bottom: 0.25rem;
+      }
+      .job-details-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 1rem;
+      }
+      .job-section {
+        margin-bottom: 1.5rem;
+      }
+      .section-title {
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        color: #6c757d;
+        margin-bottom: 0.75rem;
+        border-bottom: 1px solid #dee2e6;
+        padding-bottom: 0.5rem;
+      }
+      .clarification-item {
+        background-color: #f8f9fa;
+        border-radius: 6px;
+        padding: 0.75rem;
+        margin-bottom: 0.75rem;
+      }
+      .clarification-item:last-child {
+        margin-bottom: 0;
+      }
+      .clarification-inline {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        flex-wrap: wrap;
+      }
+      .clarification-detail {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        min-width: 0;
+        flex: 1;
+      }
+      .clarification-label {
+        font-weight: 600;
+        color: #6c757d;
+        font-size: 0.85rem;
+        min-width: 80px;
+      }
+      .clarification-value {
+        font-size: 0.9rem;
+        color: #495057;
+        flex: 1;
+        min-width: 0;
+      }
+      .clarification-request {
+        background-color: #e3f2fd;
+        border-left: 3px solid #2196f3;
+        padding: 0.5rem;
+        border-radius: 4px;
+        margin-top: 0.5rem;
+      }
+             .clarification-response {
+         background-color: #e8f5e8;
+         border-left: 3px solid #4caf50;
+         padding: 0.5rem;
+         border-radius: 4px;
+         margin-top: 0.5rem;
+       }
+       .clarification-table {
+         border: 1px solid #dee2e6;
+         border-radius: 6px;
+         overflow: hidden;
+         background-color: #fff;
+       }
+       .clarification-header {
+         display: flex;
+         background-color: #f8f9fa;
+         border-bottom: 2px solid #dee2e6;
+         font-weight: 600;
+         color: #495057;
+         font-size: 0.9rem;
+       }
+       .clarification-row {
+         display: flex;
+         border-bottom: 1px solid #dee2e6;
+         transition: background-color 0.2s ease;
+       }
+       .clarification-row:hover {
+         background-color: #f8f9fa;
+       }
+       .clarification-row:last-child {
+         border-bottom: none;
+       }
+       .clarification-col {
+         flex: 1;
+         padding: 0.75rem;
+         display: flex;
+         align-items: center;
+         word-wrap: break-word;
+         min-width: 0;
+       }
+               .clarification-col:not(:last-child) {
+          border-right: 1px solid #dee2e6;
         }
-        
-        body {
-            background-color: #f8f9fa;
-            color: #495057;
+        .job-details-compact {
+          margin-top: 0.5rem;
         }
-        
-        .page-header {
-            padding: 1.5rem 0;
-            margin-bottom: 1.5rem;
-            border-bottom: 1px solid var(--border-color);
+        .detail-row {
+          display: flex;
+          align-items: center;
+          margin-bottom: 0.5rem;
+          font-size: 0.9rem;
         }
-        
-        .card {
-            border: none;
-            border-radius: 8px;
-            box-shadow: var(--card-shadow);
-            margin-bottom: 1.5rem;
+        .detail-label {
+          font-weight: 600;
+          color: #6c757d;
+          min-width: 80px;
+          margin-right: 0.5rem;
         }
-        
-        .card-header {
-            background-color: white;
-            border-bottom: 1px solid var(--border-color);
-            padding: 0.75rem 1.25rem;
-            border-radius: 8px 8px 0 0 !important;
-        }
-        
-        .card-header h4 {
-            font-size: 1rem;
-            font-weight: 600;
-            margin: 0;
-            color: #343a40;
-        }
-        
-        .card-body {
-            padding: 1.25rem;
-        }
-        
-        .info-row {
-            display: flex;
-            justify-content: space-between;
-            padding: 0.5rem 0;
-            font-size: 0.9rem;
-        }
-        
-        .info-label {
-            font-weight: 500;
-            color: #6c757d;
-            min-width: 120px;
-        }
-        
-        .info-value {
-            color: #212529;
-            text-align: right;
-            flex: 1;
-        }
-        
-        .status-badge {
-            font-size: 0.8rem;
-            padding: 0.35rem 0.75rem;
-            border-radius: 4px;
-            font-weight: 500;
-        }
-        
-        .trip-card {
-            border-left: 3px solid var(--primary-color);
-            background-color: white;
-            padding: 0.75rem;
-            margin-bottom: 0.75rem;
-            border-radius: 6px;
-            font-size: 0.85rem;
-        }
-        
-        .employee-badge {
-            background-color: #f0f7ff;
-            color: var(--primary-color);
-            padding: 0.2rem 0.5rem;
-            border-radius: 12px;
-            font-size: 0.75rem;
-            margin-right: 0.25rem;
-            margin-bottom: 0.25rem;
-            display: inline-block;
-        }
-        
-        .clarification-item {
-            border-left: 3px solid var(--warning-color);
-            background-color: #fffcf5;
-            padding: 0.75rem;
-            margin-bottom: 0.75rem;
-            border-radius: 6px;
-            font-size: 0.85rem;
-        }
-        
-        .clarification-item.resolved {
-            border-left-color: var(--success-color);
-            background-color: #f5fff7;
-        }
-        
-        .special-project-badge {
-            background-color: #f0f2ff;
-            color: var(--primary-color);
-            padding: 0.3rem 0.75rem;
-            border-radius: 12px;
-            font-size: 0.8rem;
-            margin-right: 0.5rem;
-            margin-bottom: 0.5rem;
-            display: inline-block;
-        }
-        
-        .empty-state {
-            text-align: center;
-            padding: 1.5rem;
-            color: #adb5bd;
-            font-size: 0.9rem;
-        }
-        
-        .empty-state i {
-            font-size: 1.5rem;
-            margin-bottom: 0.5rem;
-            opacity: 0.5;
-        }
-        
-        .back-link {
-            color: var(--primary-color);
-            font-size: 0.9rem;
-            margin-bottom: 0.5rem;
-            display: inline-block;
-        }
-        
-        .badge-primary {
-            background-color: var(--primary-color);
-        }
-        
-        .badge-success {
-            background-color: var(--success-color);
-        }
-        
-        .badge-warning {
-            background-color: var(--warning-color);
-        }
-        
-        .badge-danger {
-            background-color: var(--danger-color);
-        }
-        
-        .badge-info {
-            background-color: var(--info-color);
-        }
-        
-        .btn-block {
-            font-size: 0.85rem;
-            padding: 0.5rem;
+        .detail-value {
+          color: #495057;
+          font-weight: 500;
         }
     </style>
 </head>
-
 <body>
-    <div class="wrapper">
-        <?php 
-        // Include appropriate sidebar based on role
-        if ($_SESSION['roleID'] == 1) {
-            include 'components/sidebar.php';
-        } elseif ($_SESSION['roleID'] == 4) {
-            include 'components/adminSidebar.php';
-        }
-        ?>
-        
-        <div class="main-panel">
-            <div class="main-header">
-                <div class="main-header-logo">
-                    <!-- Logo Header -->
-                    <div class="logo-header" data-background-color="dark">
-                        <a href="../index.html" class="logo">
-                            <img
-                                src="../assets/img/Logo_white.png"
-                                alt="navbar brand"
-                                class="navbar-brand"
-                                height="20"
-                            />
-                        </a>
-                        <div class="nav-toggle">
-                            <button class="btn btn-toggle toggle-sidebar">
-                                <i class="gg-menu-right"></i>
-                            </button>
-                            <button class="btn btn-toggle sidenav-toggler">
-                                <i class="gg-menu-left"></i>
-                            </button>
-                        </div>
-                        <button class="topbar-toggler more">
-                            <i class="gg-more-vertical-alt"></i>
-                        </button>
+<div class="wrapper">
+    <?php include 'components/adminSidebar.php'; ?>
+    <div class="main-panel">
+        <div class="main-header">
+            <div class="main-header-logo">
+                <!-- Logo Header -->
+                <div class="logo-header" data-background-color="dark">
+                    <a href="../views/admindashboard.php" class="logo">
+                        <img src="../assets/img/app-logo1.png" alt="navbar brand" class="navbar-brand" height="20" />
+                    </a>
+                    <div class="nav-toggle">
+                        <button class="btn btn-toggle toggle-sidebar"><i class="gg-menu-right"></i></button>
+                        <button class="btn btn-toggle sidenav-toggler"><i class="gg-menu-left"></i></button>
                     </div>
-                    <!-- End Logo Header -->
+                    <button class="topbar-toggler more"><i class="gg-more-vertical-alt"></i></button>
                 </div>
-                <?php include 'components/navbar.php'; ?>
+                <!-- End Logo Header -->
             </div>
-
-            <div class="container">
-                <div class="page-inner">
-                    <div class="page-header d-flex justify-content-between align-items-center">
-                        <div>
-                            <a href="<?= $_SESSION['roleID'] == 1 ? 'supervisorEditJobs.php' : 'approveJobs.php' ?>" class="back-link">
-                                <i class="fas fa-arrow-left mr-1"></i> Back to Jobs
-                            </a>
-                            <h1 class="mb-0">Job Details</h1>
-                            <p class="text-muted mb-0">
-                                <strong>Job ID:</strong> #<?= $jobDetails['job']['jobID'] ?> | 
-                                <strong>Type:</strong> <?= htmlspecialchars($jobDetails['job']['job_type_name'] ?? 'N/A') ?>
-                            </p>
-                        </div>
-                        <span class="status-badge badge-<?= $jobDetails['status_class'] ?>">
-                            <?= $jobDetails['status'] ?>
-                        </span>
+            <?php include 'components/navbar.php'; ?>
+        </div>
+        
+        <div class="container">
+            <div class="page-inner">
+                <div class="page-header d-flex justify-content-between align-items-center">
+                    <h4 class="fw-bold mb-0">Job Approvals</h4>
+                    <div class="badge bg-light text-dark"><?= count($pendingJobs) ?> Pending</div>
+                </div>
+                
+                <div class="alert alert-info py-2">
+                    <i class="fas fa-info-circle me-2"></i> Review and verify completed jobs submitted by employees.
+                </div>
+                
+                <!-- Pending Clarification Approval Section -->
+                <?php if (!empty($jobsWithPendingClarificationApproval)): ?>
+                <div class="job-section">
+                    <h5 class="fw-bold mb-3 text-primary"><i class="fas fa-question-circle me-2"></i>Pending Clarification Responses</h5>
+                    <div class="alert alert-info py-2 mb-3">
+                        <i class="fas fa-info-circle me-2"></i> These clarifications have been resolved by supervisor-in-charge and need your approval to proceed.
                     </div>
-
                     <div class="row">
-                        <!-- Job Information -->
-                        <div class="col-lg-8">
-                            <div class="card">
-                                <div class="card-header">
-                                    <h4><i class="fas fa-info-circle mr-2"></i>Job Information</h4>
-                                </div>
+                        <?php 
+                        // Group clarifications by jobID
+                        $pendingClarificationsByJob = [];
+                        foreach ($jobsWithPendingClarificationApproval as $item) {
+                            $jobID = $item['clarification']['jobID'];
+                            if (!isset($pendingClarificationsByJob[$jobID])) {
+                                $pendingClarificationsByJob[$jobID] = [
+                                    'job_data' => $item,
+                                    'clarifications' => []
+                                ];
+                            }
+                            $pendingClarificationsByJob[$jobID]['clarifications'][] = $item['clarification'];
+                        }
+                        
+                        foreach ($pendingClarificationsByJob as $jobID => $jobData): 
+                            $item = $jobData['job_data'];
+                            $clarifications = $jobData['clarifications'];
+                            $boat = $item['boat'];
+                            $employees = $item['employees'];
+                            $port = $item['port'];
+                            $special_projects = $item['special_projects'];
+                        ?>
+                        <div class="col-md-12">
+                            <div class="card job-card border-primary">
                                 <div class="card-body">
-                                    <div class="info-row">
-                                        <span class="info-label">Vessel Name:</span>
-                                        <span class="info-value"><?= htmlspecialchars($jobDetails['job']['vessel_name'] ?? 'Not Assigned') ?></span>
+                                    <div class="row">
+                                        <!-- Left Column - Job Details -->
+                                        <div class="col-md-4">
+                                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                                <h5 class="card-title mb-0 fw-bold">Job #<?= htmlspecialchars($jobID) ?></h5>
+                                                <span class="badge bg-primary text-white status-badge">Response Pending</span>
+                                            </div>
+                                            
+                                            <div class="job-details-compact">
+                                                <div class="detail-row">
+                                                    <span class="detail-label">Vessel:</span>
+                                                    <span class="detail-value"><?= htmlspecialchars($item['vessel_name'] ?? '-') ?></span>
+                                                </div>
+                                                <div class="detail-row">
+                                                    <span class="detail-label">Job Type:</span>
+                                                    <span class="detail-value"><?= htmlspecialchars($item['job_type'] ?? '-') ?></span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- Right Column - Clarification Table -->
+                                        <div class="col-md-8">
+                                            <h6 class="fw-semibold mb-2">Pending Clarification Requests:</h6>
+                                            <div class="clarification-table">
+                                                <div class="clarification-header">
+                                                    <div class="clarification-col">Request ID</div>
+                                                    <div class="clarification-col">Request</div>
+                                                    <div class="clarification-col">Response</div>
+                                                </div>
+                                                <?php foreach ($clarifications as $index => $clarification): ?>
+                                                <div class="clarification-row">
+                                                    <div class="clarification-col">
+                                                        <span class="badge bg-primary"><?= $clarification['clarification_id'] ?></span>
+                                                    </div>
+                                                    <div class="clarification-col">
+                                                        <?= htmlspecialchars($clarification['clarification_request_comment']) ?>
+                                                    </div>
+                                                    <div class="clarification-col">
+                                                        <?php if (!empty($clarification['clarification_resolved_comment'])): ?>
+                                                            <span class="text-success"><?= htmlspecialchars($clarification['clarification_resolved_comment']) ?></span>
+                                                        <?php else: ?>
+                                                            <span class="text-muted">Pending Response</span>
+                                                        <?php endif; ?>
+                                                    </div>
+                                                </div>
+                                                <?php endforeach; ?>
+                                            </div>
+                                        </div>
                                     </div>
-                                    <div class="info-row">
-                                        <span class="info-label">Job Type:</span>
-                                        <span class="info-value"><?= htmlspecialchars($jobDetails['job']['job_type_name'] ?? 'N/A') ?></span>
-                                    </div>
-                                    <div class="info-row">
-                                        <span class="info-label">Start Date:</span>
-                                        <span class="info-value"><?= date('M d, Y', strtotime($jobDetails['job']['start_date'])) ?></span>
-                                    </div>
-                                    <div class="info-row">
-                                        <span class="info-label">End Date:</span>
-                                        <span class="info-value"><?= $jobDetails['job']['end_date'] ? date('M d, Y', strtotime($jobDetails['job']['end_date'])) : 'Not Set' ?></span>
-                                    </div>
-                                    <div class="info-row">
-                                        <span class="info-label">Port:</span>
-                                        <span class="info-value"><?= htmlspecialchars($jobDetails['job']['portname'] ?? 'Not Assigned') ?></span>
-                                    </div>
-                                    <div class="info-row">
-                                        <span class="info-label">Boat:</span>
-                                        <span class="info-value"><?= htmlspecialchars($jobDetails['job']['boat_name'] ?? 'Not Assigned') ?></span>
-                                    </div>
-                                    <?php if (!empty($jobDetails['job']['comment'])): ?>
-                                    <div class="info-row">
-                                        <span class="info-label">Comments:</span>
-                                        <span class="info-value"><?= htmlspecialchars($jobDetails['job']['comment']) ?></span>
-                                    </div>
-                                    <?php endif; ?>
-                                    <div class="info-row">
-                                        <span class="info-label">Created By:</span>
-                                        <span class="info-value"><?= htmlspecialchars($jobDetails['job']['created_by_fname'] . ' ' . $jobDetails['job']['created_by_lname']) ?></span>
+                                </div>
+                                <div class="card-footer bg-white border-top-0">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <!-- See More Details Button -->
+                                        <a href="jobdetails.php?jobID=<?= $jobID ?>" class="btn btn-info btn-sm">
+                                            <i class="fas fa-eye me-1"></i> See More Details
+                                        </a>
+                                        
+                                        <form method="post" action="../controllers/approveJobsController.php" class="d-flex gap-2">
+                                            <input type="hidden" name="clarification_pending_id" value="<?= $clarifications[0]['clarification_id'] ?>">
+                                            <input type="hidden" name="clarification_action" value="">
+                                            <button type="button" name="clarification_action_btn" value="1" class="btn btn-success btn-sm action-btn">
+                                                <i class="fas fa-check me-1"></i> Approve Resolution
+                                            </button>
+                                            <button type="button" name="clarification_action_btn" value="3" class="btn btn-danger btn-sm action-btn">
+                                                <i class="fas fa-times me-1"></i> Reject Resolution
+                                            </button>
+                                        </form>
                                     </div>
                                 </div>
                             </div>
-
-                            <!-- Trip Details -->
-                            <div class="card">
-                                <div class="card-header">
-                                    <h4><i class="fas fa-calendar-alt mr-2"></i>Trip Details</h4>
-                                </div>
+                        </div>
+                        <?php endforeach; ?>
+                    </div>
+                </div>
+                <?php endif; ?>
+                
+                <!-- Clarification Jobs Section -->
+                <?php if (!empty($jobsWithClarifications)): ?>
+                <div class="job-section">
+                    <h5 class="fw-bold mb-3 text-warning"><i class="fas fa-exclamation-circle me-2"></i>Jobs with Pending Clarifications</h5>
+                    <div class="alert alert-warning py-2 mb-3">
+                        <i class="fas fa-info-circle me-2"></i> These jobs have clarification requests that are waiting for supervisor-in-charge response. Jobs cannot proceed until clarifications are resolved.
+                    </div>
+                    <div class="row">
+                        <?php 
+                        // Group clarifications by jobID
+                        $clarificationsByJob = [];
+                        foreach ($jobsWithClarifications as $item) {
+                            $jobID = $item['clarification']['jobID'];
+                            if (!isset($clarificationsByJob[$jobID])) {
+                                $clarificationsByJob[$jobID] = [
+                                    'job_data' => $item,
+                                    'clarifications' => []
+                                ];
+                            }
+                            $clarificationsByJob[$jobID]['clarifications'][] = $item['clarification'];
+                        }
+                        
+                        foreach ($clarificationsByJob as $jobID => $jobData): 
+                            $item = $jobData['job_data'];
+                            $clarifications = $jobData['clarifications'];
+                            $boat = $item['boat'];
+                            $employees = $item['employees'];
+                            $port = $item['port'];
+                            $special_projects = $item['special_projects'];
+                        ?>
+                        <div class="col-md-12">
+                            <div class="card job-card border-warning">
                                 <div class="card-body">
-                                    <?php if (empty($jobDetails['trips'])): ?>
-                                        <div class="empty-state">
-                                            <i class="fas fa-calendar-times"></i>
-                                            <p>No trip days have been added to this job yet.</p>
-                                        </div>
-                                    <?php else: ?>
-                                        <?php foreach ($jobDetails['trips'] as $trip): ?>
-                                            <div class="trip-card">
-                                                <div class="d-flex justify-content-between align-items-center mb-1">
-                                                    <strong><?= date('M d, Y', strtotime($trip['trip_date'])) ?></strong>
-                                                    <span class="badge badge-primary"><?= $trip['employee_count'] ?> Employee<?= $trip['employee_count'] != 1 ? 's' : '' ?></span>
+                                    <div class="row">
+                                        <!-- Left Column - Job Details -->
+                                        <div class="col-md-4">
+                                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                                <h5 class="card-title mb-0 fw-bold">Job #<?= htmlspecialchars($jobID) ?></h5>
+                                                <span class="badge bg-warning text-dark status-badge">Clarification Needed</span>
+                                            </div>
+                                            
+                                            <div class="job-details-compact">
+                                                <div class="detail-row">
+                                                    <span class="detail-label">Vessel:</span>
+                                                    <span class="detail-value"><?= htmlspecialchars($item['vessel_name'] ?? '-') ?></span>
                                                 </div>
-                                                <?php if (!empty($trip['employee_details'])): ?>
-                                                    <div class="mt-1">
-                                                        <small class="text-muted">Assigned Employees:</small>
+                                                <div class="detail-row">
+                                                    <span class="detail-label">Job Type:</span>
+                                                    <span class="detail-value"><?= htmlspecialchars($item['job_type'] ?? '-') ?></span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- Right Column - Clarification Table -->
+                                        <div class="col-md-8">
+                                            <h6 class="fw-semibold mb-2">Clarification Requests:</h6>
+                                            <div class="clarification-table">
+                                                <div class="clarification-header">
+                                                    <div class="clarification-col">Request ID</div>
+                                                    <div class="clarification-col">Request</div>
+                                                    <div class="clarification-col">Status</div>
+                                                </div>
+                                                <?php foreach ($clarifications as $index => $clarification): ?>
+                                                <div class="clarification-row">
+                                                    <div class="clarification-col">
+                                                        <span class="badge bg-warning text-dark"><?= $clarification['clarification_id'] ?></span>
+                                                    </div>
+                                                    <div class="clarification-col">
+                                                        <?= htmlspecialchars($clarification['clarification_request_comment']) ?>
+                                                    </div>
+                                                    <div class="clarification-col">
+                                                        <span class="badge bg-warning text-dark">Waiting for Supervisor-in-Charge Response</span>
+                                                    </div>
+                                                </div>
+                                                <?php endforeach; ?>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- See More Details Button -->
+                                <div class="card-footer bg-white border-top-0">
+                                    <div class="d-flex justify-content-start">
+                                        <a href="jobdetails.php?jobID=<?= $jobID ?>" class="btn btn-info btn-sm">
+                                            <i class="fas fa-eye me-1"></i> See More Details
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <?php endforeach; ?>
+                    </div>
+                </div>
+                <?php endif; ?>
+                
+                <!-- Main Job Approval Section -->
+                
+                <?php if (!empty($pendingJobs)): ?>
+                <div class="job-section">
+                    <h5 class="fw-bold mb-3"><i class="fas fa-tasks me-2"></i>Pending Job Approvals</h5>
+                    <div class="row">
+                        <?php foreach ($pendingJobs as $item): 
+                            $job = $item['job'];
+                            // Check if this job has any pending clarifications (status = 0 or 1)
+                            $hasPendingClarifications = false;
+                            if (!empty($jobsWithClarifications)) {
+                                foreach ($jobsWithClarifications as $clarifyItem) {
+                                    if ($clarifyItem['clarification']['jobID'] == $job['jobID'] && 
+                                        in_array($clarifyItem['clarification']['clarification_status'], [0, 1])) {
+                                        $hasPendingClarifications = true;
+                                        break;
+                                    }
+                                }
+                            }
+                            // Skip jobs that have pending clarifications (status = 0 or 1)
+                            if ($hasPendingClarifications) {
+                                continue;
+                            }
+                            $boat = $item['boat'];
+                            $port = $item['port'];
+                            $special_projects = $item['special_projects'];
+                            $vessel_name = $item['vessel_name'];
+                            $job_type = $item['job_type'];
+                            $job_creator = $item['job_creator'];
+                            $trips = $item['trips'];
+                        ?>
+                        <div class="col-md-12">
+                            <div class="card job-card">
+                                <div class="card-body">
+                                    <div class="row">
+                                        <!-- Left Column - Job Details -->
+                                        <div class="col-md-5 border-end pe-3">
+                                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                                <h5 class="card-title mb-0 fw-bold">Job #<?= htmlspecialchars($job['jobID']) ?></h5>
+                                                <?php if (empty($job['end_date'])): ?>
+                                                    <span class="badge bg-info status-badge">Ongoing</span>
+                                                <?php else: ?>
+                                                    <span class="badge bg-primary status-badge">Pending Approval</span>
+                                                <?php endif; ?>
+                                            </div>
+                                            
+                                            <?php if (!empty($item['job_creator'])): ?>
+                                            <div class="text-muted small mb-2">
+                                                <i class="fas fa-user-tie me-1"></i>
+                                                Created by: <?= htmlspecialchars($item['job_creator']['fname'] . ' ' . $item['job_creator']['lname']) ?>
+                                            </div>
+                                            <?php endif; ?>
+                                            
+                                            <?php if ($job['comment']): ?>
+                                            <div class="mb-2">
+                                                <small class="text-muted job-meta">Note</small>
+                                                <div class="small"><?= htmlspecialchars($job['comment']) ?></div>
+                                            </div>
+                                            <?php endif; ?>
+                                            
+                                            <div class="job-details-grid mt-2">
+                                                <div>
+                                                    <small class="text-muted job-meta">Vessel</small>
+                                                    <div class="fw-semibold"><?= htmlspecialchars($item['vessel_name'] ?? '-') ?></div>
+                                                </div>
+                                                <div>
+                                                    <small class="text-muted job-meta">Job Type</small>
+                                                    <div class="fw-semibold"><?= htmlspecialchars($item['job_type'] ?? '-') ?></div>
+                                                </div>
+                                                <div>
+                                                    <small class="text-muted job-meta">Boat</small>
+                                                    <div class="fw-semibold"><?= htmlspecialchars($boat['boat_name'] ?? '-') ?></div>
+                                                </div>
+                                                <div>
+                                                    <small class="text-muted job-meta">Port</small>
+                                                    <div class="fw-semibold"><?= htmlspecialchars($port['portname'] ?? '-') ?></div>
+                                                </div>
+                                            </div>
+                                            
+                                            <div class="job-duration mt-2">
+                                                <div class="d-flex justify-content-between small">
+                                                    <div>
+                                                        <small class="text-muted">Start</small>
+                                                        <div class="fw-semibold"><?= htmlspecialchars($job['start_date']) ?></div>
+                                                    </div>
+                                                    <div class="text-end">
+                                                        <small class="text-muted">End</small>
+                                                        <div class="fw-semibold">
+                                                            <?php if (!empty($job['end_date'])): ?>
+                                                                <?= htmlspecialchars($job['end_date']) ?>
+                                                            <?php else: ?>
+                                                                <span class="text-warning">Not closed</span>
+                                                            <?php endif; ?>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            
+                                            <?php if ($special_projects): ?>
+                                            <div class="mt-2">
+                                                <small class="text-muted job-meta">Special Projects</small>
+                                                <div class="mt-1">
+                                                    <?php foreach ($special_projects as $sp): ?>
+                                                    <div class="special-project-item">
+                                                        <div class="fw-semibold"><?= htmlspecialchars($sp['name'] ?? 'Special Project') ?></div>
+                                                        <?php if (!empty($sp['evidence'])): ?>
+                                                        <a href="../uploads/evidence/<?= htmlspecialchars($sp['evidence']) ?>" 
+                                                           target="_blank" 
+                                                           class="evidence-link text-primary d-inline-block mt-1">
+                                                            <i class="fas fa-paperclip me-1"></i> Evidence
+                                                        </a>
+                                                        <?php endif; ?>
+                                                    </div>
+                                                    <?php endforeach; ?>
+                                                </div>
+                                            </div>
+                                            <?php endif; ?>
+                                            
+                                            <div class="mt-3 d-flex gap-2">
+                                                <button type="button" class="btn btn-outline-primary btn-sm" data-bs-toggle="modal" data-bs-target="#specialProjectModal" data-jobid="<?= $job['jobID'] ?>">
+                                                    <i class="fas fa-plus"></i> Add Project
+                                                </button>
+                                                <?php if (!empty($special_projects)): ?>
+                                                <button type="button" class="btn btn-outline-info btn-sm" data-bs-toggle="modal" data-bs-target="#viewSpecialProjectModal" data-sp='<?= json_encode($special_projects[0]) ?>'>
+                                                    <i class="fas fa-eye"></i> View Project
+                                                </button>
+                                                <?php endif; ?>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- Right Column - Trips -->
+                                        <div class="col-md-7 ps-3">
+                                            <h6 class="section-title">Trips / Days</h6>
+                                            
+                                            <?php if (empty($item['trips'])): ?>
+                                            <div class="alert alert-warning py-2 small mb-0">
+                                                <i class="fas fa-exclamation-triangle me-1"></i> No days/trips added yet.
+                                            </div>
+                                            <?php else: ?>
+                                                <?php foreach ($item['trips'] as $tripItem): ?>
+                                                <div class="trip-card">
+                                                    <div class="d-flex justify-content-between align-items-start mb-1">
+                                                        <strong><?= htmlspecialchars($tripItem['trip']['trip_date']) ?></strong>
+                                                        <?php if (isset($tripItem['attendance']['attendance_status'])): ?>
+                                                            <?php
+                                                                $status = $tripItem['attendance']['attendance_status'];
+                                                                $statusText = $status == 1 ? 'Verified' : ($status == 3 ? 'Rejected' : 'Pending');
+                                                                $statusClass = $status == 1 ? 'bg-success text-white' : ($status == 3 ? 'bg-danger text-white' : 'bg-warning text-dark');
+                                                            ?>
+                                                            <span class="badge <?= $statusClass ?> status-badge"><?= $statusText ?></span>
+                                                        <?php endif; ?>
+                                                    </div>
+                                                    
+                                                    <?php if (!empty($tripItem['employees'])): ?>
+                                                    <div class="small mt-2">
+                                                        <div class="text-muted">Team Members:</div>
                                                         <div class="mt-1">
-                                                            <?php foreach ($trip['employee_details'] as $emp): ?>
-                                                                <span class="employee-badge">
-                                                                    <?= htmlspecialchars($emp['fname'] . ' ' . $emp['lname']) ?>
-                                                                    <?php if (!empty($emp['role_name'])): ?>
-                                                                        <small>(<?= htmlspecialchars($emp['role_name']) ?>)</small>
-                                                                    <?php endif; ?>
-                                                                </span>
+                                                            <?php foreach ($tripItem['employees'] as $emp): ?>
+                                                            <span class="badge bg-light text-dark employee-badge">
+                                                                <i class="fas fa-user me-1"></i>
+                                                                <?= htmlspecialchars($emp['fname'] . ' ' . $emp['lname']) ?>
+                                                            </span>
                                                             <?php endforeach; ?>
                                                         </div>
                                                     </div>
-                                                <?php else: ?>
-                                                    <small class="text-muted">No employees assigned</small>
-                                                <?php endif; ?>
-                                            </div>
-                                        <?php endforeach; ?>
-                                    <?php endif; ?>
-                                </div>
-                            </div>
-
-                            <!-- Clarifications -->
-                            <?php if (!empty($jobDetails['clarifications'])): ?>
-                            <div class="card">
-                                <div class="card-header">
-                                    <h4><i class="fas fa-question-circle mr-2"></i>Clarifications</h4>
-                                </div>
-                                <div class="card-body">
-                                    <?php foreach ($jobDetails['clarifications'] as $clar): ?>
-                                        <div class="clarification-item <?= $clar['clarification_status'] == 2 ? 'resolved' : '' ?>">
-                                            <div class="d-flex justify-content-between align-items-center mb-1">
-                                                <strong>
-                                                    <?php if ($clar['clarification_status'] == 0): ?>
-                                                        <i class="fas fa-clock text-warning mr-1"></i>Pending
-                                                    <?php elseif ($clar['clarification_status'] == 1): ?>
-                                                        <i class="fas fa-hourglass-half text-info mr-1"></i>Pending Approval
-                                                    <?php else: ?>
-                                                        <i class="fas fa-check-circle text-success mr-1"></i>Resolved
                                                     <?php endif; ?>
-                                                    <?= htmlspecialchars($clar['requested_by_fname'] . ' ' . $clar['requested_by_lname']) ?>
-                                                </strong>
-                                                <small class="text-muted">ID: <?= $clar['clarification_id'] ?></small>
-                                            </div>
-                                            <div class="mb-1">
-                                                <small class="text-muted">Request:</small>
-                                                <p class="mb-1"><?= htmlspecialchars($clar['clarification_request_comment']) ?></p>
-                                            </div>
-                                            <?php if (!empty($clar['clarification_resolved_comment'])): ?>
-                                                <div class="mb-1">
-                                                    <small class="text-muted">Resolution:</small>
-                                                    <p class="mb-1"><?= htmlspecialchars($clar['clarification_resolved_comment']) ?></p>
                                                 </div>
+                                                <?php endforeach; ?>
                                             <?php endif; ?>
                                         </div>
-                                    <?php endforeach; ?>
+                                    </div>
                                 </div>
+                                
+                                <?php
+                                $firstAttendanceID = null;
+                                foreach ($trips as $tripItem) {
+                                    if (!empty($tripItem['attendance']['job_attendanceID'])) {
+                                        $firstAttendanceID = $tripItem['attendance']['job_attendanceID'];
+                                        break;
+                                    }
+                                }
+                                ?>
+                                
+                                <?php if ($firstAttendanceID): ?>
+                                <div class="card-footer">
+                                    <?php if (empty($job['end_date'])): ?>
+                                        <!-- Ongoing Job - Buttons Disabled -->
+                                        <div class="d-flex justify-content-end gap-2">
+                                            <button type="button" class="btn btn-success btn-sm action-btn" disabled>
+                                                <i class="fas fa-check me-1"></i> Approve
+                                            </button>
+                                            <button type="button" class="btn btn-warning btn-sm action-btn" disabled>
+                                                <i class="fas fa-question me-1"></i> Clarify
+                                            </button>
+                                            <button type="button" class="btn btn-danger btn-sm action-btn" disabled>
+                                                <i class="fas fa-times me-1"></i> Reject
+                                            </button>
+                                        </div>
+                                        <div class="text-center mt-2">
+                                            <span class="badge bg-info text-white">
+                                                <i class="fas fa-clock me-1"></i> Ongoing Job
+                                            </span>
+                                            <small class="text-muted d-block mt-1">Job must be completed (end date added) before approval</small>
+                                        </div>
+                                    <?php else: ?>
+                                        <!-- Completed Job - Buttons Enabled -->
+                                        <form method="post" action="../controllers/approveJobsController.php" class="d-flex justify-content-end gap-2">
+                                            <input type="hidden" name="job_attendanceID" value="<?= $firstAttendanceID ?>">
+                                            <input type="hidden" name="action" value="">
+                                            <button type="button" name="action_btn" value="1" class="btn btn-success btn-sm action-btn">
+                                                <i class="fas fa-check me-1"></i> Approve
+                                            </button>
+                                            <button type="button" class="btn btn-warning btn-sm action-btn btn-clarify">
+                                                <i class="fas fa-question me-1"></i> Clarify
+                                            </button>
+                                            <button type="button" name="action_btn" value="3" class="btn btn-danger btn-sm action-btn">
+                                                <i class="fas fa-times me-1"></i> Reject
+                                            </button>
+                                        </form>
+                                    <?php endif; ?>
+                                    
+                                    <!-- See More Details Button -->
+                                    <div class="d-flex justify-content-start mt-2">
+                                        <a href="jobdetails.php?jobID=<?= $job['jobID'] ?>" class="btn btn-info btn-sm">
+                                            <i class="fas fa-eye me-1"></i> See More Details
+                                        </a>
+                                    </div>
+                                </div>
+                                <?php endif; ?>
                             </div>
-                            <?php endif; ?>
                         </div>
-
-                        <!-- Sidebar -->
-                        <div class="col-lg-4">
-                            <!-- Special Projects -->
-                            <?php if (!empty($jobDetails['special_projects'])): ?>
-                            <div class="card">
-                                <div class="card-header">
-                                    <h4><i class="fas fa-star mr-2"></i>Special Projects</h4>
-                                </div>
+                        <?php endforeach; ?>
+                    </div>
+                </div>
+                <?php else: ?>
+                <div class="alert alert-success text-center py-4 my-4">
+                    <i class="fas fa-check-circle fa-3x mb-3 text-success"></i>
+                    <h4 class="fw-bold">No Pending Approvals</h4>
+                    <p class="text-muted">All jobs have been reviewed and approved, or are waiting for clarification resolution.</p>
+                </div>
+                <?php endif; ?>
+                
+                <!-- Ongoing Jobs Section -->
+                
+                <?php if (!empty($ongoingJobs)): ?>
+                <div class="job-section">
+                    <h5 class="fw-bold mb-3 text-info"><i class="fas fa-clock me-2"></i>Ongoing Jobs</h5>
+                    <!-- <div class="alert alert-info py-2 mb-3">
+                        <i class="fas fa-info-circle me-2"></i> These jobs are currently in progress and cannot be approved until completed.
+                    </div> -->
+                    <div class="row">
+                        <?php foreach ($ongoingJobs as $item): 
+                            $job = $item['job'];
+                            $boat = $item['boat'];
+                            $port = $item['port'];
+                            $special_projects = $item['special_projects'];
+                            $vessel_name = $item['vessel_name'];
+                            $job_type = $item['job_type'];
+                            $job_creator = $item['job_creator'];
+                            $trips = $item['trips'];
+                        ?>
+                        <div class="col-md-12">
+                            <div class="card job-card border-info">
                                 <div class="card-body">
-                                    <?php foreach ($jobDetails['special_projects'] as $sp): ?>
-                                        <span class="special-project-badge">
-                                            <?= htmlspecialchars($sp['name']) ?>
-                                        </span>
-                                    <?php endforeach; ?>
-                                </div>
-                            </div>
-                            <?php endif; ?>
-
-                            <!-- Approval Information -->
-                            <?php if ($jobDetails['approval']): ?>
-                            <div class="card">
-                                <div class="card-header">
-                                    <h4><i class="fas fa-check-double mr-2"></i>Approval Information</h4>
-                                </div>
-                                <div class="card-body">
-                                    <div class="info-row">
-                                        <span class="info-label">Status:</span>
-                                        <span class="info-value">
-                                            <?php if ($jobDetails['approval']['approval_status'] == 1): ?>
-                                                <span class="badge badge-success">Approved</span>
-                                            <?php elseif ($jobDetails['approval']['approval_status'] == 2): ?>
-                                                <span class="badge badge-danger">Rejected</span>
+                                    <div class="row">
+                                        <!-- Left Column - Job Details -->
+                                        <div class="col-md-5 border-end pe-3">
+                                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                                <h5 class="card-title mb-0 fw-bold">Job #<?= htmlspecialchars($job['jobID']) ?></h5>
+                                                <span class="badge bg-info status-badge">Ongoing</span>
+                                            </div>
+                                            
+                                            <?php if (!empty($item['job_creator'])): ?>
+                                            <div class="text-muted small mb-2">
+                                                <i class="fas fa-user-tie me-1"></i>
+                                                Created by: <?= htmlspecialchars($item['job_creator']['fname'] . ' ' . $item['job_creator']['lname']) ?>
+                                            </div>
                                             <?php endif; ?>
-                                        </span>
+                                            
+                                            <?php if ($job['comment']): ?>
+                                            <div class="mb-2">
+                                                <small class="text-muted job-meta">Note</small>
+                                                <div class="small"><?= htmlspecialchars($job['comment']) ?></div>
+                                            </div>
+                                            <?php endif; ?>
+                                            
+                                            <div class="job-details-grid mt-2">
+                                                <div>
+                                                    <small class="text-muted job-meta">Vessel</small>
+                                                    <div class="fw-semibold"><?= htmlspecialchars($item['vessel_name'] ?? '-') ?></div>
+                                                </div>
+                                                <div>
+                                                    <small class="text-muted job-meta">Job Type</small>
+                                                    <div class="fw-semibold"><?= htmlspecialchars($item['job_type'] ?? '-') ?></div>
+                                                </div>
+                                                <div>
+                                                    <small class="text-muted job-meta">Boat</small>
+                                                    <div class="fw-semibold"><?= htmlspecialchars($boat['boat_name'] ?? '-') ?></div>
+                                                </div>
+                                                <div>
+                                                    <small class="text-muted job-meta">Port</small>
+                                                    <div class="fw-semibold"><?= htmlspecialchars($port['portname'] ?? '-') ?></div>
+                                                </div>
+                                            </div>
+                                            
+                                            <div class="job-duration mt-2">
+                                                <div class="d-flex justify-content-between small">
+                                                    <div>
+                                                        <small class="text-muted">Start</small>
+                                                        <div class="fw-semibold"><?= htmlspecialchars($job['start_date']) ?></div>
+                                                    </div>
+                                                    <div class="text-end">
+                                                        <small class="text-muted">End</small>
+                                                        <div class="fw-semibold">
+                                                            <span class="text-warning">Not closed</span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            
+                                            <?php if ($special_projects): ?>
+                                            <div class="mt-2">
+                                                <small class="text-muted job-meta">Special Projects</small>
+                                                <div class="mt-1">
+                                                    <?php foreach ($special_projects as $sp): ?>
+                                                    <div class="special-project-item">
+                                                        <div class="fw-semibold"><?= htmlspecialchars($sp['name'] ?? 'Special Project') ?></div>
+                                                        <?php if (!empty($sp['evidence'])): ?>
+                                                        <a href="../uploads/evidence/<?= htmlspecialchars($sp['evidence']) ?>" 
+                                                           target="_blank" 
+                                                           class="evidence-link text-primary d-inline-block mt-1">
+                                                            <i class="fas fa-paperclip me-1"></i> Evidence
+                                                        </a>
+                                                        <?php endif; ?>
+                                                    </div>
+                                                    <?php endforeach; ?>
+                                                </div>
+                                            </div>
+                                            <?php endif; ?>
+                                        </div>
+                                        
+                                        <!-- Right Column - Trips -->
+                                        <div class="col-md-7 ps-3">
+                                            <h6 class="section-title">Trips / Days</h6>
+                                            
+                                            <?php if (empty($item['trips'])): ?>
+                                            <div class="alert alert-warning py-2 small mb-0">
+                                                <i class="fas fa-exclamation-triangle me-1"></i> No days/trips added yet.
+                                            </div>
+                                            <?php else: ?>
+                                                <?php foreach ($item['trips'] as $tripItem): ?>
+                                                <div class="trip-card">
+                                                    <div class="d-flex justify-content-between align-items-start mb-1">
+                                                        <strong><?= htmlspecialchars($tripItem['trip']['trip_date']) ?></strong>
+                                                        <?php if (isset($tripItem['attendance']['attendance_status'])): ?>
+                                                            <?php
+                                                                $status = $tripItem['attendance']['attendance_status'];
+                                                                $statusText = $status == 1 ? 'Verified' : ($status == 3 ? 'Rejected' : 'Pending');
+                                                                $statusClass = $status == 1 ? 'bg-success text-white' : ($status == 3 ? 'bg-danger text-white' : 'bg-warning text-dark');
+                                                            ?>
+                                                            <span class="badge <?= $statusClass ?> status-badge"><?= $statusText ?></span>
+                                                        <?php endif; ?>
+                                                    </div>
+                                                    
+                                                    <?php if (!empty($tripItem['employees'])): ?>
+                                                    <div class="small mt-2">
+                                                        <div class="text-muted">Team Members:</div>
+                                                        <div class="mt-1">
+                                                            <?php foreach ($tripItem['employees'] as $emp): ?>
+                                                            <span class="badge bg-light text-dark employee-badge">
+                                                                <i class="fas fa-user me-1"></i>
+                                                                <?= htmlspecialchars($emp['fname'] . ' ' . $emp['lname']) ?>
+                                                            </span>
+                                                            <?php endforeach; ?>
+                                                        </div>
+                                                    </div>
+                                                    <?php endif; ?>
+                                                </div>
+                                                <?php endforeach; ?>
+                                            <?php endif; ?>
+                                                <div class="d-flex justify-content-end mt-2">
+                                                <a href="jobdetails.php?jobID=<?= $job['jobID'] ?>" class="btn btn-info btn-sm">
+                                                    <i class="fas fa-eye me-1"></i> See More Details
+                                                </a>
+                                            </div>
+                                        </div>
+                                        
                                     </div>
-                                    <div class="info-row">
-                                        <span class="info-label">Approved By:</span>
-                                        <span class="info-value"><?= htmlspecialchars($jobDetails['approval']['approved_by_fname'] . ' ' . $jobDetails['approval']['approved_by_lname']) ?></span>
-                                    </div>
-                                    <div class="info-row">
-                                        <span class="info-label">Date:</span>
-                                        <span class="info-value"><?= date('M d, Y H:i', strtotime($jobDetails['approval']['approval_date'])) ?></span>
-                                    </div>
-                                    <?php if (!empty($jobDetails['approval']['comment'])): ?>
-                                    <div class="info-row">
-                                        <span class="info-label">Comment:</span>
-                                        <span class="info-value"><?= htmlspecialchars($jobDetails['approval']['comment']) ?></span>
-                                    </div>
-                                    <?php endif; ?>
+                                    
                                 </div>
+                                
                             </div>
-                            <?php endif; ?>
+                        </div>
+                        <?php endforeach; ?>
+                    </div>
+                </div>
+                <?php endif; ?>
+            </div>
+        </div>
+        
+        <?php include 'components/footer.php'; ?>
+    </div>
+</div>
 
-                            <!-- Quick Actions -->
-                            <div class="card">
-                                <div class="card-header">
-                                    <h4><i class="fas fa-tools mr-2"></i>Quick Actions</h4>
-                                </div>
-                                <div class="card-body">
-                                    <?php if ($_SESSION['roleID'] == 1 && $jobDetails['status'] == 'Draft'): ?>
-                                    <button class="btn btn-primary btn-block mb-2" onclick="window.location.href='supervisorEditJobs.php?edit_job=<?= $jobDetails['job']['jobID'] ?>'">
-                                        <i class="fas fa-edit mr-1"></i> Edit Job
-                                    </button>
-                                    <?php endif; ?>
-                                    <button class="btn btn-outline-secondary btn-block" onclick="window.print()">
-                                        <i class="fas fa-print mr-1"></i> Print Details
-                                    </button>
-                                </div>
-                            </div>
+<!-- Clarification Modal -->
+<div class="modal fade" id="clarificationModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header py-2">
+                <h5 class="modal-title">Request Clarification</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="clarificationForm" method="post" action="../controllers/approveJobsController.php">
+                <div class="modal-body py-2">
+                    <input type="hidden" name="job_attendanceID" id="modal_job_attendanceID">
+                    <input type="hidden" name="action" value="2">
+                    <div class="mb-3">
+                        <label for="clarification_comment" class="form-label small">Clarification Request</label>
+                        <textarea class="form-control form-control-sm" id="clarification_comment" name="clarification_comment" rows="3" required></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer py-2">
+                    <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-sm btn-primary">Submit Request</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Special Project Modal -->
+<div class="modal fade" id="specialProjectModal" tabindex="-1" aria-labelledby="specialProjectModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <form id="specialProjectForm" method="POST" action="../controllers/addSpecialProjectController.php" enctype="multipart/form-data" class="compact-form">
+                <div class="modal-header py-2">
+                    <h5 class="modal-title" id="specialProjectModalLabel">Add Special Project</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body py-2">
+                    <input type="hidden" name="jobID" id="modalJobID">
+                    <div class="row g-2">
+                        <div class="col-md-6">
+                            <label for="spName" class="form-label small">Project Name</label>
+                            <input type="text" class="form-control form-control-sm" id="spName" name="name" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="spVessel" class="form-label small">Vessel</label>
+                            <select class="form-control form-control-sm" id="spVessel" name="vesselID" required>
+                                <option value="">Select Vessel</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="spDate" class="form-label small">Date</label>
+                            <input type="date" class="form-control form-control-sm" id="spDate" name="date" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="spAllowance" class="form-label small">Allowance</label>
+                            <input type="number" step="0.01" class="form-control form-control-sm" id="spAllowance" name="allowance" required>
+                        </div>
+                        <div class="col-md-12">
+                            <label for="spEvidence" class="form-label small">Evidence (PDF, XLSX, Word, Mail Trailer)</label>
+                            <input type="file" class="form-control form-control-sm" id="spEvidence" name="evidence" accept=".pdf, .xlsx, .xls, .doc, .docx, .eml, .msg">
                         </div>
                     </div>
                 </div>
-            </div>
+                <div class="modal-footer py-2">
+                    <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-sm btn-primary">Add Project</button>
+                </div>
+            </form>
         </div>
-        <?php include 'components/footer.php'; ?>
     </div>
+</div>
 
-    <!-- Core JS Files -->
-    <script src="../assets/js/core/jquery.3.2.1.min.js"></script>
-    <script src="../assets/js/core/popper.min.js"></script>
-    <script src="../assets/js/core/bootstrap.min.js"></script>
+<!-- View/Edit Special Project Modal -->
+<div class="modal fade" id="viewSpecialProjectModal" tabindex="-1" aria-labelledby="viewSpecialProjectModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <form id="editSpecialProjectForm" method="POST" action="../controllers/updateSpecialProjectController.php" enctype="multipart/form-data" class="compact-form">
+                <div class="modal-header py-2">
+                    <h5 class="modal-title" id="viewSpecialProjectModalLabel">Special Project Details</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body py-2">
+                    <input type="hidden" name="spProjectID" id="editSpProjectID">
+                    <div class="row g-2">
+                        <div class="col-md-6">
+                            <label for="editSpName" class="form-label small">Project Name</label>
+                            <input type="text" class="form-control form-control-sm" id="editSpName" name="name" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="editSpVessel" class="form-label small">Vessel</label>
+                            <select class="form-control form-control-sm" id="editSpVessel" name="vesselID" required>
+                                <option value="">Select Vessel</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="editSpDate" class="form-label small">Date</label>
+                            <input type="date" class="form-control form-control-sm" id="editSpDate" name="date" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="editSpAllowance" class="form-label small">Allowance</label>
+                            <input type="number" step="0.01" class="form-control form-control-sm" id="editSpAllowance" name="allowance" required>
+                        </div>
+                        <div class="col-md-12">
+                            <label for="editSpEvidence" class="form-label small">Evidence (PDF, XLSX, Word, Mail Trailer)</label>
+                            <input type="file" class="form-control form-control-sm" id="editSpEvidence" name="evidence" accept=".pdf, .xlsx, .xls, .doc, .docx, .eml, .msg">
+                            <div id="currentEvidence" class="mt-1 small"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer py-2">
+                    <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-sm btn-primary">Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
 
-    <!-- jQuery UI -->
-    <script src="../assets/js/plugin/jquery-ui-1.12.1.custom/jquery-ui.min.js"></script>
-    <script src="../assets/js/plugin/jquery-ui-touch-punch/jquery.ui.touch-punch.min.js"></script>
+<script src="../assets/js/core/jquery-3.7.1.min.js"></script>
+<script src="../assets/js/core/popper.min.js"></script>
+<script src="../assets/js/core/bootstrap.min.js"></script>
+<script src="../assets/js/plugin/jquery-scrollbar/jquery.scrollbar.min.js"></script>
+<script src="../assets/js/plugin/datatables/datatables.min.js"></script>
+<script src="../assets/js/kaiadmin.min.js"></script>
+<script src="../assets/js/setting-demo2.js"></script>
+<script src="../assets/js/plugin/sweetalert/sweetalert.min.js"></script>
 
-    <!-- jQuery Scrollbar -->
-    <script src="../assets/js/plugin/jquery-scrollbar/jquery.scrollbar.min.js"></script>
+<script>
+$(document).ready(function() {
+    // Handle clarify button click
+    $(document).on('click', '.btn-clarify', function(e) {
+        e.preventDefault();
+        var jobAttendanceID = $(this).closest('form').find('input[name="job_attendanceID"]').val();
+        $('#modal_job_attendanceID').val(jobAttendanceID);
+        $('#clarificationModal').modal('show');
+    });
 
-    <!-- Atlantis JS -->
-    <script src="../assets/js/atlantis.min.js"></script>
+    // SweetAlert for Approve/Reject
+    $(document).on('click', 'form[action$="approveJobsController.php"] .action-btn', function(e) {
+        var btn = $(this);
+        var form = btn.closest('form');
+        var isApprove = btn.hasClass('btn-success');
+        var isReject = btn.hasClass('btn-danger');
+        if (!isApprove && !isReject) return;
+        
+        e.preventDefault();
+        var actionText = isApprove ? 'approve this job' : 'reject this job';
+        var confirmButtonText = isApprove ? 'Yes, Approve' : 'Yes, Reject';
+        
+        swal({
+            title: 'Are you sure?',
+            text: 'Do you want to ' + actionText + '?',
+            icon: 'warning',
+            buttons: {
+                cancel: {
+                    text: 'Cancel',
+                    visible: true,
+                    className: 'btn btn-default'
+                },
+                confirm: {
+                    text: confirmButtonText,
+                    visible: true,
+                    className: isApprove ? 'btn btn-success' : 'btn btn-danger'
+                }
+            },
+            dangerMode: isReject
+        }).then(function(willDo) {
+            if (willDo) {
+                if (form.find('input[name="action"]').length) {
+                    form.find('input[name="action"]').val(btn.val());
+                }
+                if (form.find('input[name="clarification_action"]').length) {
+                    form.find('input[name="clarification_action"]').val(btn.val());
+                }
+                form[0].submit();
+            }
+        });
+    });
+
+    // Set jobID in modal when button is clicked
+    $(document).on('click', '[data-bs-target="#specialProjectModal"]', function() {
+        var jobID = $(this).data('jobid');
+        $('#modalJobID').val(jobID);
+        $('#specialProjectForm')[0].reset();
+    });
+
+    // Load vessels for dropdowns
+    function loadVessels() {
+        console.log('Loading vessels...');
+        $.ajax({
+            url: '../controllers/getVesselsController.php',
+            type: 'GET',
+            dataType: 'json',
+            success: function(response) {
+                console.log('Vessels response:', response);
+                if (response.success) {
+                    var vesselOptions = '<option value="">Select Vessel</option>';
+                    response.data.forEach(function(vessel) {
+                        vesselOptions += '<option value="' + vessel.vesselID + '">' + vessel.vessel_name + '</option>';
+                    });
+                    $('#spVessel, #editSpVessel').html(vesselOptions);
+                    console.log('Loaded', response.data.length, 'vessels');
+                } else {
+                    console.error('Failed to load vessels:', response.error);
+                }
+            },
+            error: function(xhr, status, error) {
+                console.error('Failed to load vessels:', error);
+                console.error('Response:', xhr.responseText);
+            }
+        });
+    }
+
+    // Load vessels when page loads
+    loadVessels();
+
+    // Populate special project modal on view
+    $(document).on('click', '[data-bs-target="#viewSpecialProjectModal"]', function() {
+        var sp = $(this).data('sp');
+        if (typeof sp === 'string') sp = JSON.parse(sp);
+        $('#editSpProjectID').val(sp.spProjectID);
+        $('#editSpName').val(sp.name);
+        
+        // For edit modal, we need to find the vesselID based on vessel name
+        if (sp.vessel_name) {
+            $('#editSpVessel option').each(function() {
+                if ($(this).text() === sp.vessel_name) {
+                    $('#editSpVessel').val($(this).val());
+                    return false;
+                }
+            });
+        }
+        
+        $('#editSpDate').val(sp.date ? sp.date.split('T')[0] : '');
+        $('#editSpAllowance').val(sp.allowance);
+        if (sp.evidence) {
+            var fileName = sp.evidence;
+            $('#currentEvidence').html('<a href="../uploads/evidence/' + sp.evidence + '" target="_blank" class="text-primary">Current: ' + fileName + '</a>');
+        } else {
+            $('#currentEvidence').html('<span class="text-muted">No evidence uploaded</span>');
+        }
+    });
+});
+</script>
 </body>
 </html>
+
+//
+<?php
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['clarification_pending_id'], $_POST['clarification_action'])) {
+    // This handles approval/rejection of clarification_status = 2
+    $clarification_id = intval($_POST['clarification_pending_id']);
+    $action = intval($_POST['clarification_action']); // 1=approve, 3=reject
+    $userID = isset($_SESSION['userID']) ? $_SESSION['userID'] : null;
+    if (!$userID) {
+        header("Location: ../index.php");
+        exit;
+    }
+    // Get jobID and approvalID from clarifications table
+    $getClar = $conn->prepare("SELECT jobID, approvalID FROM clarifications WHERE clarification_id = ? AND clarification_requesterID = ? AND clarification_status = 1");
+    if (!$getClar) throw new Exception("Prepare failed: " . $conn->error);
+    $getClar->bind_param("ii", $clarification_id, $userID);
+    if (!$getClar->execute()) throw new Exception("Execute failed: " . $getClar->error);
+    $getClar->bind_result($jobID, $approvalID);
+    if (!$getClar->fetch()) throw new Exception("Clarification record not found");
+    $getClar->close();
+    // Update clarifications table: set clarification_status = 1 (resolved)
+    $stmtClar = $conn->prepare("UPDATE clarifications SET clarification_status = 2 WHERE clarification_id = ?");
+    if (!$stmtClar) throw new Exception("Prepare failed: " . $conn->error);
+    $stmtClar->bind_param("i", $clarification_id);
+    if (!$stmtClar->execute()) throw new Exception("Execute failed: " . $stmtClar->error);
+    $stmtClar->close();
+    // Update approvals table: set approval_status = 1 (approved) or 3 (rejected)
+    $stmtApp = $conn->prepare("UPDATE approvals SET approval_status = ? WHERE approvalID = ?");
+    if (!$stmtApp) throw new Exception("Prepare failed: " . $conn->error);
+    $stmtApp->bind_param("ii", $action, $approvalID);
+    if (!$stmtApp->execute()) throw new Exception("Execute failed: " . $stmtApp->error);
+    $stmtApp->close();
+    header("Location: ../views/approvejobs.php");
+    exit;
+}
