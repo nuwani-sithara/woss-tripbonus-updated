@@ -186,7 +186,7 @@ function getJobStatus(mysqli $conn, int $jobID, int $userID): array {
         LIMIT 1
     ");
     if ($res && $res->num_rows > 0) {
-        return ["status" => "readonly"];
+        return ["status" => "approved"];
     }
 
     // 🔹 Default editable
