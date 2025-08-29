@@ -501,7 +501,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['jobID'], $_POST['acti
         $updateApproval->execute();
     }
     
-    header("Location: ../views/supervisorInChargeApproval.php");
+    header("Location: ../views/supervisorinchargeapproval.php");
     exit;
 }
 
@@ -527,7 +527,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['review_jobID'], $_POS
         $stmt->bind_param("sii", $stage, $userID, $jobID);
         $stmt->execute();
         
-        header("Location: ../views/supervisorInChargeApproval.php?message=job_resubmitted");
+        header("Location: ../views/supervisorinchargeapproval.php?message=job_resubmitted");
         exit;
     }
 }
@@ -548,7 +548,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['clarification_id'], $
     $stmt->bind_param("sii", $resolutionComment, $clarificationID, $userID);
     $stmt->execute();
     
-    header("Location: ../views/supervisorInChargeApproval.php?message=clarification_resolved");
+    header("Location: ../views/supervisorinchargeapproval.php?message=clarification_resolved");
     exit;
 }
 
@@ -584,14 +584,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['clarification_approva
             $stmt->bind_param("i", $approvalID);
             $stmt->execute();
             
-            header("Location: ../views/supervisorInChargeApproval.php?message=clarification_approved");
+            header("Location: ../views/supervisorinchargeapproval.php?message=clarification_approved");
         } elseif ($approvalAction === 'reject') {
             // Reject the clarification resolution - keep it open for supervisor to fix
             $stmt = $conn->prepare("UPDATE clarifications SET clarification_status = 0 WHERE clarification_id = ?");
             $stmt->bind_param("i", $clarificationID);
             $stmt->execute();
             
-            header("Location: ../views/supervisorInChargeApproval.php?message=clarification_rejected");
+            header("Location: ../views/supervisorinchargeapproval.php?message=clarification_rejected");
         }
     }
     
