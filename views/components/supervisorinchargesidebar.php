@@ -43,8 +43,8 @@ $current_page = basename($_SERVER['PHP_SELF']);
         </li>
         <li class="nav-item <?php if($current_page == 'supervisorinchargeapproval.php') echo 'active'; ?>">
           <a href="../views/supervisorinchargeapproval.php">
-            <i class="fas fa-plus-circle"></i>
-            <p>Approvals</p>
+            <i class="fas fa-check-circle"></i>
+            <p>Job Approvals</p>
           </a>
         </li>
         <li class="nav-item <?php if($current_page == 'supervisorinchargejobs.php') echo 'active'; ?>">
