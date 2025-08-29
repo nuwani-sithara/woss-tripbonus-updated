@@ -799,6 +799,9 @@ $totalClarifications = count($clarificationJobs);
     <!-- Atlantis JS -->
     <script src="../assets/js/atlantis.min.js"></script>
 
+    <script src="../assets/js/kaiadmin.min.js"></script>
+
+
     <!-- Custom JS for supervisor dashboard -->
     <script>
       // Auto-refresh dashboard every 30 seconds
