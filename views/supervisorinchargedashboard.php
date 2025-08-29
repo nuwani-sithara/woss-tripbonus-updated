@@ -142,7 +142,7 @@ $totalCount = $totalResult ? $totalResult->fetch_assoc()['count'] : 0;
             <div class="main-header-logo">
                 <!-- Logo Header -->
                 <div class="logo-header" data-background-color="dark">
-                    <a href="../views/supervisorInChargeDashboard.php" class="logo">
+                    <a href="../views/supervisorinchargedashboard.php" class="logo">
                         <img src="../assets/img/app-logo1.png" alt="navbar brand" class="navbar-brand" height="20" />
                     </a>
                     <div class="nav-toggle">
@@ -297,7 +297,7 @@ $totalCount = $totalResult ? $totalResult->fetch_assoc()['count'] : 0;
                                     <div class="flex-grow-1 ms-3">
                                         <h6 class="card-title mb-1">Review Job Approvals</h6>
                                         <p class="card-text text-muted small">Review and approve jobs before they go to Operations Manager</p>
-                                        <a href="supervisorInChargeApproval.php" class="btn btn-primary btn-sm">
+                                        <a href="supervisorinchargeapproval.php" class="btn btn-primary btn-sm">
                                             <i class="fas fa-arrow-right me-1"></i> Go to Approvals
                                         </a>
                                     </div>
@@ -315,7 +315,7 @@ $totalCount = $totalResult ? $totalResult->fetch_assoc()['count'] : 0;
                                     <div class="flex-grow-1 ms-3">
                                         <h6 class="card-title mb-1">Resolve Clarifications</h6>
                                         <p class="card-text text-muted small">Respond to clarification requests from Operations Manager</p>
-                                        <a href="supervisorInChargeApproval.php" class="btn btn-warning btn-sm">
+                                        <a href="supervisorinchargeapproval.php" class="btn btn-warning btn-sm">
                                             <i class="fas fa-arrow-right me-1"></i> View Clarifications
                                         </a>
                                     </div>
