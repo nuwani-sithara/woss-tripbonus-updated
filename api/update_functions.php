@@ -283,13 +283,12 @@ function resolveClarification(mysqli $conn, int $clarificationID, int $userID, a
     $resolvedComment = $conn->real_escape_string($data['clarification_resolved_comment'] ?? '');
     $resolverID = $userID;
 
-    $update = $conn->query("
-        UPDATE clarifications
-        SET clarification_resolverID = $resolverID,
-            clarification_resolved_comment = '$resolvedComment',
-            clarification_status = 2
-        WHERE clarification_id = $clarificationID AND jobID = $jobID
-    ");
+     $update = $conn->query("UPDATE clarifications SET 
+        clarification_resolverID = $resolverID,
+        clarification_resolved_comment = '$resolvedComment',
+        clarification_status = 1
+        WHERE clarification_id = $clarificationID AND jobID = $jobID");
+        
     if ($update) return ['success'=>true, 'message'=>'Clarification resolved successfully!'];
     return ['success'=>false, 'error'=>'Failed to resolve clarification.'];
 }
