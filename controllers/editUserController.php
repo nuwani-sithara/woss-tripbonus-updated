@@ -31,7 +31,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Prepare base query
     $query = 'UPDATE users SET email=?, eno=?, username=?, fname=?, lname=?, roleID=?, rateID=?';
     $params = [$email, $eno, $username, $fname, $lname, $roleID, $rateID];
-    $types = 'ssssssi';
+    $types = 'sssssii';
 
     // Add password to query if provided
     if (!empty($password)) {

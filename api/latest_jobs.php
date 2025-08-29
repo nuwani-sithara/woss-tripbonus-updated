@@ -50,8 +50,7 @@ $sql = "SELECT
         LEFT JOIN approvals a ON j.jobID = a.jobID AND a.approval_stage = 'job_approval'
         WHERE j.jobCreatedBy = $loggedUserID
         GROUP BY j.jobID
-        ORDER BY j.start_date DESC
-        LIMIT 10";
+        ORDER BY j.start_date DESC";
 
 $res = $conn->query($sql);
 if ($res) {
