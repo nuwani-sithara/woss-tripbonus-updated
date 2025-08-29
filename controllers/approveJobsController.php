@@ -547,93 +547,93 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['job_attendanceID'], $
     exit;
 }
 
-// if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['clarification_pending_id'], $_POST['clarification_action'])) {
-//     // This handles approval/rejection of clarification_status = 2
-//     $clarification_id = intval($_POST['clarification_pending_id']);
-//     $action = intval($_POST['clarification_action']); // 1=approve, 3=reject
-//     $userID = isset($_SESSION['userID']) ? $_SESSION['userID'] : null;
-//     if (!$userID) {
-//         header("Location: ../index.php");
-//         exit;
-//     }
-//     // Get jobID and approvalID from clarifications table
-//     $getClar = $conn->prepare("SELECT jobID, approvalID FROM clarifications WHERE clarification_id = ? AND clarification_requesterID = ? AND clarification_status = 1");
-//     if (!$getClar) throw new Exception("Prepare failed: " . $conn->error);
-//     $getClar->bind_param("ii", $clarification_id, $userID);
-//     if (!$getClar->execute()) throw new Exception("Execute failed: " . $getClar->error);
-//     $getClar->bind_result($jobID, $approvalID);
-//     if (!$getClar->fetch()) throw new Exception("Clarification record not found");
-//     $getClar->close();
-//     // Update clarifications table: set clarification_status = 1 (resolved)
-//     $stmtClar = $conn->prepare("UPDATE clarifications SET clarification_status = 2 WHERE clarification_id = ?");
-//     if (!$stmtClar) throw new Exception("Prepare failed: " . $conn->error);
-//     $stmtClar->bind_param("i", $clarification_id);
-//     if (!$stmtClar->execute()) throw new Exception("Execute failed: " . $stmtClar->error);
-//     $stmtClar->close();
-//     // Update approvals table: set approval_status = 1 (approved) or 3 (rejected)
-//     $stmtApp = $conn->prepare("UPDATE approvals SET approval_status = ? WHERE approvalID = ?");
-//     if (!$stmtApp) throw new Exception("Prepare failed: " . $conn->error);
-//     $stmtApp->bind_param("ii", $action, $approvalID);
-//     if (!$stmtApp->execute()) throw new Exception("Execute failed: " . $stmtApp->error);
-//     $stmtApp->close();
-//     header("Location: ../views/approvejobs.php");
-//     exit;
-// }
-
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['clarification_pending_id'], $_POST['clarification_action'])) {
-    // This handles approval/rejection of clarification_status = 2 (response pending approval)
+    // This handles approval/rejection of clarification_status = 2
     $clarification_id = intval($_POST['clarification_pending_id']);
     $action = intval($_POST['clarification_action']); // 1=approve, 3=reject
     $userID = isset($_SESSION['userID']) ? $_SESSION['userID'] : null;
-    
     if (!$userID) {
         header("Location: ../index.php");
         exit;
     }
-    
-    // Get jobID and approvalID from clarifications table - looking for status 2 (response pending approval)
-    $getClar = $conn->prepare("SELECT jobID, approvalID FROM clarifications WHERE clarification_id = ? AND clarification_status = 2");
+    // Get jobID and approvalID from clarifications table
+    $getClar = $conn->prepare("SELECT jobID, approvalID FROM clarifications WHERE clarification_id = ? AND clarification_requesterID = ? AND clarification_status = 1");
     if (!$getClar) throw new Exception("Prepare failed: " . $conn->error);
-    
-    $getClar->bind_param("i", $clarification_id);
+    $getClar->bind_param("ii", $clarification_id, $userID);
     if (!$getClar->execute()) throw new Exception("Execute failed: " . $getClar->error);
-    
     $getClar->bind_result($jobID, $approvalID);
-    if (!$getClar->fetch()) {
-        $getClar->close();
-        throw new Exception("Clarification record not found or not in correct status");
-    }
+    if (!$getClar->fetch()) throw new Exception("Clarification record not found");
     $getClar->close();
-    
-    // Update clarifications table based on action
-    if ($action == 1) {
-        // Approve - set clarification_status = 3 (approved)
-        $newClarStatus = 3;
-    } else if ($action == 3) {
-        // Reject - set clarification_status = 4 (rejected)
-        $newClarStatus = 4;
-    } else {
-        throw new Exception("Invalid action");
-    }
-    
-    $stmtClar = $conn->prepare("UPDATE clarifications SET clarification_status = ? WHERE clarification_id = ?");
+    // Update clarifications table: set clarification_status = 1 (resolved)
+    $stmtClar = $conn->prepare("UPDATE clarifications SET clarification_status = 2 WHERE clarification_id = ?");
     if (!$stmtClar) throw new Exception("Prepare failed: " . $conn->error);
-    
-    $stmtClar->bind_param("ii", $newClarStatus, $clarification_id);
+    $stmtClar->bind_param("i", $clarification_id);
     if (!$stmtClar->execute()) throw new Exception("Execute failed: " . $stmtClar->error);
     $stmtClar->close();
-    
     // Update approvals table: set approval_status = 1 (approved) or 3 (rejected)
     $stmtApp = $conn->prepare("UPDATE approvals SET approval_status = ? WHERE approvalID = ?");
     if (!$stmtApp) throw new Exception("Prepare failed: " . $conn->error);
-    
     $stmtApp->bind_param("ii", $action, $approvalID);
     if (!$stmtApp->execute()) throw new Exception("Execute failed: " . $stmtApp->error);
     $stmtApp->close();
-    
     header("Location: ../views/approvejobs.php");
     exit;
 }
+
+// if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['clarification_pending_id'], $_POST['clarification_action'])) {
+//     // This handles approval/rejection of clarification_status = 2 (response pending approval)
+//     $clarification_id = intval($_POST['clarification_pending_id']);
+//     $action = intval($_POST['clarification_action']); // 1=approve, 3=reject
+//     $userID = isset($_SESSION['userID']) ? $_SESSION['userID'] : null;
+    
+//     if (!$userID) {
+//         header("Location: ../index.php");
+//         exit;
+//     }
+    
+//     // Get jobID and approvalID from clarifications table - looking for status 2 (response pending approval)
+//     $getClar = $conn->prepare("SELECT jobID, approvalID FROM clarifications WHERE clarification_id = ? AND clarification_status = 2");
+//     if (!$getClar) throw new Exception("Prepare failed: " . $conn->error);
+    
+//     $getClar->bind_param("i", $clarification_id);
+//     if (!$getClar->execute()) throw new Exception("Execute failed: " . $getClar->error);
+    
+//     $getClar->bind_result($jobID, $approvalID);
+//     if (!$getClar->fetch()) {
+//         $getClar->close();
+//         throw new Exception("Clarification record not found or not in correct status");
+//     }
+//     $getClar->close();
+    
+//     // Update clarifications table based on action
+//     if ($action == 1) {
+//         // Approve - set clarification_status = 3 (approved)
+//         $newClarStatus = 3;
+//     } else if ($action == 3) {
+//         // Reject - set clarification_status = 4 (rejected)
+//         $newClarStatus = 4;
+//     } else {
+//         throw new Exception("Invalid action");
+//     }
+    
+//     $stmtClar = $conn->prepare("UPDATE clarifications SET clarification_status = ? WHERE clarification_id = ?");
+//     if (!$stmtClar) throw new Exception("Prepare failed: " . $conn->error);
+    
+//     $stmtClar->bind_param("ii", $newClarStatus, $clarification_id);
+//     if (!$stmtClar->execute()) throw new Exception("Execute failed: " . $stmtClar->error);
+//     $stmtClar->close();
+    
+//     // Update approvals table: set approval_status = 1 (approved) or 3 (rejected)
+//     $stmtApp = $conn->prepare("UPDATE approvals SET approval_status = ? WHERE approvalID = ?");
+//     if (!$stmtApp) throw new Exception("Prepare failed: " . $conn->error);
+    
+//     $stmtApp->bind_param("ii", $action, $approvalID);
+//     if (!$stmtApp->execute()) throw new Exception("Execute failed: " . $stmtApp->error);
+//     $stmtApp->close();
+    
+//     header("Location: ../views/approvejobs.php");
+//     exit;
+// }
 
 $jobs = getJobsForApproval($conn);
 // Merge in jobs that have been verified by attendance but not yet approved by job approver
