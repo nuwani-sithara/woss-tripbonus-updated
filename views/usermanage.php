@@ -339,7 +339,7 @@ $employeesCount = getEmployeesCount();
                           <tr>
                             <th>User ID</th>
                             <th>Employee No</th> <!-- New column -->
-                            <th>Email</th>
+                            <!-- <th>Email</th> -->
                             <th>Username</th>
                             <th>First Name</th>
                             <th>Last Name</th>
@@ -356,7 +356,7 @@ $employeesCount = getEmployeesCount();
                               echo '<tr>';
                               echo '<td>' . htmlspecialchars($user['userID']) . '</td>';
                               echo '<td>' . htmlspecialchars($user['eno'] ?? '') . '</td>'; // New column
-                              echo '<td>' . htmlspecialchars($user['email']) . '</td>';
+                              // echo '<td>' . htmlspecialchars($user['email']) . '</td>';
                               echo '<td>' . htmlspecialchars($user['username']) . '</td>';
                               echo '<td>' . htmlspecialchars($user['fname']) . '</td>';
                               echo '<td>' . htmlspecialchars($user['lname']) . '</td>';

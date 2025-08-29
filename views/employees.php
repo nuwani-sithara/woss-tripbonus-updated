@@ -62,7 +62,7 @@ $employees = getEmployees();
                                         <!-- <th>Emp ID</th>
                                         <th>User ID</th> -->
                                         <th>Employee No</th>
-                                        <th>Email</th>
+                                        <!-- <th>Email</th> -->
                                         <th>Username</th>
                                         <th>First Name</th>
                                         <th>Last Name</th>
@@ -78,7 +78,7 @@ $employees = getEmployees();
                                             <!-- <td><?= htmlspecialchars($emp['empID']) ?></td>
                                             <td><?= htmlspecialchars($emp['userID']) ?></td> -->
                                             <td><?= htmlspecialchars($emp['eno']) ?></td>
-                                            <td><?= htmlspecialchars($emp['email']) ?></td>
+                                            <!-- <td><?= htmlspecialchars($emp['email']) ?></td> -->
                                             <td><?= htmlspecialchars($emp['username']) ?></td>
                                             <td><?= htmlspecialchars($emp['fname']) ?></td>
                                             <td><?= htmlspecialchars($emp['lname']) ?></td>
