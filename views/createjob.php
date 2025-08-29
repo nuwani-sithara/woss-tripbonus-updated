@@ -328,6 +328,7 @@ $jobType_result = mysqli_query($conn, "SELECT jobtypeID, type_name FROM jobtype"
             // Handle job type change to hide/show fields for General job type
             $('#jobType').change(function() {
                 var selectedJobType = $(this).val();
+                var jobTypeText = $('#jobType option:selected').text();
                 
                 if (selectedJobType == '6') {
                     $('#vesselNameGroup').hide();
@@ -352,15 +353,15 @@ $jobType_result = mysqli_query($conn, "SELECT jobtypeID, type_name FROM jobtype"
 
             function updateJobKeyPreview() {
                 var jobNumber = $('#jobNumberPreview').val();
-                var boatName = $('#boatName option:selected').text();
                 var selectedJobType = $('#jobType').val();
+                var jobTypeText = $('#jobType option:selected').text();
                 
                 if (selectedJobType == '6') {
                     $('#jobKeyPreview').text('WOSS -' + jobNumber);
-                } else if (jobNumber && boatName && boatName !== 'Select Boat') {
-                    $('#jobKeyPreview').text('WOSS -' + jobNumber + ' ' + boatName);
+                } else if (jobNumber && jobTypeText && jobTypeText !== 'Select Job Type') {
+                    $('#jobKeyPreview').text('WOSS -' + jobNumber + ' [' + jobTypeText + ']');
                 } else {
-                    $('#jobKeyPreview').text('WOSS -' + jobNumber + ' [boat name]');
+                    $('#jobKeyPreview').text('WOSS -' + jobNumber + ' [job type]');
                 }
             }
             

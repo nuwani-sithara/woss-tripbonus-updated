@@ -29,8 +29,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['create_job'])) {
         $conn->begin_transaction();
 
         // Insert job (trigger will automatically generate jobNumber and jobkey)
-        $jobInsert = $conn->prepare("INSERT INTO jobs (start_date, comment, jobtypeID, vesselID, jobCreatedBy, boatID) VALUES (?, ?, ?, ?, ?, ?)");
-        $jobInsert->bind_param("ssiiii", $startDate, $comment, $jobTypeID, $vesselID, $userID, $boatID);
+        // REMOVED boatID from this insert since it's not in the jobs table
+        $jobInsert = $conn->prepare("INSERT INTO jobs (start_date, comment, jobtypeID, vesselID, jobCreatedBy) VALUES (?, ?, ?, ?, ?)");
+        $jobInsert->bind_param("ssiii", $startDate, $comment, $jobTypeID, $vesselID, $userID);
         $jobInsert->execute();
         $jobID = $conn->insert_id;
         $jobInsert->close();
@@ -41,12 +42,20 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['create_job'])) {
         $tripInsert->execute();
         $tripInsert->close();
 
-        // Assign port
+        // Assign port (only if portID is provided)
         if ($portID !== null) {
             $portAssign = $conn->prepare("INSERT INTO portassignments (portID, jobID) VALUES (?, ?)");
             $portAssign->bind_param("ii", $portID, $jobID);
             $portAssign->execute();
             $portAssign->close();
+        }
+
+        // Assign boat (only if boatID is provided) - using the separate boatassignments table
+        if ($boatID !== null) {
+            $boatAssign = $conn->prepare("INSERT INTO boatassignments (boatID, jobID) VALUES (?, ?)");
+            $boatAssign->bind_param("ii", $boatID, $jobID);
+            $boatAssign->execute();
+            $boatAssign->close();
         }
 
         // Handle special project
