@@ -147,7 +147,7 @@ $employeesCount = getEmployeesCount();
                           <div class="numbers">
                             <p class="card-category">System Users</p>
                             <h4 class="card-title" id="exportToExcel" style="cursor: pointer; color: #007bff;">
-                              <a href="systemUsers.php" style="color: #007bff; text-decoration: none;">View All</a>
+                              <a href="systemusers.php" style="color: #007bff; text-decoration: none;">View All</a>
                             </h4>
                           </div>
                         </div>

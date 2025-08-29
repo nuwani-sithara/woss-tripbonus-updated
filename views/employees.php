@@ -59,8 +59,9 @@ $employees = getEmployees();
                             <table id="employees-table" class="display table table-striped table-hover">
                                 <thead>
                                     <tr>
-                                        <th>Emp ID</th>
-                                        <th>User ID</th>
+                                        <!-- <th>Emp ID</th>
+                                        <th>User ID</th> -->
+                                        <th>Employee No</th>
                                         <th>Email</th>
                                         <th>Username</th>
                                         <th>First Name</th>
@@ -74,8 +75,9 @@ $employees = getEmployees();
                                 <tbody>
                                     <?php foreach ($employees as $emp): ?>
                                         <tr>
-                                            <td><?= htmlspecialchars($emp['empID']) ?></td>
-                                            <td><?= htmlspecialchars($emp['userID']) ?></td>
+                                            <!-- <td><?= htmlspecialchars($emp['empID']) ?></td>
+                                            <td><?= htmlspecialchars($emp['userID']) ?></td> -->
+                                            <td><?= htmlspecialchars($emp['eno']) ?></td>
                                             <td><?= htmlspecialchars($emp['email']) ?></td>
                                             <td><?= htmlspecialchars($emp['username']) ?></td>
                                             <td><?= htmlspecialchars($emp['fname']) ?></td>
