@@ -215,7 +215,6 @@ if (!isset($jobs)) $jobs = [];
       </div>
     </div>
   </div>
-  <?php include 'components/footer.php'; ?>
 
    <!-- Core JS Files -->
     <script src="../assets/js/core/jquery.3.2.1.min.js"></script>

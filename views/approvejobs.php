@@ -70,204 +70,235 @@ $ongoingJobs = array_filter($jobs, function($item) {
     <link rel="stylesheet" href="../assets/css/plugins.min.css" />
     <link rel="stylesheet" href="../assets/css/kaiadmin.min.css" />
     <style>
-      .job-card {
-        transition: all 0.2s ease;
-        border-left: 4px solid #dee2e6;
-        margin-bottom: 1.5rem;
-        border-radius: 8px;
+      :root {
+        --compact-padding: 0.5rem;
+        --compact-margin: 0.25rem;
+        --compact-font-sm: 0.8rem;
+        --compact-font-xs: 0.75rem;
       }
-      .job-card:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+      
+      .compact-card {
+        transition: all 0.2s ease;
+        border-left: 3px solid #dee2e6;
+        margin-bottom: 1rem;
+        border-radius: 6px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.04);
+      }
+      
+      .compact-card:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.06);
         border-left-color: #0d6efd;
       }
-      .job-header {
-        padding-bottom: 0.75rem;
-        margin-bottom: 0.75rem;
+      
+      .compact-card .card-body {
+        padding: 0.75rem;
       }
-      .job-meta {
-        font-size: 0.85rem;
-        color: #6c757d;
-      }
-      .employee-badge {
-        font-size: 0.8rem;
-        margin-right: 0.3rem;
-        margin-bottom: 0.3rem;
-        padding: 0.25rem 0.5rem;
-      }
-      .evidence-link {
-        font-size: 0.85rem;
-      }
-      .action-btn {
-        min-width: 90px;
-        font-size: 0.85rem;
-        padding: 0.4rem 0.65rem;
-      }
-      .status-badge {
-        font-size: 0.75rem;
-        padding: 0.3rem 0.6rem;
-      }
-      .job-duration {
-        background-color: #f8f9fa;
-        border-radius: 6px;
-        padding: 0.5rem 0.75rem;
-      }
-      .special-project-item {
-        border-left: 2px solid #0d6efd;
-        padding-left: 0.5rem;
-        margin-bottom: 0.5rem;
-        font-size: 0.9rem;
-      }
-      .card-body {
-        padding: 1.25rem;
-      }
-      .card-footer {
-        padding: 1rem;
+      
+      .compact-card .card-footer {
+        padding: 0.75rem;
         background-color: #f8fafc;
         border-top: 1px solid rgba(0,0,0,0.05);
       }
-      .info-icon {
-        width: 20px;
-        margin-right: 0.5rem;
+      
+      .compact-header {
+        padding-bottom: 0.5rem;
+        margin-bottom: 0.5rem;
+        border-bottom: 1px solid #e9ecef;
       }
-      .trip-card {
-        border: 1px solid #e9ecef;
-        border-radius: 6px;
-        padding: 0.75rem;
-        margin-bottom: 0.75rem;
-        background-color: #fff;
-      }
-      .trip-card:hover {
-        background-color: #f8f9fa;
-      }
-      .compact-form .form-control {
-        padding: 0.375rem 0.75rem;
-        font-size: 0.9rem;
-      }
-      .compact-form label {
-        font-size: 0.85rem;
+      
+      .compact-title {
+        font-size: 1rem;
+        font-weight: 600;
         margin-bottom: 0.25rem;
       }
-      .job-details-grid {
+      
+      .compact-meta {
+        font-size: var(--compact-font-sm);
+        color: #6c757d;
+        line-height: 1.3;
+      }
+      
+      .compact-badge {
+        font-size: var(--compact-font-xs);
+        padding: 0.2rem 0.5rem;
+      }
+      
+      .compact-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-        gap: 1rem;
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+        gap: 0.5rem;
+        margin-bottom: 0.5rem;
       }
-      .job-section {
-        margin-bottom: 1.5rem;
+      
+      .compact-grid-item {
+        margin-bottom: 0.25rem;
       }
-      .section-title {
-        font-size: 0.9rem;
+      
+      .compact-grid-label {
+        font-size: var(--compact-font-xs);
+        color: #6c757d;
+        margin-bottom: 0.1rem;
+      }
+      
+      .compact-grid-value {
+        font-size: var(--compact-font-sm);
+        font-weight: 500;
+        color: #495057;
+      }
+      
+      .compact-duration {
+        background-color: #f8f9fa;
+        border-radius: 4px;
+        padding: 0.4rem 0.5rem;
+        margin-bottom: 0.5rem;
+      }
+      
+      .compact-duration-item {
+        font-size: var(--compact-font-sm);
+      }
+      
+      .compact-employee-badge {
+        font-size: var(--compact-font-xs);
+        margin-right: 0.2rem;
+        margin-bottom: 0.2rem;
+        padding: 0.2rem 0.4rem;
+      }
+      
+      .compact-action-btn {
+        min-width: 80px;
+        font-size: var(--compact-font-sm);
+        padding: 0.3rem 0.5rem;
+      }
+      
+      .compact-section-title {
+        font-size: var(--compact-font-sm);
         text-transform: uppercase;
         letter-spacing: 0.5px;
         color: #6c757d;
-        margin-bottom: 0.75rem;
+        margin-bottom: 0.5rem;
         border-bottom: 1px solid #dee2e6;
-        padding-bottom: 0.5rem;
+        padding-bottom: 0.25rem;
       }
-      .clarification-item {
+      
+      .compact-trip-card {
+        border: 1px solid #e9ecef;
+        border-radius: 4px;
+        padding: 0.5rem;
+        margin-bottom: 0.5rem;
+        background-color: #fff;
+      }
+      
+      .compact-trip-card:hover {
         background-color: #f8f9fa;
-        border-radius: 6px;
-        padding: 0.75rem;
-        margin-bottom: 0.75rem;
       }
-      .clarification-item:last-child {
-        margin-bottom: 0;
+      
+      .compact-project-item {
+        border-left: 2px solid #0d6efd;
+        padding-left: 0.4rem;
+        margin-bottom: 0.4rem;
+        font-size: var(--compact-font-sm);
       }
-      .clarification-inline {
+      
+      .compact-evidence-link {
+        font-size: var(--compact-font-xs);
+      }
+      
+      .compact-clarification-table {
+        border: 1px solid #dee2e6;
+        border-radius: 4px;
+        overflow: hidden;
+        background-color: #fff;
+        font-size: var(--compact-font-sm);
+      }
+      
+      .compact-clarification-header {
         display: flex;
-        align-items: center;
-        gap: 1rem;
-        flex-wrap: wrap;
+        background-color: #f8f9fa;
+        border-bottom: 1px solid #dee2e6;
+        font-weight: 600;
+        color: #495057;
+        font-size: var(--compact-font-sm);
       }
-      .clarification-detail {
+      
+      .compact-clarification-row {
         display: flex;
-        align-items: center;
-        gap: 0.5rem;
-        min-width: 0;
+        border-bottom: 1px solid #dee2e6;
+        transition: background-color 0.2s ease;
+      }
+      
+      .compact-clarification-row:hover {
+        background-color: #f8f9fa;
+      }
+      
+      .compact-clarification-row:last-child {
+        border-bottom: none;
+      }
+      
+      .compact-clarification-col {
         flex: 1;
+        padding: 0.5rem;
+        display: flex;
+        align-items: center;
+        word-wrap: break-word;
+        min-width: 0;
       }
-      .clarification-label {
+      
+      .compact-clarification-col:not(:last-child) {
+        border-right: 1px solid #dee2e6;
+      }
+      
+      .compact-alert {
+        padding: 0.5rem;
+        margin-bottom: 0.75rem;
+        font-size: var(--compact-font-sm);
+      }
+      
+      .compact-form .form-control {
+        padding: 0.3rem 0.5rem;
+        font-size: var(--compact-font-sm);
+      }
+      
+      .compact-form label {
+        font-size: var(--compact-font-xs);
+        margin-bottom: 0.2rem;
+      }
+      
+      .compact-modal .modal-header {
+        padding: 0.75rem;
+      }
+      
+      .compact-modal .modal-body {
+        padding: 0.75rem;
+      }
+      
+      .compact-modal .modal-footer {
+        padding: 0.75rem;
+      }
+      
+      .compact-detail-row {
+        display: flex;
+        align-items: center;
+        margin-bottom: 0.4rem;
+        font-size: var(--compact-font-sm);
+      }
+      
+      .compact-detail-label {
         font-weight: 600;
         color: #6c757d;
-        font-size: 0.85rem;
-        min-width: 80px;
+        min-width: 70px;
+        margin-right: 0.4rem;
+        font-size: var(--compact-font-xs);
       }
-      .clarification-value {
-        font-size: 0.9rem;
+      
+      .compact-detail-value {
         color: #495057;
-        flex: 1;
-        min-width: 0;
+        font-weight: 500;
       }
-      .clarification-request {
-        background-color: #e3f2fd;
-        border-left: 3px solid #2196f3;
-        padding: 0.5rem;
-        border-radius: 4px;
-        margin-top: 0.5rem;
+      
+      .compact-section {
+        margin-bottom: 1rem;
       }
-             .clarification-response {
-         background-color: #e8f5e8;
-         border-left: 3px solid #4caf50;
-         padding: 0.5rem;
-         border-radius: 4px;
-         margin-top: 0.5rem;
-       }
-       .clarification-table {
-         border: 1px solid #dee2e6;
-         border-radius: 6px;
-         overflow: hidden;
-         background-color: #fff;
-       }
-       .clarification-header {
-         display: flex;
-         background-color: #f8f9fa;
-         border-bottom: 2px solid #dee2e6;
-         font-weight: 600;
-         color: #495057;
-         font-size: 0.9rem;
-       }
-       .clarification-row {
-         display: flex;
-         border-bottom: 1px solid #dee2e6;
-         transition: background-color 0.2s ease;
-       }
-       .clarification-row:hover {
-         background-color: #f8f9fa;
-       }
-       .clarification-row:last-child {
-         border-bottom: none;
-       }
-       .clarification-col {
-         flex: 1;
-         padding: 0.75rem;
-         display: flex;
-         align-items: center;
-         word-wrap: break-word;
-         min-width: 0;
-       }
-               .clarification-col:not(:last-child) {
-          border-right: 1px solid #dee2e6;
-        }
-        .job-details-compact {
-          margin-top: 0.5rem;
-        }
-        .detail-row {
-          display: flex;
-          align-items: center;
-          margin-bottom: 0.5rem;
-          font-size: 0.9rem;
-        }
-        .detail-label {
-          font-weight: 600;
-          color: #6c757d;
-          min-width: 80px;
-          margin-right: 0.5rem;
-        }
-        .detail-value {
-          color: #495057;
-          font-weight: 500;
-        }
     </style>
 </head>
 <body>
@@ -294,21 +325,21 @@ $ongoingJobs = array_filter($jobs, function($item) {
         
         <div class="container">
             <div class="page-inner">
-                <div class="page-header d-flex justify-content-between align-items-center">
+                <div class="page-header d-flex justify-content-between align-items-center mb-3">
                     <h4 class="fw-bold mb-0">Job Approvals</h4>
-                    <div class="badge bg-light text-dark"><?= count($pendingJobs) ?> Pending</div>
+                    <div class="badge bg-light text-dark compact-badge"><?= count($pendingJobs) ?> Pending</div>
                 </div>
                 
-                <div class="alert alert-info py-2">
+                <div class="alert alert-info compact-alert">
                     <i class="fas fa-info-circle me-2"></i> Review and verify completed jobs submitted by employees.
                 </div>
                 
                 <!-- Pending Clarification Approval Section -->
                 <?php if (!empty($jobsWithPendingClarificationApproval)): ?>
-                <div class="job-section">
-                    <h5 class="fw-bold mb-3 text-primary"><i class="fas fa-question-circle me-2"></i>Pending Clarification Responses</h5>
-                    <div class="alert alert-info py-2 mb-3">
-                        <i class="fas fa-info-circle me-2"></i> These clarifications have been resolved by supervisor-in-charge and need your approval to proceed.
+                <div class="compact-section">
+                    <h5 class="fw-bold mb-2 text-primary"><i class="fas fa-question-circle me-1"></i>Pending Clarification Responses</h5>
+                    <div class="alert alert-info compact-alert mb-2">
+                        <i class="fas fa-info-circle me-1"></i> These clarifications have been resolved and need your approval.
                     </div>
                     <div class="row">
                         <?php 
@@ -334,24 +365,24 @@ $ongoingJobs = array_filter($jobs, function($item) {
                             $special_projects = $item['special_projects'];
                         ?>
                         <div class="col-md-12">
-                            <div class="card job-card border-primary">
+                            <div class="card compact-card border-primary">
                                 <div class="card-body">
                                     <div class="row">
                                         <!-- Left Column - Job Details -->
                                         <div class="col-md-4">
-                                            <div class="d-flex justify-content-between align-items-start mb-2">
-                                                <h5 class="card-title mb-0 fw-bold">Job #<?= htmlspecialchars($jobID) ?></h5>
-                                                <span class="badge bg-primary text-white status-badge">Response Pending</span>
-                                            </div>
-                                            
-                                            <div class="job-details-compact">
-                                                <div class="detail-row">
-                                                    <span class="detail-label">Vessel:</span>
-                                                    <span class="detail-value"><?= htmlspecialchars($item['vessel_name'] ?? '-') ?></span>
+                                            <div class="compact-header">
+                                                <div class="d-flex justify-content-between align-items-start">
+                                                    <h5 class="compact-title mb-0">Job #<?= htmlspecialchars($jobID) ?></h5>
+                                                    <span class="badge bg-primary text-white compact-badge">Response Pending</span>
                                                 </div>
-                                                <div class="detail-row">
-                                                    <span class="detail-label">Job Type:</span>
-                                                    <span class="detail-value"><?= htmlspecialchars($item['job_type'] ?? '-') ?></span>
+                                                
+                                                <div class="compact-detail-row">
+                                                    <span class="compact-detail-label">Vessel:</span>
+                                                    <span class="compact-detail-value"><?= htmlspecialchars($item['vessel_name'] ?? '-') ?></span>
+                                                </div>
+                                                <div class="compact-detail-row">
+                                                    <span class="compact-detail-label">Job Type:</span>
+                                                    <span class="compact-detail-value"><?= htmlspecialchars($item['job_type'] ?? '-') ?></span>
                                                 </div>
                                             </div>
                                         </div>
@@ -359,21 +390,21 @@ $ongoingJobs = array_filter($jobs, function($item) {
                                         <!-- Right Column - Clarification Table -->
                                         <div class="col-md-8">
                                             <h6 class="fw-semibold mb-2">Pending Clarification Requests:</h6>
-                                            <div class="clarification-table">
-                                                <div class="clarification-header">
-                                                    <div class="clarification-col">Request ID</div>
-                                                    <div class="clarification-col">Request</div>
-                                                    <div class="clarification-col">Response</div>
+                                            <div class="compact-clarification-table">
+                                                <div class="compact-clarification-header">
+                                                    <div class="compact-clarification-col">Request ID</div>
+                                                    <div class="compact-clarification-col">Request</div>
+                                                    <div class="compact-clarification-col">Response</div>
                                                 </div>
                                                 <?php foreach ($clarifications as $index => $clarification): ?>
-                                                <div class="clarification-row">
-                                                    <div class="clarification-col">
-                                                        <span class="badge bg-primary"><?= $clarification['clarification_id'] ?></span>
+                                                <div class="compact-clarification-row">
+                                                    <div class="compact-clarification-col">
+                                                        <span class="badge bg-primary compact-badge"><?= $clarification['clarification_id'] ?></span>
                                                     </div>
-                                                    <div class="clarification-col">
+                                                    <div class="compact-clarification-col">
                                                         <?= htmlspecialchars($clarification['clarification_request_comment']) ?>
                                                     </div>
-                                                    <div class="clarification-col">
+                                                    <div class="compact-clarification-col">
                                                         <?php if (!empty($clarification['clarification_resolved_comment'])): ?>
                                                             <span class="text-success"><?= htmlspecialchars($clarification['clarification_resolved_comment']) ?></span>
                                                         <?php else: ?>
@@ -386,21 +417,21 @@ $ongoingJobs = array_filter($jobs, function($item) {
                                         </div>
                                     </div>
                                 </div>
-                                <div class="card-footer bg-white border-top-0">
+                                <div class="card-footer bg-white border-top-0 pt-0">
                                     <div class="d-flex justify-content-between align-items-center">
                                         <!-- See More Details Button -->
-                                        <a href="jobdetails.php?jobID=<?= $jobID ?>" class="btn btn-info btn-sm">
-                                            <i class="fas fa-eye me-1"></i> See More Details
+                                        <a href="jobdetails.php?jobID=<?= $jobID ?>" class="btn btn-info btn-sm compact-action-btn">
+                                            <i class="fas fa-eye me-1"></i> Details
                                         </a>
                                         
-                                        <form method="post" action="../controllers/approveJobsController.php" class="d-flex gap-2">
+                                        <form method="post" action="../controllers/approveJobsController.php" class="d-flex gap-1">
                                             <input type="hidden" name="clarification_pending_id" value="<?= $clarifications[0]['clarification_id'] ?>">
                                             <input type="hidden" name="clarification_action" value="">
-                                            <button type="button" name="clarification_action_btn" value="1" class="btn btn-success btn-sm action-btn">
-                                                <i class="fas fa-check me-1"></i> Approve Resolution
+                                            <button type="button" name="clarification_action_btn" value="1" class="btn btn-success btn-sm compact-action-btn">
+                                                <i class="fas fa-check me-1"></i> Approve
                                             </button>
-                                            <button type="button" name="clarification_action_btn" value="3" class="btn btn-danger btn-sm action-btn">
-                                                <i class="fas fa-times me-1"></i> Reject Resolution
+                                            <button type="button" name="clarification_action_btn" value="3" class="btn btn-danger btn-sm compact-action-btn">
+                                                <i class="fas fa-times me-1"></i> Reject
                                             </button>
                                         </form>
                                     </div>
@@ -414,10 +445,10 @@ $ongoingJobs = array_filter($jobs, function($item) {
                 
                 <!-- Clarification Jobs Section -->
                 <?php if (!empty($jobsWithClarifications)): ?>
-                <div class="job-section">
-                    <h5 class="fw-bold mb-3 text-warning"><i class="fas fa-exclamation-circle me-2"></i>Jobs with Pending Clarifications</h5>
-                    <div class="alert alert-warning py-2 mb-3">
-                        <i class="fas fa-info-circle me-2"></i> These jobs have clarification requests that are waiting for supervisor-in-charge response. Jobs cannot proceed until clarifications are resolved.
+                <div class="compact-section">
+                    <h5 class="fw-bold mb-2 text-warning"><i class="fas fa-exclamation-circle me-1"></i>Jobs with Pending Clarifications</h5>
+                    <div class="alert alert-warning compact-alert mb-2">
+                        <i class="fas fa-info-circle me-1"></i> These jobs have clarification requests waiting for supervisor response.
                     </div>
                     <div class="row">
                         <?php 
@@ -443,24 +474,24 @@ $ongoingJobs = array_filter($jobs, function($item) {
                             $special_projects = $item['special_projects'];
                         ?>
                         <div class="col-md-12">
-                            <div class="card job-card border-warning">
+                            <div class="card compact-card border-warning">
                                 <div class="card-body">
                                     <div class="row">
                                         <!-- Left Column - Job Details -->
                                         <div class="col-md-4">
-                                            <div class="d-flex justify-content-between align-items-start mb-2">
-                                                <h5 class="card-title mb-0 fw-bold">Job #<?= htmlspecialchars($jobID) ?></h5>
-                                                <span class="badge bg-warning text-dark status-badge">Clarification Needed</span>
-                                            </div>
-                                            
-                                            <div class="job-details-compact">
-                                                <div class="detail-row">
-                                                    <span class="detail-label">Vessel:</span>
-                                                    <span class="detail-value"><?= htmlspecialchars($item['vessel_name'] ?? '-') ?></span>
+                                            <div class="compact-header">
+                                                <div class="d-flex justify-content-between align-items-start">
+                                                    <h5 class="compact-title mb-0">Job #<?= htmlspecialchars($jobID) ?></h5>
+                                                    <span class="badge bg-warning text-dark compact-badge">Clarification Needed</span>
                                                 </div>
-                                                <div class="detail-row">
-                                                    <span class="detail-label">Job Type:</span>
-                                                    <span class="detail-value"><?= htmlspecialchars($item['job_type'] ?? '-') ?></span>
+                                                
+                                                <div class="compact-detail-row">
+                                                    <span class="compact-detail-label">Vessel:</span>
+                                                    <span class="compact-detail-value"><?= htmlspecialchars($item['vessel_name'] ?? '-') ?></span>
+                                                </div>
+                                                <div class="compact-detail-row">
+                                                    <span class="compact-detail-label">Job Type:</span>
+                                                    <span class="compact-detail-value"><?= htmlspecialchars($item['job_type'] ?? '-') ?></span>
                                                 </div>
                                             </div>
                                         </div>
@@ -468,22 +499,22 @@ $ongoingJobs = array_filter($jobs, function($item) {
                                         <!-- Right Column - Clarification Table -->
                                         <div class="col-md-8">
                                             <h6 class="fw-semibold mb-2">Clarification Requests:</h6>
-                                            <div class="clarification-table">
-                                                <div class="clarification-header">
-                                                    <div class="clarification-col">Request ID</div>
-                                                    <div class="clarification-col">Request</div>
-                                                    <div class="clarification-col">Status</div>
+                                            <div class="compact-clarification-table">
+                                                <div class="compact-clarification-header">
+                                                    <div class="compact-clarification-col">Request ID</div>
+                                                    <div class="compact-clarification-col">Request</div>
+                                                    <div class="compact-clarification-col">Status</div>
                                                 </div>
                                                 <?php foreach ($clarifications as $index => $clarification): ?>
-                                                <div class="clarification-row">
-                                                    <div class="clarification-col">
-                                                        <span class="badge bg-warning text-dark"><?= $clarification['clarification_id'] ?></span>
+                                                <div class="compact-clarification-row">
+                                                    <div class="compact-clarification-col">
+                                                        <span class="badge bg-warning text-dark compact-badge"><?= $clarification['clarification_id'] ?></span>
                                                     </div>
-                                                    <div class="clarification-col">
+                                                    <div class="compact-clarification-col">
                                                         <?= htmlspecialchars($clarification['clarification_request_comment']) ?>
                                                     </div>
-                                                    <div class="clarification-col">
-                                                        <span class="badge bg-warning text-dark">Waiting for Supervisor-in-Charge Response</span>
+                                                    <div class="compact-clarification-col">
+                                                        <span class="badge bg-warning text-dark compact-badge">Waiting for Response</span>
                                                     </div>
                                                 </div>
                                                 <?php endforeach; ?>
@@ -493,10 +524,10 @@ $ongoingJobs = array_filter($jobs, function($item) {
                                 </div>
                                 
                                 <!-- See More Details Button -->
-                                <div class="card-footer bg-white border-top-0">
+                                <div class="card-footer bg-white border-top-0 pt-0">
                                     <div class="d-flex justify-content-start">
-                                        <a href="jobdetails.php?jobID=<?= $jobID ?>" class="btn btn-info btn-sm">
-                                            <i class="fas fa-eye me-1"></i> See More Details
+                                        <a href="jobdetails.php?jobID=<?= $jobID ?>" class="btn btn-info btn-sm compact-action-btn">
+                                            <i class="fas fa-eye me-1"></i> Details
                                         </a>
                                     </div>
                                 </div>
@@ -510,8 +541,8 @@ $ongoingJobs = array_filter($jobs, function($item) {
                 <!-- Main Job Approval Section -->
                 
                 <?php if (!empty($pendingJobs)): ?>
-                <div class="job-section">
-                    <h5 class="fw-bold mb-3"><i class="fas fa-tasks me-2"></i>Pending Job Approvals</h5>
+                <div class="compact-section">
+                    <h5 class="fw-bold mb-2"><i class="fas fa-tasks me-1"></i>Pending Job Approvals</h5>
                     <div class="row">
                         <?php foreach ($pendingJobs as $item): 
                             $job = $item['job'];
@@ -539,62 +570,64 @@ $ongoingJobs = array_filter($jobs, function($item) {
                             $trips = $item['trips'];
                         ?>
                         <div class="col-md-12">
-                            <div class="card job-card">
+                            <div class="card compact-card">
                                 <div class="card-body">
                                     <div class="row">
                                         <!-- Left Column - Job Details -->
-                                        <div class="col-md-5 border-end pe-3">
-                                            <div class="d-flex justify-content-between align-items-start mb-2">
-                                                <h5 class="card-title mb-0 fw-bold">Job #<?= htmlspecialchars($job['jobID']) ?></h5>
-                                                <?php if (empty($job['end_date'])): ?>
-                                                    <span class="badge bg-info status-badge">Ongoing</span>
-                                                <?php else: ?>
-                                                    <span class="badge bg-primary status-badge">Pending Approval</span>
+                                        <div class="col-md-5 border-end pe-2">
+                                            <div class="compact-header">
+                                                <div class="d-flex justify-content-between align-items-start">
+                                                    <h5 class="compact-title mb-0">Job #<?= htmlspecialchars($job['jobID']) ?></h5>
+                                                    <?php if (empty($job['end_date'])): ?>
+                                                        <span class="badge bg-info compact-badge">Ongoing</span>
+                                                    <?php else: ?>
+                                                        <span class="badge bg-primary compact-badge">Pending Approval</span>
+                                                    <?php endif; ?>
+                                                </div>
+                                                
+                                                <?php if (!empty($item['job_creator'])): ?>
+                                                <div class="compact-meta">
+                                                    <i class="fas fa-user-tie me-1"></i>
+                                                    Created by: <?= htmlspecialchars($item['job_creator']['fname'] . ' ' . $item['job_creator']['lname']) ?>
+                                                </div>
+                                                <?php endif; ?>
+                                                
+                                                <?php if ($job['comment']): ?>
+                                                <div class="mt-1">
+                                                    <div class="compact-meta">Note</div>
+                                                    <div class="compact-grid-value"><?= htmlspecialchars($job['comment']) ?></div>
+                                                </div>
                                                 <?php endif; ?>
                                             </div>
                                             
-                                            <?php if (!empty($item['job_creator'])): ?>
-                                            <div class="text-muted small mb-2">
-                                                <i class="fas fa-user-tie me-1"></i>
-                                                Created by: <?= htmlspecialchars($item['job_creator']['fname'] . ' ' . $item['job_creator']['lname']) ?>
-                                            </div>
-                                            <?php endif; ?>
-                                            
-                                            <?php if ($job['comment']): ?>
-                                            <div class="mb-2">
-                                                <small class="text-muted job-meta">Note</small>
-                                                <div class="small"><?= htmlspecialchars($job['comment']) ?></div>
-                                            </div>
-                                            <?php endif; ?>
-                                            
-                                            <div class="job-details-grid mt-2">
-                                                <div>
-                                                    <small class="text-muted job-meta">Vessel</small>
-                                                    <div class="fw-semibold"><?= htmlspecialchars($item['vessel_name'] ?? '-') ?></div>
+                                            <div class="compact-grid mt-2">
+                                                <div class="compact-grid-item">
+                                                    <div class="compact-grid-label">Vessel</div>
+                                                    <div class="compact-grid-value"><?= htmlspecialchars($item['vessel_name'] ?? '-') ?></div>
                                                 </div>
-                                                <div>
-                                                    <small class="text-muted job-meta">Job Type</small>
-                                                    <div class="fw-semibold"><?= htmlspecialchars($item['job_type'] ?? '-') ?></div>
+                                                <div class="compact-grid-item">
+                                                    <div class="compact-grid-label">Job Type</div>
+                                                    <div class="compact-grid-value"><?= htmlspecialchars($item['job_type'] ?? '-') ?></div>
                                                 </div>
-                                                <div>
-                                                    <small class="text-muted job-meta">Boat</small>
-                                                    <div class="fw-semibold"><?= htmlspecialchars($boat['boat_name'] ?? '-') ?></div>
+                                                <div class="compact-grid-item">
+                                                    <div class="compact-grid-label">Boat</div>
+                                                    <div class="compact-grid-value"><?= htmlspecialchars($boat['boat_name'] ?? '-') ?></div>
                                                 </div>
-                                                <div>
-                                                    <small class="text-muted job-meta">Port</small>
-                                                    <div class="fw-semibold"><?= htmlspecialchars($port['portname'] ?? '-') ?></div>
+                                                <div class="compact-grid-item">
+                                                    <div class="compact-grid-label">Port</div>
+                                                    <div class="compact-grid-value"><?= htmlspecialchars($port['portname'] ?? '-') ?></div>
                                                 </div>
                                             </div>
                                             
-                                            <div class="job-duration mt-2">
-                                                <div class="d-flex justify-content-between small">
+                                            <div class="compact-duration mt-1">
+                                                <div class="d-flex justify-content-between compact-duration-item">
                                                     <div>
-                                                        <small class="text-muted">Start</small>
-                                                        <div class="fw-semibold"><?= htmlspecialchars($job['start_date']) ?></div>
+                                                        <div class="compact-grid-label">Start</div>
+                                                        <div class="compact-grid-value"><?= htmlspecialchars($job['start_date']) ?></div>
                                                     </div>
                                                     <div class="text-end">
-                                                        <small class="text-muted">End</small>
-                                                        <div class="fw-semibold">
+                                                        <div class="compact-grid-label">End</div>
+                                                        <div class="compact-grid-value">
                                                             <?php if (!empty($job['end_date'])): ?>
                                                                 <?= htmlspecialchars($job['end_date']) ?>
                                                             <?php else: ?>
@@ -607,15 +640,15 @@ $ongoingJobs = array_filter($jobs, function($item) {
                                             
                                             <?php if ($special_projects): ?>
                                             <div class="mt-2">
-                                                <small class="text-muted job-meta">Special Projects</small>
+                                                <div class="compact-grid-label">Special Projects</div>
                                                 <div class="mt-1">
                                                     <?php foreach ($special_projects as $sp): ?>
-                                                    <div class="special-project-item">
-                                                        <div class="fw-semibold"><?= htmlspecialchars($sp['name'] ?? 'Special Project') ?></div>
+                                                    <div class="compact-project-item">
+                                                        <div class="compact-grid-value"><?= htmlspecialchars($sp['name'] ?? 'Special Project') ?></div>
                                                         <?php if (!empty($sp['evidence'])): ?>
                                                         <a href="../uploads/evidence/<?= htmlspecialchars($sp['evidence']) ?>" 
                                                            target="_blank" 
-                                                           class="evidence-link text-primary d-inline-block mt-1">
+                                                           class="compact-evidence-link text-primary d-inline-block mt-1">
                                                             <i class="fas fa-paperclip me-1"></i> Evidence
                                                         </a>
                                                         <?php endif; ?>
@@ -625,12 +658,12 @@ $ongoingJobs = array_filter($jobs, function($item) {
                                             </div>
                                             <?php endif; ?>
                                             
-                                            <div class="mt-3 d-flex gap-2">
-                                                <button type="button" class="btn btn-outline-primary btn-sm" data-bs-toggle="modal" data-bs-target="#specialProjectModal" data-jobid="<?= $job['jobID'] ?>">
+                                            <div class="mt-2 d-flex gap-1">
+                                                <button type="button" class="btn btn-outline-primary btn-sm compact-action-btn" data-bs-toggle="modal" data-bs-target="#specialProjectModal" data-jobid="<?= $job['jobID'] ?>">
                                                     <i class="fas fa-plus"></i> Add Project
                                                 </button>
                                                 <?php if (!empty($special_projects)): ?>
-                                                <button type="button" class="btn btn-outline-info btn-sm" data-bs-toggle="modal" data-bs-target="#viewSpecialProjectModal" data-sp='<?= json_encode($special_projects[0]) ?>'>
+                                                <button type="button" class="btn btn-outline-info btn-sm compact-action-btn" data-bs-toggle="modal" data-bs-target="#viewSpecialProjectModal" data-sp='<?= json_encode($special_projects[0]) ?>'>
                                                     <i class="fas fa-eye"></i> View Project
                                                 </button>
                                                 <?php endif; ?>
@@ -638,34 +671,34 @@ $ongoingJobs = array_filter($jobs, function($item) {
                                         </div>
                                         
                                         <!-- Right Column - Trips -->
-                                        <div class="col-md-7 ps-3">
-                                            <h6 class="section-title">Trips / Days</h6>
+                                        <div class="col-md-7 ps-2">
+                                            <h6 class="compact-section-title">Trips / Days</h6>
                                             
                                             <?php if (empty($item['trips'])): ?>
-                                            <div class="alert alert-warning py-2 small mb-0">
+                                            <div class="alert alert-warning compact-alert mb-0">
                                                 <i class="fas fa-exclamation-triangle me-1"></i> No days/trips added yet.
                                             </div>
                                             <?php else: ?>
                                                 <?php foreach ($item['trips'] as $tripItem): ?>
-                                                <div class="trip-card">
+                                                <div class="compact-trip-card">
                                                     <div class="d-flex justify-content-between align-items-start mb-1">
-                                                        <strong><?= htmlspecialchars($tripItem['trip']['trip_date']) ?></strong>
+                                                        <strong class="compact-grid-value"><?= htmlspecialchars($tripItem['trip']['trip_date']) ?></strong>
                                                         <?php if (isset($tripItem['attendance']['attendance_status'])): ?>
                                                             <?php
                                                                 $status = $tripItem['attendance']['attendance_status'];
                                                                 $statusText = $status == 1 ? 'Verified' : ($status == 3 ? 'Rejected' : 'Pending');
                                                                 $statusClass = $status == 1 ? 'bg-success text-white' : ($status == 3 ? 'bg-danger text-white' : 'bg-warning text-dark');
                                                             ?>
-                                                            <span class="badge <?= $statusClass ?> status-badge"><?= $statusText ?></span>
+                                                            <span class="badge <?= $statusClass ?> compact-badge"><?= $statusText ?></span>
                                                         <?php endif; ?>
                                                     </div>
                                                     
                                                     <?php if (!empty($tripItem['employees'])): ?>
-                                                    <div class="small mt-2">
-                                                        <div class="text-muted">Team Members:</div>
+                                                    <div class="compact-meta mt-1">
+                                                        <div>Team Members:</div>
                                                         <div class="mt-1">
                                                             <?php foreach ($tripItem['employees'] as $emp): ?>
-                                                            <span class="badge bg-light text-dark employee-badge">
+                                                            <span class="badge bg-light text-dark compact-employee-badge">
                                                                 <i class="fas fa-user me-1"></i>
                                                                 <?= htmlspecialchars($emp['fname'] . ' ' . $emp['lname']) ?>
                                                             </span>
@@ -694,35 +727,35 @@ $ongoingJobs = array_filter($jobs, function($item) {
                                 <div class="card-footer">
                                     <?php if (empty($job['end_date'])): ?>
                                         <!-- Ongoing Job - Buttons Disabled -->
-                                        <div class="d-flex justify-content-end gap-2">
-                                            <button type="button" class="btn btn-success btn-sm action-btn" disabled>
+                                        <div class="d-flex justify-content-end gap-1">
+                                            <button type="button" class="btn btn-success btn-sm compact-action-btn" disabled>
                                                 <i class="fas fa-check me-1"></i> Approve
                                             </button>
-                                            <button type="button" class="btn btn-warning btn-sm action-btn" disabled>
+                                            <button type="button" class="btn btn-warning btn-sm compact-action-btn" disabled>
                                                 <i class="fas fa-question me-1"></i> Clarify
                                             </button>
-                                            <button type="button" class="btn btn-danger btn-sm action-btn" disabled>
+                                            <button type="button" class="btn btn-danger btn-sm compact-action-btn" disabled>
                                                 <i class="fas fa-times me-1"></i> Reject
                                             </button>
                                         </div>
                                         <div class="text-center mt-2">
-                                            <span class="badge bg-info text-white">
+                                            <span class="badge bg-info text-white compact-badge">
                                                 <i class="fas fa-clock me-1"></i> Ongoing Job
                                             </span>
-                                            <small class="text-muted d-block mt-1">Job must be completed (end date added) before approval</small>
+                                            <small class="text-muted d-block mt-1">Job must be completed before approval</small>
                                         </div>
                                     <?php else: ?>
                                         <!-- Completed Job - Buttons Enabled -->
-                                        <form method="post" action="../controllers/approveJobsController.php" class="d-flex justify-content-end gap-2">
+                                        <form method="post" action="../controllers/approveJobsController.php" class="d-flex justify-content-end gap-1">
                                             <input type="hidden" name="job_attendanceID" value="<?= $firstAttendanceID ?>">
                                             <input type="hidden" name="action" value="">
-                                            <button type="button" name="action_btn" value="1" class="btn btn-success btn-sm action-btn">
+                                            <button type="button" name="action_btn" value="1" class="btn btn-success btn-sm compact-action-btn">
                                                 <i class="fas fa-check me-1"></i> Approve
                                             </button>
-                                            <button type="button" class="btn btn-warning btn-sm action-btn btn-clarify">
+                                            <button type="button" class="btn btn-warning btn-sm compact-action-btn btn-clarify">
                                                 <i class="fas fa-question me-1"></i> Clarify
                                             </button>
-                                            <button type="button" name="action_btn" value="3" class="btn btn-danger btn-sm action-btn">
+                                            <button type="button" name="action_btn" value="3" class="btn btn-danger btn-sm compact-action-btn">
                                                 <i class="fas fa-times me-1"></i> Reject
                                             </button>
                                         </form>
@@ -730,8 +763,8 @@ $ongoingJobs = array_filter($jobs, function($item) {
                                     
                                     <!-- See More Details Button -->
                                     <div class="d-flex justify-content-start mt-2">
-                                        <a href="jobdetails.php?jobID=<?= $job['jobID'] ?>" class="btn btn-info btn-sm">
-                                            <i class="fas fa-eye me-1"></i> See More Details
+                                        <a href="jobdetails.php?jobID=<?= $job['jobID'] ?>" class="btn btn-info btn-sm compact-action-btn">
+                                            <i class="fas fa-eye me-1"></i> Details
                                         </a>
                                     </div>
                                 </div>
@@ -742,21 +775,18 @@ $ongoingJobs = array_filter($jobs, function($item) {
                     </div>
                 </div>
                 <?php else: ?>
-                <div class="alert alert-success text-center py-4 my-4">
-                    <i class="fas fa-check-circle fa-3x mb-3 text-success"></i>
-                    <h4 class="fw-bold">No Pending Approvals</h4>
-                    <p class="text-muted">All jobs have been reviewed and approved, or are waiting for clarification resolution.</p>
+                <div class="alert alert-success text-center py-3 my-3">
+                    <i class="fas fa-check-circle fa-2x mb-2 text-success"></i>
+                    <h5 class="fw-bold">No Pending Approvals</h5>
+                    <p class="text-muted mb-0">All jobs have been reviewed and approved.</p>
                 </div>
                 <?php endif; ?>
                 
                 <!-- Ongoing Jobs Section -->
                 
                 <?php if (!empty($ongoingJobs)): ?>
-                <div class="job-section">
-                    <h5 class="fw-bold mb-3 text-info"><i class="fas fa-clock me-2"></i>Ongoing Jobs</h5>
-                    <!-- <div class="alert alert-info py-2 mb-3">
-                        <i class="fas fa-info-circle me-2"></i> These jobs are currently in progress and cannot be approved until completed.
-                    </div> -->
+                <div class="compact-section">
+                    <h5 class="fw-bold mb-2 text-info"><i class="fas fa-clock me-1"></i>Ongoing Jobs</h5>
                     <div class="row">
                         <?php foreach ($ongoingJobs as $item): 
                             $job = $item['job'];
@@ -769,58 +799,60 @@ $ongoingJobs = array_filter($jobs, function($item) {
                             $trips = $item['trips'];
                         ?>
                         <div class="col-md-12">
-                            <div class="card job-card border-info">
+                            <div class="card compact-card border-info">
                                 <div class="card-body">
                                     <div class="row">
                                         <!-- Left Column - Job Details -->
-                                        <div class="col-md-5 border-end pe-3">
-                                            <div class="d-flex justify-content-between align-items-start mb-2">
-                                                <h5 class="card-title mb-0 fw-bold">Job #<?= htmlspecialchars($job['jobID']) ?></h5>
-                                                <span class="badge bg-info status-badge">Ongoing</span>
+                                        <div class="col-md-5 border-end pe-2">
+                                            <div class="compact-header">
+                                                <div class="d-flex justify-content-between align-items-start">
+                                                    <h5 class="compact-title mb-0">Job #<?= htmlspecialchars($job['jobID']) ?></h5>
+                                                    <span class="badge bg-info compact-badge">Ongoing</span>
+                                                </div>
+                                                
+                                                <?php if (!empty($item['job_creator'])): ?>
+                                                <div class="compact-meta">
+                                                    <i class="fas fa-user-tie me-1"></i>
+                                                    Created by: <?= htmlspecialchars($item['job_creator']['fname'] . ' ' . $item['job_creator']['lname']) ?>
+                                                </div>
+                                                <?php endif; ?>
+                                                
+                                                <?php if ($job['comment']): ?>
+                                                <div class="mt-1">
+                                                    <div class="compact-meta">Note</div>
+                                                    <div class="compact-grid-value"><?= htmlspecialchars($job['comment']) ?></div>
+                                                </div>
+                                                <?php endif; ?>
                                             </div>
                                             
-                                            <?php if (!empty($item['job_creator'])): ?>
-                                            <div class="text-muted small mb-2">
-                                                <i class="fas fa-user-tie me-1"></i>
-                                                Created by: <?= htmlspecialchars($item['job_creator']['fname'] . ' ' . $item['job_creator']['lname']) ?>
-                                            </div>
-                                            <?php endif; ?>
-                                            
-                                            <?php if ($job['comment']): ?>
-                                            <div class="mb-2">
-                                                <small class="text-muted job-meta">Note</small>
-                                                <div class="small"><?= htmlspecialchars($job['comment']) ?></div>
-                                            </div>
-                                            <?php endif; ?>
-                                            
-                                            <div class="job-details-grid mt-2">
-                                                <div>
-                                                    <small class="text-muted job-meta">Vessel</small>
-                                                    <div class="fw-semibold"><?= htmlspecialchars($item['vessel_name'] ?? '-') ?></div>
+                                            <div class="compact-grid mt-2">
+                                                <div class="compact-grid-item">
+                                                    <div class="compact-grid-label">Vessel</div>
+                                                    <div class="compact-grid-value"><?= htmlspecialchars($item['vessel_name'] ?? '-') ?></div>
                                                 </div>
-                                                <div>
-                                                    <small class="text-muted job-meta">Job Type</small>
-                                                    <div class="fw-semibold"><?= htmlspecialchars($item['job_type'] ?? '-') ?></div>
+                                                <div class="compact-grid-item">
+                                                    <div class="compact-grid-label">Job Type</div>
+                                                    <div class="compact-grid-value"><?= htmlspecialchars($item['job_type'] ?? '-') ?></div>
                                                 </div>
-                                                <div>
-                                                    <small class="text-muted job-meta">Boat</small>
-                                                    <div class="fw-semibold"><?= htmlspecialchars($boat['boat_name'] ?? '-') ?></div>
+                                                <div class="compact-grid-item">
+                                                    <div class="compact-grid-label">Boat</div>
+                                                    <div class="compact-grid-value"><?= htmlspecialchars($boat['boat_name'] ?? '-') ?></div>
                                                 </div>
-                                                <div>
-                                                    <small class="text-muted job-meta">Port</small>
-                                                    <div class="fw-semibold"><?= htmlspecialchars($port['portname'] ?? '-') ?></div>
+                                                <div class="compact-grid-item">
+                                                    <div class="compact-grid-label">Port</div>
+                                                    <div class="compact-grid-value"><?= htmlspecialchars($port['portname'] ?? '-') ?></div>
                                                 </div>
                                             </div>
                                             
-                                            <div class="job-duration mt-2">
-                                                <div class="d-flex justify-content-between small">
+                                            <div class="compact-duration mt-1">
+                                                <div class="d-flex justify-content-between compact-duration-item">
                                                     <div>
-                                                        <small class="text-muted">Start</small>
-                                                        <div class="fw-semibold"><?= htmlspecialchars($job['start_date']) ?></div>
+                                                        <div class="compact-grid-label">Start</div>
+                                                        <div class="compact-grid-value"><?= htmlspecialchars($job['start_date']) ?></div>
                                                     </div>
                                                     <div class="text-end">
-                                                        <small class="text-muted">End</small>
-                                                        <div class="fw-semibold">
+                                                        <div class="compact-grid-label">End</div>
+                                                        <div class="compact-grid-value">
                                                             <span class="text-warning">Not closed</span>
                                                         </div>
                                                     </div>
@@ -829,15 +861,15 @@ $ongoingJobs = array_filter($jobs, function($item) {
                                             
                                             <?php if ($special_projects): ?>
                                             <div class="mt-2">
-                                                <small class="text-muted job-meta">Special Projects</small>
+                                                <div class="compact-grid-label">Special Projects</div>
                                                 <div class="mt-1">
                                                     <?php foreach ($special_projects as $sp): ?>
-                                                    <div class="special-project-item">
-                                                        <div class="fw-semibold"><?= htmlspecialchars($sp['name'] ?? 'Special Project') ?></div>
+                                                    <div class="compact-project-item">
+                                                        <div class="compact-grid-value"><?= htmlspecialchars($sp['name'] ?? 'Special Project') ?></div>
                                                         <?php if (!empty($sp['evidence'])): ?>
                                                         <a href="../uploads/evidence/<?= htmlspecialchars($sp['evidence']) ?>" 
                                                            target="_blank" 
-                                                           class="evidence-link text-primary d-inline-block mt-1">
+                                                           class="compact-evidence-link text-primary d-inline-block mt-1">
                                                             <i class="fas fa-paperclip me-1"></i> Evidence
                                                         </a>
                                                         <?php endif; ?>
@@ -849,34 +881,34 @@ $ongoingJobs = array_filter($jobs, function($item) {
                                         </div>
                                         
                                         <!-- Right Column - Trips -->
-                                        <div class="col-md-7 ps-3">
-                                            <h6 class="section-title">Trips / Days</h6>
+                                        <div class="col-md-7 ps-2">
+                                            <h6 class="compact-section-title">Trips / Days</h6>
                                             
                                             <?php if (empty($item['trips'])): ?>
-                                            <div class="alert alert-warning py-2 small mb-0">
+                                            <div class="alert alert-warning compact-alert mb-0">
                                                 <i class="fas fa-exclamation-triangle me-1"></i> No days/trips added yet.
                                             </div>
                                             <?php else: ?>
                                                 <?php foreach ($item['trips'] as $tripItem): ?>
-                                                <div class="trip-card">
+                                                <div class="compact-trip-card">
                                                     <div class="d-flex justify-content-between align-items-start mb-1">
-                                                        <strong><?= htmlspecialchars($tripItem['trip']['trip_date']) ?></strong>
+                                                        <strong class="compact-grid-value"><?= htmlspecialchars($tripItem['trip']['trip_date']) ?></strong>
                                                         <?php if (isset($tripItem['attendance']['attendance_status'])): ?>
                                                             <?php
                                                                 $status = $tripItem['attendance']['attendance_status'];
                                                                 $statusText = $status == 1 ? 'Verified' : ($status == 3 ? 'Rejected' : 'Pending');
                                                                 $statusClass = $status == 1 ? 'bg-success text-white' : ($status == 3 ? 'bg-danger text-white' : 'bg-warning text-dark');
                                                             ?>
-                                                            <span class="badge <?= $statusClass ?> status-badge"><?= $statusText ?></span>
+                                                            <span class="badge <?= $statusClass ?> compact-badge"><?= $statusText ?></span>
                                                         <?php endif; ?>
                                                     </div>
                                                     
                                                     <?php if (!empty($tripItem['employees'])): ?>
-                                                    <div class="small mt-2">
-                                                        <div class="text-muted">Team Members:</div>
+                                                    <div class="compact-meta mt-1">
+                                                        <div>Team Members:</div>
                                                         <div class="mt-1">
                                                             <?php foreach ($tripItem['employees'] as $emp): ?>
-                                                            <span class="badge bg-light text-dark employee-badge">
+                                                            <span class="badge bg-light text-dark compact-employee-badge">
                                                                 <i class="fas fa-user me-1"></i>
                                                                 <?= htmlspecialchars($emp['fname'] . ' ' . $emp['lname']) ?>
                                                             </span>
@@ -888,8 +920,8 @@ $ongoingJobs = array_filter($jobs, function($item) {
                                                 <?php endforeach; ?>
                                             <?php endif; ?>
                                                 <div class="d-flex justify-content-end mt-2">
-                                                <a href="jobdetails.php?jobID=<?= $job['jobID'] ?>" class="btn btn-info btn-sm">
-                                                    <i class="fas fa-eye me-1"></i> See More Details
+                                                <a href="jobdetails.php?jobID=<?= $job['jobID'] ?>" class="btn btn-info btn-sm compact-action-btn">
+                                                    <i class="fas fa-eye me-1"></i> Details
                                                 </a>
                                             </div>
                                         </div>
@@ -912,7 +944,7 @@ $ongoingJobs = array_filter($jobs, function($item) {
 </div>
 
 <!-- Clarification Modal -->
-<div class="modal fade" id="clarificationModal" tabindex="-1" aria-hidden="true">
+<div class="modal fade compact-modal" id="clarificationModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header py-2">
@@ -923,7 +955,7 @@ $ongoingJobs = array_filter($jobs, function($item) {
                 <div class="modal-body py-2">
                     <input type="hidden" name="job_attendanceID" id="modal_job_attendanceID">
                     <input type="hidden" name="action" value="2">
-                    <div class="mb-3">
+                    <div class="mb-2">
                         <label for="clarification_comment" class="form-label small">Clarification Request</label>
                         <textarea class="form-control form-control-sm" id="clarification_comment" name="clarification_comment" rows="3" required></textarea>
                     </div>
@@ -938,7 +970,7 @@ $ongoingJobs = array_filter($jobs, function($item) {
 </div>
 
 <!-- Special Project Modal -->
-<div class="modal fade" id="specialProjectModal" tabindex="-1" aria-labelledby="specialProjectModalLabel" aria-hidden="true">
+<div class="modal fade compact-modal" id="specialProjectModal" tabindex="-1" aria-labelledby="specialProjectModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <form id="specialProjectForm" method="POST" action="../controllers/addSpecialProjectController.php" enctype="multipart/form-data" class="compact-form">
@@ -983,7 +1015,7 @@ $ongoingJobs = array_filter($jobs, function($item) {
 </div>
 
 <!-- View/Edit Special Project Modal -->
-<div class="modal fade" id="viewSpecialProjectModal" tabindex="-1" aria-labelledby="viewSpecialProjectModalLabel" aria-hidden="true">
+<div class="modal fade compact-modal" id="viewSpecialProjectModal" tabindex="-1" aria-labelledby="viewSpecialProjectModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <form id="editSpecialProjectForm" method="POST" action="../controllers/updateSpecialProjectController.php" enctype="multipart/form-data" class="compact-form">
