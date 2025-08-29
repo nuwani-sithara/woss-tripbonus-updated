@@ -147,7 +147,7 @@ function getJobStatus(mysqli $conn, int $jobID, int $userID): array {
         SELECT approvalID 
         FROM clarifications 
         WHERE jobID = $jobID 
-          AND clarification_status = 2
+          AND clarification_status = 1
         LIMIT 1
     ");
     if ($pendingRes && $pendingRes->num_rows > 0) {
@@ -161,20 +161,28 @@ function getJobStatus(mysqli $conn, int $jobID, int $userID): array {
 
     // 🔹 Check rejected
     $rejRes = $conn->query("
-        SELECT approvalID 
+        SELECT approvalID, approval_stage
         FROM approvals 
         WHERE jobID = $jobID 
-          AND approval_status = 3
-          AND approval_stage = 'job_approval'
+        AND approval_status = 3
+        AND approval_stage IN ('job_approval', 'supervisor_in_charge_approval')
         LIMIT 1
     ");
+
     if ($rejRes && $rejRes->num_rows > 0) {
         $row = $rejRes->fetch_assoc();
+
+        // Map rejection stage to message
+        $status = ($row['approval_stage'] === 'job_approval')
+            ? "rejected by OM"
+            : "rejected by SIC";
+
         return [
-            "status" => "rejected",
+            "status" => $status,
             "approvalID" => (int)$row['approvalID']
         ];
     }
+
 
     // 🔹 Check approved → readonly
     $res = $conn->query("
@@ -182,7 +190,7 @@ function getJobStatus(mysqli $conn, int $jobID, int $userID): array {
         FROM approvals 
         WHERE jobID = $jobID 
           AND approval_status = 1 
-          AND approval_stage = 'job_approval'
+          AND approval_stage IN ('job_approval', 'supervisor_in_charge_approval')
         LIMIT 1
     ");
     if ($res && $res->num_rows > 0) {
