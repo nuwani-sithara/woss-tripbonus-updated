@@ -19,11 +19,11 @@ if (!$conn) {
     die("Database connection failed: " . mysqli_connect_error());
 }
 
-// Get the next job number
-$nextJobNumber = 1000; // Default starting number
-$maxJobQuery = mysqli_query($conn, "SELECT MAX(CAST(SUBSTRING_INDEX(SUBSTRING_INDEX(jobkey, '-', -1), ' ', 1) AS UNSIGNED)) as max_num FROM jobs WHERE jobkey IS NOT NULL AND jobkey != ''");
-if ($maxJobQuery && $maxJobResult = mysqli_fetch_assoc($maxJobQuery)) {
-    $nextJobNumber = $maxJobResult['max_num'] + 1;
+// Get the next job number from the sequence table
+$nextJobNumber = 1000; // Default fallback
+$sequenceQuery = mysqli_query($conn, "SELECT last_job_number + 1 as next_num FROM job_sequence WHERE id = 1");
+if ($sequenceQuery && $sequenceResult = mysqli_fetch_assoc($sequenceQuery)) {
+    $nextJobNumber = $sequenceResult['next_num'];
 }
 
 $vessel_result = mysqli_query($conn, "SELECT vesselID, vessel_name FROM vessels");
@@ -150,7 +150,7 @@ $jobType_result = mysqli_query($conn, "SELECT jobtypeID, type_name FROM jobtype"
             padding-top: 15px;
         }
         .page-header h3 {
-            margin-bottom: 1rem; /* adjust spacing */
+            margin-bottom: 1rem;
         }
     </style>
 </head>
@@ -193,7 +193,6 @@ $jobType_result = mysqli_query($conn, "SELECT jobtypeID, type_name FROM jobtype"
                     <div class="page-header">
                         <h3 class="fw-bold mb-2">Job Creation</h3>
                     </div>
-                                            <!-- <p class="text-muted mb-0">Create a new job with a unique identifier</p> -->
 
                     <div class="row">
                         <div class="col-md-12">
@@ -220,7 +219,6 @@ $jobType_result = mysqli_query($conn, "SELECT jobtypeID, type_name FROM jobtype"
                                                         <select class="form-control" id="jobType" name="jobTypeID" required>
                                                             <option value="">Select Job Type</option>
                                                             <?php 
-                                                            // Reset pointer for job type result
                                                             mysqli_data_seek($jobType_result, 0);
                                                             while ($jobType = mysqli_fetch_assoc($jobType_result)) { ?>
                                                                 <option value="<?php echo $jobType['jobtypeID']; ?>"><?php echo $jobType['type_name']; ?></option>
@@ -233,11 +231,9 @@ $jobType_result = mysqli_query($conn, "SELECT jobtypeID, type_name FROM jobtype"
                                             <div class="row">
                                                 <div class="col-md-6">
                                                     <div class="form-group">
-                                                        <label for="jobNumber" class="required-field">Job Number</label>
-                                                        <input type="text" class="form-control" id="jobNumber" name="jobNumber" required 
-                                                            value="<?php echo $nextJobNumber; ?>" readonly>
+                                                        <label for="jobNumberPreview">Job Number Preview</label>
+                                                        <input type="text" class="form-control" id="jobNumberPreview" value="<?php echo $nextJobNumber; ?>" readonly>
                                                         <div class="form-text">Job Key Preview: <span id="jobKeyPreview" class="job-key-preview">WOSS -<?php echo $nextJobNumber; ?> [boat name]</span></div>
-                                                        <input type="hidden" id="jobKey" name="jobKey" value="">
                                                     </div>
                                                 </div>
                                                 <div class="col-md-6">
@@ -260,7 +256,6 @@ $jobType_result = mysqli_query($conn, "SELECT jobtypeID, type_name FROM jobtype"
                                                         <select class="form-control" id="vesselName" name="vesselID" required>
                                                             <option value="">Select Vessel</option>
                                                             <?php 
-                                                            // Reset pointer for vessel result
                                                             mysqli_data_seek($vessel_result, 0);
                                                             while ($vessel = mysqli_fetch_assoc($vessel_result)) { ?>
                                                                 <option value="<?php echo $vessel['vesselID']; ?>"><?php echo $vessel['vessel_name']; ?></option>
@@ -274,7 +269,6 @@ $jobType_result = mysqli_query($conn, "SELECT jobtypeID, type_name FROM jobtype"
                                                         <select class="form-control" id="boatName" name="boatID" required>
                                                             <option value="">Select Boat</option>
                                                             <?php 
-                                                            // Reset pointer for boat result
                                                             mysqli_data_seek($boat_result, 0);
                                                             while ($boat = mysqli_fetch_assoc($boat_result)) { ?>
                                                                 <option value="<?php echo $boat['boatID']; ?>"><?php echo $boat['boat_name']; ?></option>
@@ -296,7 +290,6 @@ $jobType_result = mysqli_query($conn, "SELECT jobtypeID, type_name FROM jobtype"
                                                         <select class="form-control" id="portName" name="portID" required>
                                                             <option value="">Select Port</option>
                                                             <?php 
-                                                            // Reset pointer for port result
                                                             mysqli_data_seek($port_result, 0);
                                                             while ($port = mysqli_fetch_assoc($port_result)) { ?>
                                                                 <option value="<?php echo $port['portID']; ?>"><?php echo $port['portname']; ?></option>
@@ -336,23 +329,19 @@ $jobType_result = mysqli_query($conn, "SELECT jobtypeID, type_name FROM jobtype"
             $('#jobType').change(function() {
                 var selectedJobType = $(this).val();
                 
-                if (selectedJobType == '6') { // General job type
-                    // Hide vessel, boat, and port fields
+                if (selectedJobType == '6') {
                     $('#vesselNameGroup').hide();
                     $('#boatNameGroup').hide();
                     $('#portNameGroup').hide();
                     
-                    // Remove required attribute from hidden fields
                     $('#vesselName').removeAttr('required');
                     $('#boatName').removeAttr('required');
                     $('#portName').removeAttr('required');
                 } else {
-                    // Show vessel, boat, and port fields
                     $('#vesselNameGroup').show();
                     $('#boatNameGroup').show();
                     $('#portNameGroup').show();
                     
-                    // Add required attribute back to visible fields
                     $('#vesselName').attr('required', 'required');
                     $('#boatName').attr('required', 'required');
                     $('#portName').attr('required', 'required');
@@ -362,20 +351,16 @@ $jobType_result = mysqli_query($conn, "SELECT jobtypeID, type_name FROM jobtype"
             });
 
             function updateJobKeyPreview() {
-                var jobNumber = $('#jobNumber').val();
+                var jobNumber = $('#jobNumberPreview').val();
                 var boatName = $('#boatName option:selected').text();
                 var selectedJobType = $('#jobType').val();
                 
                 if (selectedJobType == '6') {
-                    // For General job type, don't include boat name
                     $('#jobKeyPreview').text('WOSS -' + jobNumber);
-                    $('#jobKey').val('WOSS -' + jobNumber);
                 } else if (jobNumber && boatName && boatName !== 'Select Boat') {
                     $('#jobKeyPreview').text('WOSS -' + jobNumber + ' ' + boatName);
-                    $('#jobKey').val('WOSS -' + jobNumber + ' ' + boatName);
                 } else {
                     $('#jobKeyPreview').text('WOSS -' + jobNumber + ' [boat name]');
-                    $('#jobKey').val('');
                 }
             }
             
