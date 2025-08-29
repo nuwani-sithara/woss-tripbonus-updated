@@ -59,8 +59,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $conn->begin_transaction();
     try {
         // Insert into users
-        $stmt = $conn->prepare('INSERT INTO users (email, eno, username, password, fname, lname, roleID, rateID, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, NOW())');
-        $stmt->bind_param('sssssis', $email, $eno, $username, $password, $fname, $lname, $roleID, $rateID);
+        $stmt = $conn->prepare('INSERT INTO users (email, eno, username, password, fname, lname, roleID, rateID, created_at) 
+                        VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW())');
+
+        $stmt->bind_param('ssssssii', $email, $eno, $username, $password, $fname, $lname, $roleID, $rateID);
+
         if (!$stmt->execute()) {
             throw new Exception('Error creating user: ' . $stmt->error);
         }
