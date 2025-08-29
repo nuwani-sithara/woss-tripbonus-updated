@@ -28,13 +28,41 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['create_job'])) {
         // Start transaction
         $conn->begin_transaction();
 
-        // Insert job (trigger will automatically generate jobNumber and jobkey)
-        // REMOVED boatID from this insert since it's not in the jobs table
+        // Insert job (trigger will automatically generate jobNumber)
         $jobInsert = $conn->prepare("INSERT INTO jobs (start_date, comment, jobtypeID, vesselID, jobCreatedBy) VALUES (?, ?, ?, ?, ?)");
         $jobInsert->bind_param("ssiii", $startDate, $comment, $jobTypeID, $vesselID, $userID);
         $jobInsert->execute();
         $jobID = $conn->insert_id;
         $jobInsert->close();
+
+        // Get the generated job number and boat name to create jobkey
+        $jobResult = $conn->query("SELECT jobNumber FROM jobs WHERE jobID = $jobID");
+        $jobData = $jobResult->fetch_assoc();
+        $jobNumber = $jobData['jobNumber'];
+        
+        $boatName = '';
+        if ($boatID !== null) {
+            $boatResult = $conn->query("SELECT boat_name FROM boats WHERE boatID = $boatID");
+            if ($boatResult->num_rows > 0) {
+                $boatData = $boatResult->fetch_assoc();
+                $boatName = $boatData['boat_name'];
+            }
+        }
+
+        // Generate job key with boat name
+        if ($jobTypeID == 6) {
+            $jobKey = "WOSS -" . $jobNumber;
+        } else if (!empty($boatName)) {
+            $jobKey = "WOSS -" . $jobNumber . " " . $boatName;
+        } else {
+            $jobKey = "WOSS -" . $jobNumber . " [Unknown Boat]";
+        }
+
+        // Update the job with the generated jobkey
+        $updateJobKey = $conn->prepare("UPDATE jobs SET jobkey = ? WHERE jobID = ?");
+        $updateJobKey->bind_param("si", $jobKey, $jobID);
+        $updateJobKey->execute();
+        $updateJobKey->close();
 
         // Automatically create the first trip
         $tripInsert = $conn->prepare("INSERT INTO trips (jobID, trip_date) VALUES (?, ?)");
