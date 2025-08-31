@@ -351,5 +351,8 @@ window.exportTable = function(type) {
 
     <!-- Kaiadmin JS -->
     <script src="../assets/js/kaiadmin.min.js"></script>
+
+    <script src="../assets/js/setting-demo2.js"></script>
+
 </body>
 </html>

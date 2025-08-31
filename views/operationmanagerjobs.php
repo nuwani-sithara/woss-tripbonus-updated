@@ -252,6 +252,9 @@ if (!isset($jobs)) $jobs = [];
 
     <!-- Atlantis JS -->
     <script src="../assets/js/atlantis.min.js"></script>
+
+    <script src="../assets/js/setting-demo2.js"></script>
+
   <script>
   $(document).ready(function () {
     $('#jobs-table').DataTable({ pageLength: 10 });
