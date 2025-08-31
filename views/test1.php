@@ -1,273 +1,318 @@
-<script>
-$(document).ready(function () {
-    // Global variables
-    var selectedDivers = [];
-    var diverDataMap = {};
-    var diverTable = null;
-    var checkedInDivers = [];
-    
-    // Initialize page
-    function initializePage() {
-        console.log('Initializing page...');
-        loadVessels();
-        loadReportPreparationEmployees();
-        loadStandbyAssignments();
-        loadDiverTable();
+<?php
+include '../config/dbConnect.php';
+session_start();
+require_once '../vendor/autoload.php';
+if (!isset($_SESSION['userID']) || !isset($_SESSION['roleID']) || $_SESSION['roleID'] != 5) {
+    http_response_code(403);
+    exit('Access denied');
+}
+$userID = $_SESSION['userID'];
+
+function getApprovals($conn, $month, $year) {
+    $roles = [
+        'accountant' => ['table' => 'paymentverify', 'by' => 'paymentVerifyBy', 'date' => 'paymentVerifyDate'],
+        'director' => ['table' => 'directorverify', 'by' => 'directorVerifyBy', 'date' => 'directorVerifyDate'],
+    ];
+    $result = [];
+    foreach ($roles as $role => $info) {
+        $sql = "SELECT {$info['by']} as userID, {$info['date']} as date, u.fname, u.lname FROM {$info['table']} v JOIN users u ON v.{$info['by']} = u.userID WHERE v.month = ? AND v.year = ? LIMIT 1";
+        $stmt = $conn->prepare($sql);
+        $stmt->bind_param('si', $month, $year);
+        $stmt->execute();
+        $res = $stmt->get_result();
+        $result[$role] = $res->fetch_assoc();
+        $stmt->close();
     }
-    
-    // Update selected divers list
-    function updateSelectedDiversList() {
-        var list = $('#selected-divers-list');
-        var countElement = $('#selected-count');
-        
-        list.empty();
-        
-        if (selectedDivers.length === 0) {
-            list.append('<li class="text-muted">No divers selected yet</li>');
-        } else {
-            selectedDivers.forEach(function(userID) {
-                var diver = diverDataMap[userID];
-                if (diver) {
-                    list.append(`<li>${diver.fname} ${diver.lname} <span class="text-muted small">(${diver.username})</span></li>`);
-                }
-            });
+    return $result;
+}
+
+function getPayments($conn, $month, $year) {
+    $sql = "SELECT p.*, u.fname, u.lname, e.empID FROM payments p LEFT JOIN employees e ON p.empID = e.empID LEFT JOIN users u ON e.userID = u.userID WHERE p.month = ? AND p.year = ?";
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param('si', $month, $year);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $rows = [];
+    while ($row = $result->fetch_assoc()) {
+        $rows[] = $row;
+    }
+    $stmt->close();
+    return $rows;
+}
+
+function getTotals($conn, $month, $year) {
+    $sql = "SELECT SUM(jobAllowance) as totalJobAllowance, SUM(jobMealAllowance) as totalJobMealAllowance, SUM(standbyAttendanceAllowance) as totalStandbyAttendanceAllowance, SUM(standbyMealAllowance) as totalStandbyMealAllowance, SUM(reportPreparationAllowance) as totalReportPreparationAllowance, SUM(totalDivingAllowance) as totalDivingAllowance FROM payments WHERE month = ? AND year = ?";
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param('si', $month, $year);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $totals = $result->fetch_assoc();
+    $stmt->close();
+    return $totals;
+}
+
+function allApproved($approvals) {
+    return $approvals['accountant'] && $approvals['director'];
+}
+
+function logAction($conn, $userID, $action_type, $month, $year, $file_type = null, $recipients = null, $details = null) {
+    $sql = "INSERT INTO payroll_action_log (userID, action_type, month, year, file_type, recipients, details) VALUES (?, ?, ?, ?, ?, ?, ?)";
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param('ississs', $userID, $action_type, $month, $year, $file_type, $recipients, $details);
+    $stmt->execute();
+    $stmt->close();
+}
+
+$month = isset($_GET['month']) ? $_GET['month'] : date('F');
+$year = isset($_GET['year']) ? intval($_GET['year']) : date('Y');
+
+if ($_SERVER['REQUEST_METHOD'] === 'GET' && !isset($_GET['action'])) {
+    $approvals = getApprovals($conn, $month, $year);
+    $payments = getPayments($conn, $month, $year);
+    $totals = getTotals($conn, $month, $year);
+    echo json_encode([
+        'approvals' => $approvals,
+        'payments' => $payments,
+        'totals' => $totals,
+        'allApproved' => allApproved($approvals)
+    ]);
+    exit();
+}
+
+if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['action']) && $_GET['action'] === 'export') {
+    $fileType = isset($_GET['fileType']) ? $_GET['fileType'] : 'csv';
+    $approvals = getApprovals($conn, $month, $year);
+    if (!allApproved($approvals)) {
+        http_response_code(403);
+        echo "Not all approvals present.";
+        exit();
+    }
+    $payments = getPayments($conn, $month, $year);
+    $totals = getTotals($conn, $month, $year);
+    $filename = "Payroll_Report_{$month}_{$year}." . $fileType;
+    $headers = ['Employee', 'Job Allowance', 'Job Meal', 'Standby Attendance', 'Standby Meal', 'Report Prep', 'Total Diving', 'Date'];
+    $rows = [];
+    foreach ($payments as $row) {
+        $rows[] = [
+            $row['fname'] . ' ' . $row['lname'],
+            $row['jobAllowance'],
+            $row['jobMealAllowance'],
+            $row['standbyAttendanceAllowance'],
+            $row['standbyMealAllowance'],
+            $row['reportPreparationAllowance'],
+            $row['totalDivingAllowance'],
+            $row['date_time']
+        ];
+    }
+    // Export logic (CSV, XLSX, DOCX, PDF) - similar to paymentVerificationController.php
+    if ($fileType === 'csv') {
+        header('Content-Type: text/csv');
+        header("Content-Disposition: attachment; filename=\"$filename\"");
+        $output = fopen('php://output', 'w');
+        fputcsv($output, $headers);
+        foreach ($rows as $row) {
+            fputcsv($output, $row);
         }
-        
-        countElement.text(selectedDivers.length);
-        
-        // Enable button only if divers are selected AND vessel is selected
-        var vesselSelected = $('#vessel-select').val() !== '';
-        var buttonEnabled = selectedDivers.length > 0 && vesselSelected;
-        $('#mark-standby-btn').prop('disabled', !buttonEnabled);
-    }
-
-    // Load standby assignments
-    function loadStandbyAssignments() {
-        $.ajax({
-            url: '../controllers/getStandbyAssignmentsController.php',
-            method: 'GET',
-            dataType: 'json',
-            success: function(response) {
-                console.log('Standby assignments response:', response);
-                displayStandbyAssignments(response);
-                
-                // Update checked-in divers list
-                if (response.success && response.data) {
-                    // Properly extract userIDs from the response
-                    checkedInDivers = response.data.map(assignment => {
-                        return assignment.userID ? assignment.userID.toString() : null;
-                    }).filter(id => id !== null);
-                    
-                    console.log('Checked-in divers:', checkedInDivers);
-                    
-                    // After updating checked-in list, refresh the diver table
-                    refreshDiverTable();
-                }
-            },
-            error: function(xhr, status, error) {
-                console.error('Error loading standby assignments:', error);
-                displayStandbyAssignments({ success: false, data: [], error: 'Failed to load assignments' });
-            }
-        });
-    }
-
-    // Refresh diver table based on current checked-in status
-    function refreshDiverTable() {
-        var diversToShow = [];
-        
-        // Filter out checked-in divers
-        Object.values(diverDataMap).forEach(function(diver) {
-            if (checkedInDivers.indexOf(diver.userID.toString()) === -1) {
-                diversToShow.push(diver);
-            }
-        });
-        
-        console.log('Refreshing diver table with:', diversToShow);
-        
-        var tbody = $('#diver-table-body');
-        tbody.empty();
-        
-        diversToShow.forEach(function(diver) {
-            var row = `<tr>
-                <td><input type="checkbox" class="diver-checkbox" value="${diver.userID}"></td>
-                <td>${diver.fname} ${diver.lname}</td>
-                <td>${diver.username}</td>
-                <td>${diver.email}</td>
-                <td>${new Date(diver.created_at).toLocaleDateString()}</td>
-                <td>${diver.userID}</td>
-            </tr>`;
-            tbody.append(row);
-        });
-        
-        // Reinitialize DataTable if needed
-        if (diverTable) {
-            diverTable.destroy();
+        // Add totals row
+        $totalsRow = [
+            'Monthly Total',
+            '', '', '', '', '',
+            number_format($totals['totalDivingAllowance'], 2),
+            ''
+        ];
+        fputcsv($output, $totalsRow);
+        fclose($output);
+        logAction($conn, $userID, 'export', $month, $year, $fileType, null, 'Payroll export');
+        exit();
+    } elseif ($fileType === 'xlsx') {
+        if (!class_exists('PhpOffice\\PhpSpreadsheet\\Spreadsheet')) {
+            header('Content-Type: text/plain');
+            echo "PhpSpreadsheet library not installed.";
+            exit();
         }
-        
-        diverTable = $('#multi-filter-select').DataTable({
-            pageLength: 5,
-            initComplete: function() {
-                this.api()
-                    .columns()
-                    .every(function() {
-                        var column = this;
-                        var select = $(
-                            '<select class="form-select"><option value=""></option></select>'
-                        )
-                            .appendTo($(column.footer()).empty())
-                            .on("change", function() {
-                                var val = $.fn.dataTable.util.escapeRegex($(this).val());
-                                column
-                                    .search(val ? "^" + val + "$" : "", true, false)
-                                    .draw();
-                            });
-                        column
-                            .data()
-                            .unique()
-                            .sort()
-                            .each(function(d, j) {
-                                select.append(
-                                    '<option value="' + d + '">' + d + "</option>"
-                                );
-                            });
-                    });
-            }
-        });
-    }
-
-    // Checkout employee
-    function checkoutEmployee(EAID, employeeName, userID) {
-        swal({
-            title: "Confirm Checkout",
-            text: `Are you sure you want to checkout ${employeeName}?`,
-            icon: "warning",
-            buttons: {
-                cancel: {
-                    text: "Cancel",
-                    value: null,
-                    visible: true,
-                    className: "btn btn-secondary",
-                    closeModal: true,
-                },
-                confirm: {
-                    text: "Yes, Checkout",
-                    value: true,
-                    visible: true,
-                    className: "btn btn-warning",
-                    closeModal: true
-                }
-            }
-        }).then((willCheckout) => {
-            if (willCheckout) {
-                swal({
-                    title: "Processing Checkout",
-                    text: "Please wait...",
-                    icon: "info",
-                    buttons: false,
-                    closeOnClickOutside: false,
-                    closeOnEsc: false
-                });
-                
-                $.ajax({
-                    url: '../controllers/checkoutStandbyController.php',
-                    method: 'POST',
-                    data: { EAID: EAID },
-                    dataType: 'json',
-                    success: function(response) {
-                        if (response.success) {
-                            swal({
-                                title: "Checkout Successful!",
-                                text: `${employeeName} has been checked out successfully.`,
-                                icon: "success",
-                                buttons: {
-                                    confirm: {
-                                        className: "btn btn-success"
-                                    }
-                                }
-                            }).then(() => {
-                                // Remove from checked-in list
-                                checkedInDivers = checkedInDivers.filter(id => id !== userID.toString());
-                                console.log('After checkout - checkedInDivers:', checkedInDivers);
-                                
-                                // Refresh both tables
-                                refreshDiverTable();
-                                loadStandbyAssignments();
-                            });
-                        } else {
-                            swal("Error", response.error || 'Unknown error occurred', "error");
-                        }
-                    },
-                    error: function(xhr, status, error) {
-                        swal("Server Error", "An error occurred during checkout.", "error");
-                    }
-                });
-            }
-        });
-    }
-
-    // Mark divers as standby
-    function markDiversStandby() {
-        if (selectedDivers.length === 0) {
-            swal("Selection Required", "Please select at least one diver", "warning");
-            return;
+        $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+        $sheet->fromArray($headers, NULL, 'A1');
+        $sheet->fromArray($rows, NULL, 'A2');
+        // Add totals row
+        $totalsRow = [
+            'Monthly Total', '', '', '', '', '',
+            number_format($totals['totalDivingAllowance'], 2), ''
+        ];
+        $sheet->fromArray([$totalsRow], NULL, 'A' . (count($rows) + 2));
+        $writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet);
+        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        header("Content-Disposition: attachment; filename=\"$filename\"");
+        $writer->save('php://output');
+        logAction($conn, $userID, 'export', $month, $year, $fileType, null, 'Payroll export');
+        exit();
+    } elseif ($fileType === 'docx') {
+        if (!class_exists('PhpOffice\\PhpWord\\PhpWord')) {
+            header('Content-Type: text/plain');
+            echo "PhpWord library not installed.";
+            exit();
         }
-
-        var vesselID = $('#vessel-select').val();
-        if (!vesselID) {
-            swal("Vessel Selection Required", "Please select a vessel", "warning");
-            return;
+        $phpWord = new \PhpOffice\PhpWord\PhpWord();
+        $section = $phpWord->addSection();
+        $table = $section->addTable();
+        $table->addRow();
+        foreach ($headers as $header) {
+            $table->addCell(2000)->addText($header);
         }
-        
-        $.ajax({
-            url: '../controllers/markStandbyAttendanceController.php',
-            method: 'POST',
-            data: { 
-                userIDs: JSON.stringify(selectedDivers),
-                vesselID: vesselID
-            },
-            dataType: 'json',
-            success: function(response) {
-                if (response.success) {
-                    sessionStorage.setItem('lastStandbyAttendanceID', response.standbyAttendanceID);
-                    
-                    if (response.eaidMap) {
-                        sessionStorage.setItem('eaidMap', JSON.stringify(response.eaidMap));
-                    }
-                    
-                    swal("Success!", "Attendance recorded successfully!", "success");
-                    
-                    // Add to checked-in list (ensure we're adding strings)
-                    selectedDivers.forEach(userID => {
-                        if (checkedInDivers.indexOf(userID.toString()) === -1) {
-                            checkedInDivers.push(userID.toString());
-                        }
-                    });
-                    console.log('After check-in - checkedInDivers:', checkedInDivers);
-                    
-                    // Refresh both tables
-                    refreshDiverTable();
-                    loadStandbyAssignments();
-                    
-                    // Clear selection
-                    selectedDivers = [];
-                    $('#vessel-select').val('');
-                    updateSelectedDiversList();
-                    
-                    // Enable report preparation
-                    $('#report-preparation-select').prop('disabled', false);
-                } else {
-                    swal("Error", response.error || 'Unknown error', "error");
-                }
-            },
-            error: function(xhr, status, error) {
-                swal("Server Error", "Server error occurred.", "error");
+        foreach ($rows as $row) {
+            $table->addRow();
+            foreach ($row as $cell) {
+                $table->addCell(2000)->addText($cell);
             }
-        });
+        }
+        // Add totals row
+        $table->addRow();
+        $totalsRow = [
+            'Monthly Total', '', '', '', '', '',
+            number_format($totals['totalDivingAllowance'], 2), ''
+        ];
+        foreach ($totalsRow as $cell) {
+            $table->addCell(2000)->addText($cell);
+        }
+        $writer = \PhpOffice\PhpWord\IOFactory::createWriter($phpWord, 'Word2007');
+        header('Content-Type: application/vnd.openxmlformats-officedocument.wordprocessingml.document');
+        header("Content-Disposition: attachment; filename=\"$filename\"");
+        $writer->save('php://output');
+        logAction($conn, $userID, 'export', $month, $year, $fileType, null, 'Payroll export');
+        exit();
+    } elseif ($fileType === 'pdf') {
+        if (!class_exists('TCPDF')) {
+            header('Content-Type: text/plain');
+            echo "TCPDF library not installed.";
+            exit();
+        }
+        $pdf = new \TCPDF();
+        $pdf->AddPage();
+        $html = '<h2>Payroll Report - ' . htmlspecialchars($month) . ' ' . htmlspecialchars($year) . '</h2>';
+        $html .= '<table border="1" cellpadding="4"><thead><tr>';
+        foreach ($headers as $header) {
+            $html .= '<th>' . htmlspecialchars($header) . '</th>';
+        }
+        $html .= '</tr></thead><tbody>';
+        foreach ($rows as $row) {
+            $html .= '<tr>';
+            foreach ($row as $cell) {
+                $html .= '<td>' . htmlspecialchars($cell) . '</td>';
+            }
+            $html .= '</tr>';
+        }
+        // Add totals row
+        $totalsRow = [
+            'Monthly Total', '', '', '', '', '',
+            number_format($totals['totalDivingAllowance'], 2), ''
+        ];
+        $html .= '<tr style="font-weight:bold;background:#e9ecef;">';
+        foreach ($totalsRow as $cell) {
+            $html .= '<td>' . htmlspecialchars($cell) . '</td>';
+        }
+        $html .= '</tr>';
+        $html .= '</tbody></table>';
+        $pdf->writeHTML($html, true, false, true, false, '');
+        $pdf->Output($filename, 'D');
+        logAction($conn, $userID, 'export', $month, $year, $fileType, null, 'Payroll export');
+        exit();
+    } else {
+        header('Content-Type: text/plain');
+        echo "Invalid file type.";
+        exit();
     }
+}
 
-    // Rest of your code remains the same...
-    // (Event handlers, other functions, etc.)
-    
-    // Initialize the page
-    initializePage();
-});
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'email') {
+    $approvals = getApprovals($conn, $month, $year);
+    if (!allApproved($approvals)) {
+        http_response_code(403);
+        echo "Not all approvals present.";
+        exit();
+    }
+    $payments = getPayments($conn, $month, $year);
+    $totals = getTotals($conn, $month, $year);
+    // Email logic using PHPMailer
+    $recipients = 'sajiths@mclarens.lk, mark@worldsubsea.lk, anton@worldsubsea.lk, lahiru@mclarens.lk';
+    $to = 'lahiru@mclarens.lk';
+    $cc = ['sajiths@mclarens.lk', 'mark@worldsubsea.lk', 'anton@worldsubsea.lk'];
+    $subject = "Payroll Report for $month $year";
+    $headers = ['Employee', 'Job Allowance', 'Job Meal', 'Standby Attendance', 'Standby Meal', 'Report Prep', 'Total Diving', 'Date & Time'];
+    $rows = [];
+    foreach ($payments as $row) {
+        $rows[] = [
+            $row['fname'] . ' ' . $row['lname'],
+            $row['jobAllowance'],
+            $row['jobMealAllowance'],
+            $row['standbyAttendanceAllowance'],
+            $row['standbyMealAllowance'],
+            $row['reportPreparationAllowance'],
+            $row['totalDivingAllowance'],
+            $row['date_time']
+        ];
+    }
+    $totalsRow = [
+        'Monthly Total', '', '', '', '', '',
+        number_format($totals['totalDivingAllowance'], 2), ''
+    ];
+    // Build HTML table for email body
+    $html = '<h2>Payroll Report - ' . htmlspecialchars($month) . ' ' . htmlspecialchars($year) . '</h2>';
+    $html .= '<table border="1" cellpadding="4" cellspacing="0" style="border-collapse:collapse;width:100%;font-family:sans-serif;font-size:14px;">';
+    $html .= '<thead><tr style="background:#f8f9fa;">';
+    foreach ($headers as $header) {
+        $html .= '<th>' . htmlspecialchars($header) . '</th>';
+    }
+    $html .= '</tr></thead><tbody>';
+    foreach ($rows as $row) {
+        $html .= '<tr>';
+        foreach ($row as $cell) {
+            $html .= '<td>' . htmlspecialchars($cell) . '</td>';
+        }
+        $html .= '</tr>';
+    }
+    $html .= '<tr style="font-weight:bold;background:#e9ecef;">';
+    foreach ($totalsRow as $cell) {
+        $html .= '<td>' . htmlspecialchars($cell) . '</td>';
+    }
+    $html .= '</tr>';
+    $html .= '</tbody></table>';
+    $html .= '<br><p>This is an automated payroll report generated by the WOSS Trip Bonus System.</p>';
+    // Prepare CSV attachment
+    $csvData = fopen('php://temp', 'r+');
+    fputcsv($csvData, $headers);
+    foreach ($rows as $row) {
+        fputcsv($csvData, $row);
+    }
+    fputcsv($csvData, $totalsRow);
+    rewind($csvData);
+    $csvString = stream_get_contents($csvData);
+    fclose($csvData);
+    // Send email using PHPMailer
+    $mail = new PHPMailer\PHPMailer\PHPMailer(true);
+    try {
+        $mail->isSMTP();
+        $mail->Host = 'smtp.office365.com'; // Change as needed
+        $mail->SMTPAuth = true;
+        $mail->Username = 'systems@mclarens.lk'; // Change to your SMTP username
+        $mail->Password = 'Com38518'; // Change to your SMTP password or app password
+        $mail->SMTPSecure = PHPMailer\PHPMailer\PHPMailer::ENCRYPTION_STARTTLS;
+        $mail->Port = 587;
+        $mail->setFrom('subseaops@worldsubsea.lk', 'SubseaOps');
+        $mail->addAddress($to);
+        foreach ($cc as $ccEmail) {
+            $mail->addCC($ccEmail);
+        }
+        $mail->isHTML(true);
+        $mail->Subject = $subject;
+        $mail->Body = $html;
+        $mail->addStringAttachment($csvString, "Payroll_Report_{$month}_{$year}.csv", 'base64', 'text/csv');
+        $mail->send();
+        echo 'success';
+    } catch (Exception $e) {
+        http_response_code(500);
+        echo 'Mailer Error: ' . $mail->ErrorInfo;
+    }
+    logAction($conn, $userID, 'email', $month, $year, null, $recipients, 'Payroll email sent');
+    exit();
+}
+echo 'Invalid request'; 

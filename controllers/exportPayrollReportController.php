@@ -90,6 +90,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['action']) && $_GET['act
     $payments = getPayments($conn, $month, $year);
     $totals = getTotals($conn, $month, $year);
     $filename = "Payroll_Report_{$month}_{$year}." . $fileType;
+    
+    // Prepare data for export
     $headers = ['Employee', 'Job Allowance', 'Job Meal', 'Standby Attendance', 'Standby Meal', 'Report Prep', 'Total Diving', 'Date'];
     $rows = [];
     foreach ($payments as $row) {
@@ -104,11 +106,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['action']) && $_GET['act
             $row['date_time']
         ];
     }
-    // Export logic (CSV, XLSX, DOCX, PDF) - similar to paymentVerificationController.php
+    
+    // Logo path
+    $logoPath = '../assets/img/app-logo1.png';
+    
+    // Export logic (CSV, XLSX, DOCX, PDF)
     if ($fileType === 'csv') {
         header('Content-Type: text/csv');
         header("Content-Disposition: attachment; filename=\"$filename\"");
         $output = fopen('php://output', 'w');
+        fputcsv($output, ['Payroll Report - ' . $month . ' ' . $year]);
+        fputcsv($output, []);
         fputcsv($output, $headers);
         foreach ($rows as $row) {
             fputcsv($output, $row);
@@ -116,10 +124,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['action']) && $_GET['act
         // Add totals row
         $totalsRow = [
             'Monthly Total',
-            '', '', '', '', '',
+            number_format($totals['totalJobAllowance'], 2),
+            number_format($totals['totalJobMealAllowance'], 2),
+            number_format($totals['totalStandbyAttendanceAllowance'], 2),
+            number_format($totals['totalStandbyMealAllowance'], 2),
+            number_format($totals['totalReportPreparationAllowance'], 2),
             number_format($totals['totalDivingAllowance'], 2),
             ''
         ];
+        fputcsv($output, []);
         fputcsv($output, $totalsRow);
         fclose($output);
         logAction($conn, $userID, 'export', $month, $year, $fileType, null, 'Payroll export');
@@ -130,16 +143,46 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['action']) && $_GET['act
             echo "PhpSpreadsheet library not installed.";
             exit();
         }
+        
         $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
         $sheet = $spreadsheet->getActiveSheet();
-        $sheet->fromArray($headers, NULL, 'A1');
-        $sheet->fromArray($rows, NULL, 'A2');
+        
+        // Add title
+        $sheet->setCellValue('A1', 'Payroll Report - ' . $month . ' ' . $year);
+        $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(16);
+        $sheet->mergeCells('A1:H1');
+        $sheet->getStyle('A1')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+        
+        // Add empty row
+        $sheet->setCellValue('A2', '');
+        
+        // Add headers
+        $sheet->fromArray($headers, NULL, 'A3');
+        $sheet->getStyle('A3:H3')->getFont()->setBold(true);
+        
+        // Add data
+        $sheet->fromArray($rows, NULL, 'A4');
+        
         // Add totals row
         $totalsRow = [
-            'Monthly Total', '', '', '', '', '',
-            number_format($totals['totalDivingAllowance'], 2), ''
+            'Monthly Total',
+            number_format($totals['totalJobAllowance'], 2),
+            number_format($totals['totalJobMealAllowance'], 2),
+            number_format($totals['totalStandbyAttendanceAllowance'], 2),
+            number_format($totals['totalStandbyMealAllowance'], 2),
+            number_format($totals['totalReportPreparationAllowance'], 2),
+            number_format($totals['totalDivingAllowance'], 2),
+            ''
         ];
-        $sheet->fromArray([$totalsRow], NULL, 'A' . (count($rows) + 2));
+        $lastRow = count($rows) + 4;
+        $sheet->fromArray([$totalsRow], NULL, 'A' . $lastRow);
+        $sheet->getStyle('A' . $lastRow . ':H' . $lastRow)->getFont()->setBold(true);
+        
+        // Auto size columns
+        foreach(range('A','H') as $columnID) {
+            $sheet->getColumnDimension($columnID)->setAutoSize(true);
+        }
+        
         $writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet);
         header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
         header("Content-Disposition: attachment; filename=\"$filename\"");
@@ -152,28 +195,47 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['action']) && $_GET['act
             echo "PhpWord library not installed.";
             exit();
         }
+        
         $phpWord = new \PhpOffice\PhpWord\PhpWord();
         $section = $phpWord->addSection();
+        
+        // Add title
+        $section->addText('Payroll Report - ' . $month . ' ' . $year, ['bold' => true, 'size' => 16], ['alignment' => 'center']);
+        $section->addTextBreak(1);
+        
+        // Create table
         $table = $section->addTable();
+        
+        // Add headers
         $table->addRow();
         foreach ($headers as $header) {
-            $table->addCell(2000)->addText($header);
+            $table->addCell(2000)->addText($header, ['bold' => true]);
         }
+        
+        // Add data rows
         foreach ($rows as $row) {
             $table->addRow();
             foreach ($row as $cell) {
                 $table->addCell(2000)->addText($cell);
             }
         }
+        
         // Add totals row
         $table->addRow();
         $totalsRow = [
-            'Monthly Total', '', '', '', '', '',
-            number_format($totals['totalDivingAllowance'], 2), ''
+            'Monthly Total',
+            number_format($totals['totalJobAllowance'], 2),
+            number_format($totals['totalJobMealAllowance'], 2),
+            number_format($totals['totalStandbyAttendanceAllowance'], 2),
+            number_format($totals['totalStandbyMealAllowance'], 2),
+            number_format($totals['totalReportPreparationAllowance'], 2),
+            number_format($totals['totalDivingAllowance'], 2),
+            ''
         ];
         foreach ($totalsRow as $cell) {
-            $table->addCell(2000)->addText($cell);
+            $table->addCell(2000)->addText($cell, ['bold' => true]);
         }
+        
         $writer = \PhpOffice\PhpWord\IOFactory::createWriter($phpWord, 'Word2007');
         header('Content-Type: application/vnd.openxmlformats-officedocument.wordprocessingml.document');
         header("Content-Disposition: attachment; filename=\"$filename\"");
@@ -186,14 +248,45 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['action']) && $_GET['act
             echo "TCPDF library not installed.";
             exit();
         }
-        $pdf = new \TCPDF();
+        
+        $pdf = new \TCPDF('L', PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
+        $pdf->SetCreator('SubseaOps');
+        $pdf->SetAuthor('SubseaOps');
+        $pdf->SetTitle('Payroll Report - ' . $month . ' ' . $year);
+        $pdf->SetHeaderData('', 0, 'Payroll Report', $month . ' ' . $year);
+        $pdf->setHeaderFont(Array(PDF_FONT_NAME_MAIN, '', PDF_FONT_SIZE_MAIN));
+        $pdf->setFooterFont(Array(PDF_FONT_NAME_DATA, '', PDF_FONT_SIZE_DATA));
+        $pdf->SetDefaultMonospacedFont(PDF_FONT_MONOSPACED);
+        $pdf->SetMargins(PDF_MARGIN_LEFT, PDF_MARGIN_TOP, PDF_MARGIN_RIGHT);
+        $pdf->SetHeaderMargin(PDF_MARGIN_HEADER);
+        $pdf->SetFooterMargin(PDF_MARGIN_FOOTER);
+        $pdf->SetAutoPageBreak(TRUE, PDF_MARGIN_BOTTOM);
+        $pdf->SetFont('helvetica', '', 10);
         $pdf->AddPage();
-        $html = '<h2>Payroll Report - ' . htmlspecialchars($month) . ' ' . htmlspecialchars($year) . '</h2>';
-        $html .= '<table border="1" cellpadding="4"><thead><tr>';
+        
+        // Add logo if available
+        if (file_exists($logoPath)) {
+            $pdf->Image($logoPath, 10, 10, 20, 0, '', '', 'T', false, 300, '', false, false, 0, false, false, false);
+        }
+        
+        // Add title
+        $pdf->SetY(30);
+        $pdf->SetFont('helvetica', 'B', 16);
+        $pdf->Cell(0, 10, 'Payroll Report - ' . $month . ' ' . $year, 0, 1, 'C');
+        $pdf->SetFont('helvetica', '', 10);
+        $pdf->Ln(5);
+        
+        // Create table
+        $html = '<table border="1" cellpadding="4">';
+        
+        // Add headers
+        $html .= '<thead><tr style="background-color:#f8f9fa;font-weight:bold;">';
         foreach ($headers as $header) {
             $html .= '<th>' . htmlspecialchars($header) . '</th>';
         }
         $html .= '</tr></thead><tbody>';
+        
+        // Add data rows
         foreach ($rows as $row) {
             $html .= '<tr>';
             foreach ($row as $cell) {
@@ -201,17 +294,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['action']) && $_GET['act
             }
             $html .= '</tr>';
         }
+        
         // Add totals row
+        $html .= '<tr style="font-weight:bold;background-color:#e9ecef;">';
         $totalsRow = [
-            'Monthly Total', '', '', '', '', '',
-            number_format($totals['totalDivingAllowance'], 2), ''
+            'Monthly Total',
+            number_format($totals['totalJobAllowance'], 2),
+            number_format($totals['totalJobMealAllowance'], 2),
+            number_format($totals['totalStandbyAttendanceAllowance'], 2),
+            number_format($totals['totalStandbyMealAllowance'], 2),
+            number_format($totals['totalReportPreparationAllowance'], 2),
+            number_format($totals['totalDivingAllowance'], 2),
+            ''
         ];
-        $html .= '<tr style="font-weight:bold;background:#e9ecef;">';
         foreach ($totalsRow as $cell) {
             $html .= '<td>' . htmlspecialchars($cell) . '</td>';
         }
         $html .= '</tr>';
         $html .= '</tbody></table>';
+        
         $pdf->writeHTML($html, true, false, true, false, '');
         $pdf->Output($filename, 'D');
         logAction($conn, $userID, 'export', $month, $year, $fileType, null, 'Payroll export');
@@ -252,8 +353,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
         ];
     }
     $totalsRow = [
-        'Monthly Total', '', '', '', '', '',
-        number_format($totals['totalDivingAllowance'], 2), ''
+        'Monthly Total',
+        number_format($totals['totalJobAllowance'], 2),
+        number_format($totals['totalJobMealAllowance'], 2),
+        number_format($totals['totalStandbyAttendanceAllowance'], 2),
+        number_format($totals['totalStandbyMealAllowance'], 2),
+        number_format($totals['totalReportPreparationAllowance'], 2),
+        number_format($totals['totalDivingAllowance'], 2),
+        ''
     ];
     // Build HTML table for email body
     $html = '<h2>Payroll Report - ' . htmlspecialchars($month) . ' ' . htmlspecialchars($year) . '</h2>';
@@ -279,10 +386,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     $html .= '<br><p>This is an automated payroll report generated by the WOSS Trip Bonus System.</p>';
     // Prepare CSV attachment
     $csvData = fopen('php://temp', 'r+');
+    fputcsv($csvData, ['Payroll Report - ' . $month . ' ' . $year]);
+    fputcsv($csvData, []);
     fputcsv($csvData, $headers);
     foreach ($rows as $row) {
         fputcsv($csvData, $row);
     }
+    fputcsv($csvData, []);
     fputcsv($csvData, $totalsRow);
     rewind($csvData);
     $csvString = stream_get_contents($csvData);
@@ -297,7 +407,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
         $mail->Password = 'Com38518'; // Change to your SMTP password or app password
         $mail->SMTPSecure = PHPMailer\PHPMailer\PHPMailer::ENCRYPTION_STARTTLS;
         $mail->Port = 587;
-        $mail->setFrom('tripbonus@worldsubsea.lk', 'WOSS Payroll System');
+        $mail->setFrom('subseaops@worldsubsea.lk', 'SubseaOps');
         $mail->addAddress($to);
         foreach ($cc as $ccEmail) {
             $mail->addCC($ccEmail);
@@ -315,4 +425,4 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     logAction($conn, $userID, 'email', $month, $year, null, $recipients, 'Payroll email sent');
     exit();
 }
-echo 'Invalid request'; 
+echo 'Invalid request';
