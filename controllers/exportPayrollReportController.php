@@ -233,9 +233,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     $payments = getPayments($conn, $month, $year);
     $totals = getTotals($conn, $month, $year);
     // Email logic using PHPMailer
-    $recipients = 'lahiru@mclarens.lk, nuwanisithara.com@gmail.com, devindi@mclarens.lk';
+    $recipients = 'sajiths@mclarens.lk, mark@worldsubsea.lk, anton@worldsubsea.lk, lahiru@mclarens.lk';
     $to = 'lahiru@mclarens.lk';
-    $cc = ['nuwanisithara.com@gmail.com', 'devindi@mclarens.lk'];
+    $cc = ['sajiths@mclarens.lk', 'mark@worldsubsea.lk', 'anton@worldsubsea.lk'];
     $subject = "Payroll Report for $month $year";
     $headers = ['Employee', 'Job Allowance', 'Job Meal', 'Standby Attendance', 'Standby Meal', 'Report Prep', 'Total Diving', 'Date & Time'];
     $rows = [];
