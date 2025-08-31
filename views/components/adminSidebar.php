@@ -76,12 +76,12 @@ $settings_active = in_array($current_page, $settings_pages);
           </a>
         </li>
         <li class="nav-item dropdown <?php if($settings_active || $current_page == "systemusers.php" || $current_page == "employees.php") echo 'active'; ?>">
-          <a data-toggle="collapse" href="#settingsDropdown" aria-expanded="<?php echo $settings_active ? 'true' : 'false'; ?>" class="dropdown-toggle">
-            <i class="fas fa-cogs"></i>
-            <p>Settings</p>
-            <span class="caret"></span>
-          </a>
-          <div class="collapse<?php if($settings_active) echo ' show'; ?>" id="settingsDropdown">
+        <a data-toggle="collapse" href="javascript:void(0);" aria-expanded="<?php echo $settings_active ? 'true' : 'false'; ?>" class="dropdown-toggle" onclick="$('#settingsDropdown').collapse('toggle');">
+          <i class="fas fa-cogs"></i>
+          <p>Settings</p>
+          <span class="caret"></span>
+        </a>
+        <div class="collapse<?php if($settings_active) echo ' show'; ?>" id="settingsDropdown">
             <ul class="nav nav-collapse">
               <li class="nav-item <?php if($current_page == 'usermanage.php' || $current_page == "systemusers.php" || $current_page == "employees.php") echo 'active'; ?>">
                 <a href="../views/usermanage.php">
