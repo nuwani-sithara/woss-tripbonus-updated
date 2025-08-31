@@ -195,84 +195,32 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['action']) && $_GET['act
             echo "PhpWord library not installed.";
             exit();
         }
-        
-        // Create new PHPWord object
         $phpWord = new \PhpOffice\PhpWord\PhpWord();
-        
-        // Set document properties
-        $phpWord->getDocInfo()->setCreator('SubseaOps')
-            ->setCompany('World Subsea')
-            ->setTitle('Payroll Report - ' . $month . ' ' . $year);
-        
-        // Add a section
         $section = $phpWord->addSection();
-        
-        // Add title
-        $section->addText('Payroll Report - ' . $month . ' ' . $year, 
-            array('bold' => true, 'size' => 16), 
-            array('alignment' => 'center')
-        );
-        $section->addTextBreak(1);
-        
-        // Create table style
-        $tableStyle = array(
-            'borderSize' => 6,
-            'borderColor' => '999999',
-            'cellMargin' => 50,
-            'alignment' => 'center'
-        );
-        $phpWord->addTableStyle('PayrollTable', $tableStyle);
-        
-        // Create table
-        $table = $section->addTable('PayrollTable');
-        
-        // Add header row
+        $table = $section->addTable();
         $table->addRow();
         foreach ($headers as $header) {
-            $table->addCell(2000)->addText($header, array('bold' => true), array('alignment' => 'center'));
+            $table->addCell(2000)->addText($header);
         }
-        
-        // Add data rows
         foreach ($rows as $row) {
             $table->addRow();
             foreach ($row as $cell) {
-                $table->addCell(2000)->addText($cell, null, array('alignment' => 'center'));
+                $table->addCell(2000)->addText($cell);
             }
         }
-        
         // Add totals row
         $table->addRow();
         $totalsRow = [
-            'Monthly Total',
-            number_format($totals['totalJobAllowance'], 2),
-            number_format($totals['totalJobMealAllowance'], 2),
-            number_format($totals['totalStandbyAttendanceAllowance'], 2),
-            number_format($totals['totalStandbyMealAllowance'], 2),
-            number_format($totals['totalReportPreparationAllowance'], 2),
-            number_format($totals['totalDivingAllowance'], 2),
-            ''
+            'Monthly Total', '', '', '', '', '',
+            number_format($totals['totalDivingAllowance'], 2), ''
         ];
         foreach ($totalsRow as $cell) {
-            $table->addCell(2000)->addText($cell, array('bold' => true), array('alignment' => 'center'));
+            $table->addCell(2000)->addText($cell);
         }
-        
-        // Save file
-        $tempFile = tempnam(sys_get_temp_dir(), 'phpword') . '.docx';
-        $objWriter = \PhpOffice\PhpWord\IOFactory::createWriter($phpWord, 'Word2007');
-        $objWriter->save($tempFile);
-        
-        // Send headers and file
+        $writer = \PhpOffice\PhpWord\IOFactory::createWriter($phpWord, 'Word2007');
         header('Content-Type: application/vnd.openxmlformats-officedocument.wordprocessingml.document');
-        header('Content-Disposition: attachment; filename="' . $filename . '"');
-        header('Content-Length: ' . filesize($tempFile));
-        header('Cache-Control: max-age=0');
-        
-        // Read and output file
-        readfile($tempFile);
-        
-        // Clean up
-        unlink($tempFile);
-        
+        header("Content-Disposition: attachment; filename=\"$filename\"");
+        $writer->save('php://output');
         logAction($conn, $userID, 'export', $month, $year, $fileType, null, 'Payroll export');
         exit();
     } elseif ($fileType === 'pdf') {
