@@ -126,7 +126,7 @@ $(document).ready(function() {
 
 function loadPaymentsTable(month, year) {
     $.ajax({
-        url: '../controllers/getMonthlyPaymentsController.php',
+        url: '../controllers/getmonthlypaymentscontroller.php',
         type: 'GET',
         data: {
             month: month,
