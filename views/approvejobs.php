@@ -70,33 +70,55 @@ $ongoingJobs = array_filter($jobs, function($item) {
     <link rel="stylesheet" href="../assets/css/plugins.min.css" />
     <link rel="stylesheet" href="../assets/css/kaiadmin.min.css" />
     <style>
-      .job-card {
+      .compact-card {
         border-radius: 6px;
         margin-bottom: 1rem;
         transition: all 0.2s ease;
         border-left: 3px solid #dee2e6;
       }
-      .job-card:hover {
+      .compact-card:hover {
         transform: translateY(-1px);
         box-shadow: 0 3px 8px rgba(0,0,0,0.08);
       }
-      .job-header {
+      .job-card-pending {
+        border-left-color: #0d6efd;
+      }
+      .job-card-rejected {
+        border-left-color: #dc3545;
+      }
+      .job-card-clarification {
+        border-left-color: #ffc107;
+      }
+      .job-card-resolved {
+        border-left-color: #198754;
+      }
+      .compact-card-header {
         padding: 0.75rem 1rem;
         background-color: #f8fafc;
         border-bottom: 1px solid rgba(0,0,0,0.05);
+      }
+      .compact-card-body {
+        padding: 1rem;
+      }
+      .compact-card-footer {
+        padding: 0.75rem 1rem;
+        background-color: #f8fafc;
+        border-top: 1px solid rgba(0,0,0,0.05);
       }
       .job-meta {
         font-size: 0.8rem;
         color: #6c757d;
       }
+      .job-value {
+        font-size: 0.85rem;
+        font-weight: 500;
+        color: #212529;
+      }
       .employee-badge {
         font-size: 0.75rem;
-        margin-right: 0.25rem;
-        margin-bottom: 0.25rem;
+        margin-right: 0.2rem;
+        margin-bottom: 0.2rem;
         padding: 0.2rem 0.4rem;
-      }
-      .evidence-link {
-        font-size: 0.8rem;
       }
       .action-btn {
         min-width: 80px;
@@ -107,29 +129,11 @@ $ongoingJobs = array_filter($jobs, function($item) {
         font-size: 0.7rem;
         padding: 0.25rem 0.5rem;
       }
-      .job-duration {
-        background-color: #f8f9fa;
-        border-radius: 4px;
-        padding: 0.4rem 0.6rem;
-        font-size: 0.8rem;
-      }
-      .special-project-item {
-        border-left: 2px solid #0d6efd;
-        padding-left: 0.4rem;
-        margin-bottom: 0.4rem;
-        font-size: 0.85rem;
-      }
-      .card-body {
-        padding: 1rem;
-      }
-      .card-footer {
-        padding: 0.75rem 1rem;
-        background-color: #f8fafc;
-        border-top: 1px solid rgba(0,0,0,0.05);
-      }
-      .info-icon {
-        width: 18px;
-        margin-right: 0.4rem;
+      .job-details-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+        gap: 0.75rem;
+        margin-bottom: 0.75rem;
       }
       .trip-card {
         border: 1px solid #e9ecef;
@@ -142,78 +146,70 @@ $ongoingJobs = array_filter($jobs, function($item) {
       .trip-card:hover {
         background-color: #f8f9fa;
       }
-      .compact-form .form-control {
-        padding: 0.3rem 0.6rem;
-        font-size: 0.85rem;
-      }
-      .compact-form label {
+      .special-project-item {
+        border-left: 2px solid #0d6efd;
+        padding-left: 0.4rem;
+        margin-bottom: 0.4rem;
         font-size: 0.8rem;
-        margin-bottom: 0.2rem;
-      }
-      .job-details-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-        gap: 0.8rem;
-      }
-      .job-section {
-        margin-bottom: 1.2rem;
-      }
-      .section-title {
-        font-size: 0.85rem;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-        color: #6c757d;
-        margin-bottom: 0.6rem;
-        border-bottom: 1px solid #dee2e6;
-        padding-bottom: 0.4rem;
-      }
-      .clarification-item {
-        background-color: #f8f9fa;
-        border-radius: 4px;
-        padding: 0.6rem;
-        margin-bottom: 0.6rem;
-      }
-      .clarification-item:last-child {
-        margin-bottom: 0;
-      }
-      .clarification-inline {
-        display: flex;
-        align-items: center;
-        gap: 0.8rem;
-        flex-wrap: wrap;
-      }
-      .clarification-detail {
-        display: flex;
-        align-items: center;
-        gap: 0.4rem;
-        min-width: 0;
-        flex: 1;
-      }
-      .clarification-label {
-        font-weight: 600;
-        color: #6c757d;
-        font-size: 0.8rem;
-        min-width: 70px;
-      }
-      .clarification-value {
-        font-size: 0.85rem;
-        color: #495057;
-        flex: 1;
-        min-width: 0;
       }
       .clarification-request {
         background-color: #e3f2fd;
-        border-left: 3px solid #2196f3;
+        border-left: 2px solid #2196f3;
         padding: 0.4rem;
         border-radius: 3px;
         margin-top: 0.4rem;
+        font-size: 0.85rem;
       }
       .clarification-response {
         background-color: #e8f5e8;
-        border-left: 3px solid #4caf50;
+        border-left: 2px solid #4caf50;
         padding: 0.4rem;
         border-radius: 3px;
         margin-top: 0.4rem;
+        font-size: 0.85rem;
+      }
+      .section-title {
+        font-size: 0.8rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        color: #6c757d;
+        margin-bottom: 0.5rem;
+        border-bottom: 1px solid #dee2e6;
+        padding-bottom: 0.4rem;
+      }
+      .compact-detail-row {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 0.3rem;
+        font-size: 0.8rem;
+      }
+      .detail-label {
+        color: #6c757d;
+      }
+      .detail-value {
+        font-weight: 500;
+      }
+      .two-column-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+      }
+      .three-column-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        gap: 0.75rem;
+      }
+      .btn-xs {
+        padding: 0.2rem 0.4rem;
+        font-size: 0.75rem;
+        border-radius: 0.2rem;
+      }
+      .data-placeholder {
+        color: #6c757d;
+        font-style: italic;
+      }
+      .evidence-link {
+        font-size: 0.8rem;
       }
       .clarification-table {
         border: 1px solid #dee2e6;
@@ -251,35 +247,6 @@ $ongoingJobs = array_filter($jobs, function($item) {
       }
       .clarification-col:not(:last-child) {
         border-right: 1px solid #dee2e6;
-      }
-      .job-details-compact {
-        margin-top: 0.4rem;
-      }
-      .detail-row {
-        display: flex;
-        align-items: center;
-        margin-bottom: 0.4rem;
-        font-size: 0.85rem;
-      }
-      .detail-label {
-        font-weight: 600;
-        color: #6c757d;
-        min-width: 70px;
-        margin-right: 0.4rem;
-      }
-      .detail-value {
-        color: #495057;
-        font-weight: 500;
-      }
-      .compact-card-content {
-        padding: 0.75rem;
-      }
-      .compact-section {
-        margin-bottom: 0.75rem;
-      }
-      .compact-divider {
-        margin: 0.5rem 0;
-        border-top: 1px solid #e9ecef;
       }
     </style>
 </head>
@@ -347,31 +314,41 @@ $ongoingJobs = array_filter($jobs, function($item) {
                             $special_projects = $item['special_projects'];
                         ?>
                         <div class="col-md-12">
-                            <div class="card job-card border-primary">
-                                <div class="card-body compact-card-content">
-                                    <div class="row">
+                            <div class="card compact-card job-card-pending">
+                                <div class="compact-card-header d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h6 class="mb-0 fw-bold">Job #<?= htmlspecialchars($jobID) ?></h6>
+                                        <span class="badge bg-primary text-white status-badge">Response Pending</span>
+                                    </div>
+                                </div>
+                                
+                                <div class="compact-card-body">
+                                    <div class="two-column-grid">
                                         <!-- Left Column - Job Details -->
-                                        <div class="col-md-4">
-                                            <div class="d-flex justify-content-between align-items-start mb-2">
-                                                <h5 class="card-title mb-0 fw-bold">Job #<?= htmlspecialchars($jobID) ?></h5>
-                                                <span class="badge bg-primary text-white status-badge">Response Pending</span>
-                                            </div>
-                                            
-                                            <div class="job-details-compact">
-                                                <div class="detail-row">
-                                                    <span class="detail-label">Vessel:</span>
-                                                    <span class="detail-value"><?= htmlspecialchars($item['vessel_name'] ?? '-') ?></span>
+                                        <div>
+                                            <div class="job-details-grid">
+                                                <div>
+                                                    <small class="text-muted job-meta">Vessel</small>
+                                                    <div class="job-value"><?= htmlspecialchars($item['vessel_name'] ?? '-') ?></div>
                                                 </div>
-                                                <div class="detail-row">
-                                                    <span class="detail-label">Job Type:</span>
-                                                    <span class="detail-value"><?= htmlspecialchars($item['job_type'] ?? '-') ?></span>
+                                                <div>
+                                                    <small class="text-muted job-meta">Job Type</small>
+                                                    <div class="job-value"><?= htmlspecialchars($item['job_type'] ?? '-') ?></div>
+                                                </div>
+                                                <div>
+                                                    <small class="text-muted job-meta">Boat</small>
+                                                    <div class="job-value"><?= htmlspecialchars($boat['boat_name'] ?? '-') ?></div>
+                                                </div>
+                                                <div>
+                                                    <small class="text-muted job-meta">Port</small>
+                                                    <div class="job-value"><?= htmlspecialchars($port['portname'] ?? '-') ?></div>
                                                 </div>
                                             </div>
                                         </div>
                                         
                                         <!-- Right Column - Clarification Table -->
-                                        <div class="col-md-8">
-                                            <h6 class="fw-semibold mb-2">Pending Clarification Requests:</h6>
+                                        <div>
+                                            <h6 class="section-title">Pending Clarification Requests</h6>
                                             <div class="clarification-table">
                                                 <div class="clarification-header">
                                                     <div class="clarification-col">Request ID</div>
@@ -399,7 +376,7 @@ $ongoingJobs = array_filter($jobs, function($item) {
                                         </div>
                                     </div>
                                 </div>
-                                <div class="card-footer bg-white border-top-0">
+                                <div class="compact-card-footer">
                                     <div class="d-flex justify-content-between align-items-center">
                                         <!-- See More Details Button -->
                                         <a href="jobdetails.php?jobID=<?= $jobID ?>" class="btn btn-info btn-sm">
@@ -456,31 +433,41 @@ $ongoingJobs = array_filter($jobs, function($item) {
                             $special_projects = $item['special_projects'];
                         ?>
                         <div class="col-md-12">
-                            <div class="card job-card border-warning">
-                                <div class="card-body compact-card-content">
-                                    <div class="row">
+                            <div class="card compact-card job-card-clarification">
+                                <div class="compact-card-header d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h6 class="mb-0 fw-bold">Job #<?= htmlspecialchars($jobID) ?></h6>
+                                        <span class="badge bg-warning text-dark status-badge">Clarification Needed</span>
+                                    </div>
+                                </div>
+                                
+                                <div class="compact-card-body">
+                                    <div class="two-column-grid">
                                         <!-- Left Column - Job Details -->
-                                        <div class="col-md-4">
-                                            <div class="d-flex justify-content-between align-items-start mb-2">
-                                                <h5 class="card-title mb-0 fw-bold">Job #<?= htmlspecialchars($jobID) ?></h5>
-                                                <span class="badge bg-warning text-dark status-badge">Clarification Needed</span>
-                                            </div>
-                                            
-                                            <div class="job-details-compact">
-                                                <div class="detail-row">
-                                                    <span class="detail-label">Vessel:</span>
-                                                    <span class="detail-value"><?= htmlspecialchars($item['vessel_name'] ?? '-') ?></span>
+                                        <div>
+                                            <div class="job-details-grid">
+                                                <div>
+                                                    <small class="text-muted job-meta">Vessel</small>
+                                                    <div class="job-value"><?= htmlspecialchars($item['vessel_name'] ?? '-') ?></div>
                                                 </div>
-                                                <div class="detail-row">
-                                                    <span class="detail-label">Job Type:</span>
-                                                    <span class="detail-value"><?= htmlspecialchars($item['job_type'] ?? '-') ?></span>
+                                                <div>
+                                                    <small class="text-muted job-meta">Job Type</small>
+                                                    <div class="job-value"><?= htmlspecialchars($item['job_type'] ?? '-') ?></div>
+                                                </div>
+                                                <div>
+                                                    <small class="text-muted job-meta">Boat</small>
+                                                    <div class="job-value"><?= htmlspecialchars($boat['boat_name'] ?? '-') ?></div>
+                                                </div>
+                                                <div>
+                                                    <small class="text-muted job-meta">Port</small>
+                                                    <div class="job-value"><?= htmlspecialchars($port['portname'] ?? '-') ?></div>
                                                 </div>
                                             </div>
                                         </div>
                                         
                                         <!-- Right Column - Clarification Table -->
-                                        <div class="col-md-8">
-                                            <h6 class="fw-semibold mb-2">Clarification Requests:</h6>
+                                        <div>
+                                            <h6 class="section-title">Clarification Requests</h6>
                                             <div class="clarification-table">
                                                 <div class="clarification-header">
                                                     <div class="clarification-col">Request ID</div>
@@ -506,7 +493,7 @@ $ongoingJobs = array_filter($jobs, function($item) {
                                 </div>
                                 
                                 <!-- See More Details Button -->
-                                <div class="card-footer bg-white border-top-0">
+                                <div class="compact-card-footer">
                                     <div class="d-flex justify-content-start">
                                         <a href="jobdetails.php?jobID=<?= $jobID ?>" class="btn btn-info btn-sm">
                                             <i class="fas fa-eye me-1"></i> See More Details
@@ -552,78 +539,70 @@ $ongoingJobs = array_filter($jobs, function($item) {
                             $trips = $item['trips'];
                         ?>
                         <div class="col-md-12">
-                            <div class="card job-card">
-                                <div class="card-body compact-card-content">
-                                    <div class="row">
+                            <div class="card compact-card job-card-pending">
+                                <div class="compact-card-header d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h6 class="mb-0 fw-bold">Job #<?= htmlspecialchars($job['jobID']) ?></h6>
+                                        <?php if (!empty($item['job_creator'])): ?>
+                                        <small class="text-muted">By: <?= htmlspecialchars($item['job_creator']['fname'] . ' ' . $item['job_creator']['lname']) ?></small>
+                                        <?php endif; ?>
+                                    </div>
+                                    <?php if (empty($job['end_date'])): ?>
+                                        <span class="badge bg-info status-badge">Ongoing</span>
+                                    <?php else: ?>
+                                        <span class="badge bg-primary status-badge">Pending Approval</span>
+                                    <?php endif; ?>
+                                </div>
+                                
+                                <div class="compact-card-body">
+                                    <div class="two-column-grid">
                                         <!-- Left Column - Job Details -->
-                                        <div class="col-md-5 border-end pe-3">
-                                            <div class="d-flex justify-content-between align-items-start mb-2">
-                                                <h5 class="card-title mb-0 fw-bold">Job #<?= htmlspecialchars($job['jobID']) ?></h5>
-                                                <?php if (empty($job['end_date'])): ?>
-                                                    <span class="badge bg-info status-badge">Ongoing</span>
-                                                <?php else: ?>
-                                                    <span class="badge bg-primary status-badge">Pending Approval</span>
-                                                <?php endif; ?>
-                                            </div>
-                                            
-                                            <?php if (!empty($item['job_creator'])): ?>
-                                            <div class="text-muted small mb-2">
-                                                <i class="fas fa-user-tie me-1"></i>
-                                                Created by: <?= htmlspecialchars($item['job_creator']['fname'] . ' ' . $item['job_creator']['lname']) ?>
-                                            </div>
-                                            <?php endif; ?>
-                                            
-                                            <div class="compact-section">
-                                                <div class="job-details-grid">
-                                                    <div>
-                                                        <small class="text-muted job-meta">Vessel</small>
-                                                        <div class="fw-semibold"><?= htmlspecialchars($item['vessel_name'] ?? '-') ?></div>
-                                                    </div>
-                                                    <div>
-                                                        <small class="text-muted job-meta">Job Type</small>
-                                                        <div class="fw-semibold"><?= htmlspecialchars($item['job_type'] ?? '-') ?></div>
-                                                    </div>
-                                                    <div>
-                                                        <small class="text-muted job-meta">Boat</small>
-                                                        <div class="fw-semibold"><?= htmlspecialchars($boat['boat_name'] ?? '-') ?></div>
-                                                    </div>
-                                                    <div>
-                                                        <small class="text-muted job-meta">Port</small>
-                                                        <div class="fw-semibold"><?= htmlspecialchars($port['portname'] ?? '-') ?></div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            
+                                        <div>
                                             <?php if ($job['comment']): ?>
-                                            <div class="compact-section">
+                                            <div class="mb-2">
                                                 <small class="text-muted job-meta">Note</small>
                                                 <div class="small"><?= htmlspecialchars($job['comment']) ?></div>
                                             </div>
                                             <?php endif; ?>
                                             
-                                            <div class="compact-section">
-                                                <div class="job-duration">
-                                                    <div class="d-flex justify-content-between small">
-                                                        <div>
-                                                            <small class="text-muted">Start</small>
-                                                            <div class="fw-semibold"><?= htmlspecialchars($job['start_date']) ?></div>
-                                                        </div>
-                                                        <div class="text-end">
-                                                            <small class="text-muted">End</small>
-                                                            <div class="fw-semibold">
-                                                                <?php if (!empty($job['end_date'])): ?>
-                                                                    <?= htmlspecialchars($job['end_date']) ?>
-                                                                <?php else: ?>
-                                                                    <span class="text-warning">Not closed</span>
-                                                                <?php endif; ?>
-                                                            </div>
-                                                        </div>
+                                            <div class="job-details-grid">
+                                                <div>
+                                                    <small class="text-muted job-meta">Vessel</small>
+                                                    <div class="job-value"><?= htmlspecialchars($item['vessel_name'] ?? '-') ?></div>
+                                                </div>
+                                                <div>
+                                                    <small class="text-muted job-meta">Job Type</small>
+                                                    <div class="job-value"><?= htmlspecialchars($item['job_type'] ?? '-') ?></div>
+                                                </div>
+                                                <div>
+                                                    <small class="text-muted job-meta">Boat</small>
+                                                    <div class="job-value"><?= htmlspecialchars($boat['boat_name'] ?? '-') ?></div>
+                                                </div>
+                                                <div>
+                                                    <small class="text-muted job-meta">Port</small>
+                                                    <div class="job-value"><?= htmlspecialchars($port['portname'] ?? '-') ?></div>
+                                                </div>
+                                            </div>
+                                            
+                                            <div class="three-column-grid mb-2">
+                                                <div>
+                                                    <small class="text-muted">Start</small>
+                                                    <div class="job-value"><?= htmlspecialchars($job['start_date']) ?></div>
+                                                </div>
+                                                <div class="text-center">
+                                                    <small class="text-muted">End</small>
+                                                    <div class="job-value">
+                                                        <?php if (!empty($job['end_date'])): ?>
+                                                            <?= htmlspecialchars($job['end_date']) ?>
+                                                        <?php else: ?>
+                                                            <span class="text-warning">Not closed</span>
+                                                        <?php endif; ?>
                                                     </div>
                                                 </div>
                                             </div>
                                             
                                             <?php if ($special_projects): ?>
-                                            <div class="compact-section">
+                                            <div>
                                                 <small class="text-muted job-meta">Special Projects</small>
                                                 <div class="mt-1">
                                                     <?php foreach ($special_projects as $sp): ?>
@@ -655,7 +634,7 @@ $ongoingJobs = array_filter($jobs, function($item) {
                                         </div>
                                         
                                         <!-- Right Column - Trips -->
-                                        <div class="col-md-7 ps-3">
+                                        <div>
                                             <h6 class="section-title">Trips / Days</h6>
                                             
                                             <?php if (empty($item['trips'])): ?>
@@ -678,7 +657,7 @@ $ongoingJobs = array_filter($jobs, function($item) {
                                                     </div>
                                                     
                                                     <?php if (!empty($tripItem['employees'])): ?>
-                                                    <div class="small mt-2">
+                                                    <div class="small mt-1">
                                                         <div class="text-muted">Team Members:</div>
                                                         <div class="mt-1">
                                                             <?php foreach ($tripItem['employees'] as $emp): ?>
@@ -708,10 +687,10 @@ $ongoingJobs = array_filter($jobs, function($item) {
                                 ?>
                                 
                                 <?php if ($firstAttendanceID): ?>
-                                <div class="card-footer">
+                                <div class="compact-card-footer">
                                     <?php if (empty($job['end_date'])): ?>
                                         <!-- Ongoing Job - Buttons Disabled -->
-                                        <div class="d-flex justify-content-end gap-2">
+                                        <div class="d-flex justify-content-end gap-1">
                                             <button type="button" class="btn btn-success btn-sm action-btn" disabled>
                                                 <i class="fas fa-check me-1"></i> Approve
                                             </button>
@@ -730,7 +709,7 @@ $ongoingJobs = array_filter($jobs, function($item) {
                                         </div>
                                     <?php else: ?>
                                         <!-- Completed Job - Buttons Enabled -->
-                                        <form method="post" action="../controllers/approveJobsController.php" class="d-flex justify-content-end gap-2">
+                                        <form method="post" action="../controllers/approveJobsController.php" class="d-flex justify-content-end gap-1">
                                             <input type="hidden" name="job_attendanceID" value="<?= $firstAttendanceID ?>">
                                             <input type="hidden" name="action" value="">
                                             <button type="button" name="action_btn" value="1" class="btn btn-success btn-sm action-btn">
@@ -771,9 +750,6 @@ $ongoingJobs = array_filter($jobs, function($item) {
                 <?php if (!empty($ongoingJobs)): ?>
                 <div class="job-section">
                     <h5 class="fw-bold mb-3 text-info"><i class="fas fa-clock me-2"></i>Ongoing Jobs</h5>
-                    <!-- <div class="alert alert-info py-2 mb-3">
-                        <i class="fas fa-info-circle me-2"></i> These jobs are currently in progress and cannot be approved until completed.
-                    </div> -->
                     <div class="row">
                         <?php foreach ($ongoingJobs as $item): 
                             $job = $item['job'];
@@ -786,70 +762,62 @@ $ongoingJobs = array_filter($jobs, function($item) {
                             $trips = $item['trips'];
                         ?>
                         <div class="col-md-12">
-                            <div class="card job-card border-info">
-                                <div class="card-body compact-card-content">
-                                    <div class="row">
+                            <div class="card compact-card job-card-pending">
+                                <div class="compact-card-header d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h6 class="mb-0 fw-bold">Job #<?= htmlspecialchars($job['jobID']) ?></h6>
+                                        <?php if (!empty($item['job_creator'])): ?>
+                                        <small class="text-muted">By: <?= htmlspecialchars($item['job_creator']['fname'] . ' ' . $item['job_creator']['lname']) ?></small>
+                                        <?php endif; ?>
+                                    </div>
+                                    <span class="badge bg-info status-badge">Ongoing</span>
+                                </div>
+                                
+                                <div class="compact-card-body">
+                                    <div class="two-column-grid">
                                         <!-- Left Column - Job Details -->
-                                        <div class="col-md-5 border-end pe-3">
-                                            <div class="d-flex justify-content-between align-items-start mb-2">
-                                                <h5 class="card-title mb-0 fw-bold">Job #<?= htmlspecialchars($job['jobID']) ?></h5>
-                                                <span class="badge bg-info status-badge">Ongoing</span>
-                                            </div>
-                                            
-                                            <?php if (!empty($item['job_creator'])): ?>
-                                            <div class="text-muted small mb-2">
-                                                <i class="fas fa-user-tie me-1"></i>
-                                                Created by: <?= htmlspecialchars($item['job_creator']['fname'] . ' ' . $item['job_creator']['lname']) ?>
-                                            </div>
-                                            <?php endif; ?>
-                                            
-                                            <div class="compact-section">
-                                                <div class="job-details-grid">
-                                                    <div>
-                                                        <small class="text-muted job-meta">Vessel</small>
-                                                        <div class="fw-semibold"><?= htmlspecialchars($item['vessel_name'] ?? '-') ?></div>
-                                                    </div>
-                                                    <div>
-                                                        <small class="text-muted job-meta">Job Type</small>
-                                                        <div class="fw-semibold"><?= htmlspecialchars($item['job_type'] ?? '-') ?></div>
-                                                    </div>
-                                                    <div>
-                                                        <small class="text-muted job-meta">Boat</small>
-                                                        <div class="fw-semibold"><?= htmlspecialchars($boat['boat_name'] ?? '-') ?></div>
-                                                    </div>
-                                                    <div>
-                                                        <small class="text-muted job-meta">Port</small>
-                                                        <div class="fw-semibold"><?= htmlspecialchars($port['portname'] ?? '-') ?></div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            
+                                        <div>
                                             <?php if ($job['comment']): ?>
-                                            <div class="compact-section">
+                                            <div class="mb-2">
                                                 <small class="text-muted job-meta">Note</small>
                                                 <div class="small"><?= htmlspecialchars($job['comment']) ?></div>
                                             </div>
                                             <?php endif; ?>
                                             
-                                            <div class="compact-section">
-                                                <div class="job-duration">
-                                                    <div class="d-flex justify-content-between small">
-                                                        <div>
-                                                            <small class="text-muted">Start</small>
-                                                            <div class="fw-semibold"><?= htmlspecialchars($job['start_date']) ?></div>
-                                                        </div>
-                                                        <div class="text-end">
-                                                            <small class="text-muted">End</small>
-                                                            <div class="fw-semibold">
-                                                                <span class="text-warning">Not closed</span>
-                                                            </div>
-                                                        </div>
+                                            <div class="job-details-grid">
+                                                <div>
+                                                    <small class="text-muted job-meta">Vessel</small>
+                                                    <div class="job-value"><?= htmlspecialchars($item['vessel_name'] ?? '-') ?></div>
+                                                </div>
+                                                <div>
+                                                    <small class="text-muted job-meta">Job Type</small>
+                                                    <div class="job-value"><?= htmlspecialchars($item['job_type'] ?? '-') ?></div>
+                                                </div>
+                                                <div>
+                                                    <small class="text-muted job-meta">Boat</small>
+                                                    <div class="job-value"><?= htmlspecialchars($boat['boat_name'] ?? '-') ?></div>
+                                                </div>
+                                                <div>
+                                                    <small class="text-muted job-meta">Port</small>
+                                                    <div class="job-value"><?= htmlspecialchars($port['portname'] ?? '-') ?></div>
+                                                </div>
+                                            </div>
+                                            
+                                            <div class="three-column-grid mb-2">
+                                                <div>
+                                                    <small class="text-muted">Start</small>
+                                                    <div class="job-value"><?= htmlspecialchars($job['start_date']) ?></div>
+                                                </div>
+                                                <div class="text-center">
+                                                    <small class="text-muted">End</small>
+                                                    <div class="job-value">
+                                                        <span class="text-warning">Not closed</span>
                                                     </div>
                                                 </div>
                                             </div>
                                             
                                             <?php if ($special_projects): ?>
-                                            <div class="compact-section">
+                                            <div>
                                                 <small class="text-muted job-meta">Special Projects</small>
                                                 <div class="mt-1">
                                                     <?php foreach ($special_projects as $sp): ?>
@@ -870,7 +838,7 @@ $ongoingJobs = array_filter($jobs, function($item) {
                                         </div>
                                         
                                         <!-- Right Column - Trips -->
-                                        <div class="col-md-7 ps-3">
+                                        <div>
                                             <h6 class="section-title">Trips / Days</h6>
                                             
                                             <?php if (empty($item['trips'])): ?>
@@ -893,7 +861,7 @@ $ongoingJobs = array_filter($jobs, function($item) {
                                                     </div>
                                                     
                                                     <?php if (!empty($tripItem['employees'])): ?>
-                                                    <div class="small mt-2">
+                                                    <div class="small mt-1">
                                                         <div class="text-muted">Team Members:</div>
                                                         <div class="mt-1">
                                                             <?php foreach ($tripItem['employees'] as $emp): ?>
