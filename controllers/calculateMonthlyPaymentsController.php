@@ -377,7 +377,7 @@ try {
         'publishedID' => $conn->insert_id // Get the last inserted publishedID
     ];
 
-    $notificationUrl = 'https://tripbonus.worldsubsea.lk/controllers/sendPaymentNotificationController.php';
+    $notificationUrl = 'https://subseaops.worldsubsea.lk/controllers/sendPaymentNotificationController.php';
     $ch = curl_init($notificationUrl);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true); 
     curl_setopt($ch, CURLOPT_POST, true);
