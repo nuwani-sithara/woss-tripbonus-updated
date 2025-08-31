@@ -71,19 +71,19 @@ $ongoingJobs = array_filter($jobs, function($item) {
     <link rel="stylesheet" href="../assets/css/kaiadmin.min.css" />
     <style>
       .job-card {
-        transition: all 0.2s ease;
-        border-left: 4px solid #dee2e6;
-        margin-bottom: 1rem;
         border-radius: 6px;
+        margin-bottom: 1rem;
+        transition: all 0.2s ease;
+        border-left: 3px solid #dee2e6;
       }
       .job-card:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-        border-left-color: #0d6efd;
+        transform: translateY(-1px);
+        box-shadow: 0 3px 8px rgba(0,0,0,0.08);
       }
       .job-header {
-        padding-bottom: 0.5rem;
-        margin-bottom: 0.5rem;
+        padding: 0.75rem 1rem;
+        background-color: #f8fafc;
+        border-bottom: 1px solid rgba(0,0,0,0.05);
       }
       .job-meta {
         font-size: 0.8rem;
@@ -123,7 +123,7 @@ $ongoingJobs = array_filter($jobs, function($item) {
         padding: 1rem;
       }
       .card-footer {
-        padding: 0.75rem;
+        padding: 0.75rem 1rem;
         background-color: #f8fafc;
         border-top: 1px solid rgba(0,0,0,0.05);
       }
@@ -134,10 +134,10 @@ $ongoingJobs = array_filter($jobs, function($item) {
       .trip-card {
         border: 1px solid #e9ecef;
         border-radius: 4px;
-        padding: 0.6rem;
-        margin-bottom: 0.6rem;
+        padding: 0.5rem;
+        margin-bottom: 0.5rem;
         background-color: #fff;
-        font-size: 0.85rem;
+        font-size: 0.8rem;
       }
       .trip-card:hover {
         background-color: #f8f9fa;
