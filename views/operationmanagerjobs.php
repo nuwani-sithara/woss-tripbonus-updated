@@ -287,6 +287,24 @@ if (!isset($jobs)) $jobs = [];
       $('#tripEmployeesModal').modal('show');
     });
   });
+
+  // Add this to your script section or a separate JS file
+  $(document).ready(function() {
+      // Prevent default behavior on settings dropdown click
+      $('a[href="#settingsDropdown"]').click(function(e) {
+          e.preventDefault();
+          // Manually toggle the collapse
+          $('#settingsDropdown').collapse('toggle');
+      });
+      
+      // Also handle the case when URL has the hash on page load
+      if(window.location.hash === '#settingsDropdown') {
+          // Remove the hash without scrolling
+          history.replaceState(null, null, ' ');
+          // Open the dropdown
+          $('#settingsDropdown').collapse('show');
+      }
+  });
   </script>
   </body>
 </html>
