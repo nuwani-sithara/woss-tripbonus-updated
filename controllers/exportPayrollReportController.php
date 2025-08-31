@@ -196,27 +196,47 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['action']) && $_GET['act
             exit();
         }
         
+        // Create new PHPWord object
         $phpWord = new \PhpOffice\PhpWord\PhpWord();
+        
+        // Set document properties
+        $phpWord->getDocInfo()->setCreator('SubseaOps')
+            ->setCompany('World Subsea')
+            ->setTitle('Payroll Report - ' . $month . ' ' . $year);
+        
+        // Add a section
         $section = $phpWord->addSection();
         
         // Add title
-        $section->addText('Payroll Report - ' . $month . ' ' . $year, ['bold' => true, 'size' => 16], ['alignment' => 'center']);
+        $section->addText('Payroll Report - ' . $month . ' ' . $year, 
+            array('bold' => true, 'size' => 16), 
+            array('alignment' => 'center')
+        );
         $section->addTextBreak(1);
         
-        // Create table
-        $table = $section->addTable();
+        // Create table style
+        $tableStyle = array(
+            'borderSize' => 6,
+            'borderColor' => '999999',
+            'cellMargin' => 50,
+            'alignment' => 'center'
+        );
+        $phpWord->addTableStyle('PayrollTable', $tableStyle);
         
-        // Add headers
+        // Create table
+        $table = $section->addTable('PayrollTable');
+        
+        // Add header row
         $table->addRow();
         foreach ($headers as $header) {
-            $table->addCell(2000)->addText($header, ['bold' => true]);
+            $table->addCell(2000)->addText($header, array('bold' => true), array('alignment' => 'center'));
         }
         
         // Add data rows
         foreach ($rows as $row) {
             $table->addRow();
             foreach ($row as $cell) {
-                $table->addCell(2000)->addText($cell);
+                $table->addCell(2000)->addText($cell, null, array('alignment' => 'center'));
             }
         }
         
@@ -233,13 +253,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['action']) && $_GET['act
             ''
         ];
         foreach ($totalsRow as $cell) {
-            $table->addCell(2000)->addText($cell, ['bold' => true]);
+            $table->addCell(2000)->addText($cell, array('bold' => true), array('alignment' => 'center'));
         }
         
-        $writer = \PhpOffice\PhpWord\IOFactory::createWriter($phpWord, 'Word2007');
+        // Save file
+        $tempFile = tempnam(sys_get_temp_dir(), 'phpword') . '.docx';
+        $objWriter = \PhpOffice\PhpWord\IOFactory::createWriter($phpWord, 'Word2007');
+        $objWriter->save($tempFile);
+        
+        // Send headers and file
         header('Content-Type: application/vnd.openxmlformats-officedocument.wordprocessingml.document');
-        header("Content-Disposition: attachment; filename=\"$filename\"");
-        $writer->save('php://output');
+        header('Content-Disposition: attachment; filename="' . $filename . '"');
+        header('Content-Length: ' . filesize($tempFile));
+        header('Cache-Control: max-age=0');
+        
+        // Read and output file
+        readfile($tempFile);
+        
+        // Clean up
+        unlink($tempFile);
+        
         logAction($conn, $userID, 'export', $month, $year, $fileType, null, 'Payroll export');
         exit();
     } elseif ($fileType === 'pdf') {
