@@ -450,7 +450,7 @@ $paginatedJobs = array_slice(array_values($filteredJobs), $start, $jobsPerPage);
                                                         <div class="d-flex justify-content-between align-items-start mb-2">
                                                             <div>
                                                                 <span class="badge badge-status <?= $badgeClass ?>"><?= $status ?></span>
-                                                                <span class="text-muted">Job #<?= htmlspecialchars($item['job']['jobID']) ?></span>
+                                                                <span class="text-muted">Job #<?= htmlspecialchars($item['job']['jobkey']) ?></span>
                                                             </div>
                                                         </div>
                                                         <h4 class="mb-2">
