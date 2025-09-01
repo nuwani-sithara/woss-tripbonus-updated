@@ -404,7 +404,7 @@ $message = isset($_GET['message']) ? $_GET['message'] : '';
                             <div class="card compact-card job-card-clarification">
                                 <div class="compact-card-header d-flex justify-content-between align-items-center">
                                     <div>
-                                        <h6 class="mb-0 fw-bold">Job #<?= htmlspecialchars($job['jobID']) ?></h6>
+                                        <h6 class="mb-0 fw-bold">Job #<?= htmlspecialchars($job['jobkey']) ?></h6>
                                         <?php if (!empty($item['job_creator'])): ?>
                                         <small class="text-muted">By: <?= htmlspecialchars($item['job_creator']['fname'] . ' ' . $item['job_creator']['lname']) ?></small>
                                         <?php endif; ?>
@@ -601,7 +601,7 @@ $message = isset($_GET['message']) ? $_GET['message'] : '';
                             <div class="card compact-card job-card-rejected">
                                 <div class="compact-card-header d-flex justify-content-between align-items-center">
                                     <div>
-                                        <h6 class="mb-0 fw-bold">Job #<?= htmlspecialchars($job['jobID']) ?></h6>
+                                        <h6 class="mb-0 fw-bold">Job #<?= htmlspecialchars($job['jobkey']) ?></h6>
                                         <?php if (!empty($item['job_creator'])): ?>
                                         <small class="text-muted">By: <?= htmlspecialchars($item['job_creator']['fname'] . ' ' . $item['job_creator']['lname']) ?></small>
                                         <?php endif; ?>
@@ -772,7 +772,7 @@ $message = isset($_GET['message']) ? $_GET['message'] : '';
                             <div class="card compact-card job-card-pending">
                                 <div class="compact-card-header d-flex justify-content-between align-items-center">
                                     <div>
-                                        <h6 class="mb-0 fw-bold">Job #<?= htmlspecialchars($job['jobID']) ?></h6>
+                                        <h6 class="mb-0 fw-bold">Job #<?= htmlspecialchars($job['jobkey']) ?></h6>
                                         <?php if (!empty($item['job_creator'])): ?>
                                         <small class="text-muted">By: <?= htmlspecialchars($item['job_creator']['fname'] . ' ' . $item['job_creator']['lname']) ?></small>
                                         <?php endif; ?>
