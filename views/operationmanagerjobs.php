@@ -93,6 +93,7 @@ if (!isset($jobs)) $jobs = [];
                       <thead>
                         <tr>
                           <th>Job ID</th>
+                          <th>Job Key</th>
                           <th>Type</th>
                           <th>Boat</th>
                           <th>Port</th>
@@ -108,6 +109,7 @@ if (!isset($jobs)) $jobs = [];
                         <?php foreach ($jobs as $job): ?>
                           <tr>
                             <td class="fw-semibold text-primary">#<?php echo $job['jobID']; ?></td>
+                            <td><?php echo htmlspecialchars($job['jobkey']); ?></td>
                             <td><?php echo htmlspecialchars($job['job_type']); ?></td>
                             <td>
                               <span class="badge bg-secondary"><i class="fas fa-ship me-1"></i><?php echo htmlspecialchars($job['boat_name'] ?? 'N/A'); ?></span>
