@@ -42,6 +42,9 @@ switch ($user['roleID']) {
     case 7: // Director
         $sidebar = 'components/directorSidebar.php';
         break;
+    case 13: // Supervisor in Charge
+        $sidebar = 'components/supervisorinchargesidebar.php';
+        break;
     default:
         $sidebar = 'components/defaultSidebar.php';
         break;
