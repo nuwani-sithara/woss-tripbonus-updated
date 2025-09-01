@@ -151,6 +151,47 @@ if (!isset($_SESSION['userID']) || !isset($_SESSION['roleID'])) {
                         </form>
                     </div>
                 </div>
+                <!-- Jobkey-wise Search Form -->
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="mb-0">Jobkey-wise Search</h5>
+                    </div>
+                    <div class="card-body">
+                        <form id="jobkeyBreakdownForm" class="row g-3 align-items-end">
+                            <div class="col-md-3">
+                                <label for="jobkeyMonth" class="form-label">Month</label>
+                                <select class="form-select" id="jobkeyMonth" name="jobkeyMonth" required>
+                                    <option value="">Select Month</option>
+                                    <?php
+                                    foreach ($months as $num => $name) {
+                                        echo "<option value='$num'>$name</option>";
+                                    }
+                                    ?>
+                                </select>
+                            </div>
+                            <div class="col-md-2">
+                                <label for="jobkeyYear" class="form-label">Year</label>
+                                <select class="form-select" id="jobkeyYear" name="jobkeyYear" required>
+                                    <option value="">Select Year</option>
+                                    <?php
+                                    for ($y = $currentYear; $y >= $currentYear - 5; $y--) {
+                                        echo "<option value='$y'>$y</option>";
+                                    }
+                                    ?>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label for="jobkey" class="form-label">Jobkey</label>
+                                <select class="form-select" id="jobkey" name="jobkey" required>
+                                    <option value="">Select Jobkey</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <button type="submit" class="btn btn-info btn-sm w-100">Show Jobkey Breakdown</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
                 <div id="breakdownResult">
                     <!-- Allowance breakdown table will be loaded here -->
                 </div>
@@ -286,6 +327,49 @@ $(document).ready(function() {
                 }
             }
         });
+    });
+});
+
+// Jobkey-wise search functionality
+$('#jobkeyMonth, #jobkeyYear').change(function() {
+    var month = $('#jobkeyMonth').val();
+    var year = $('#jobkeyYear').val();
+    if (month && year) {
+        $.ajax({
+            url: '../controllers/getJobAllowanceBreakdownController.php',
+            type: 'POST',
+            data: { action: 'getJobkeys', month: month, year: year },
+            success: function(response) {
+                $('#jobkey').html(response);
+            }
+        });
+    } else {
+        $('#jobkey').html('<option value="">Select Jobkey</option>');
+    }
+});
+
+// Jobkey breakdown form submit
+$('#jobkeyBreakdownForm').submit(function(e) {
+    e.preventDefault();
+    $('#breakdownResult').html('<div class="text-center py-3"><span class="spinner-border spinner-border-sm"></span> Loading jobkey breakdown...</div>');
+    $.ajax({
+        url: '../controllers/getJobAllowanceBreakdownController.php',
+        type: 'POST',
+        data: $(this).serialize() + '&action=getJobkeyBreakdown',
+        success: function(response) {
+            $('#breakdownResult').html(response);
+            // Add export buttons if a table exists
+            if ($('#breakdownResult table').length) {
+                $('#breakdownResult').append(`
+                    <div class="mt-3 mb-2 text-end" id="exportButtons">
+                        <button class="btn btn-outline-primary btn-sm me-1" onclick="exportTable('csv')">Export CSV</button>
+                        <button class="btn btn-outline-success btn-sm me-1" onclick="exportTable('xlsx')">Export XLSX</button>
+                        <button class="btn btn-outline-info btn-sm me-1" onclick="exportTable('docx')">Export DOCX</button>
+                        <button class="btn btn-outline-danger btn-sm" onclick="exportTable('pdf')">Export PDF</button>
+                    </div>
+                `);
+            }
+        }
     });
 });
 </script>

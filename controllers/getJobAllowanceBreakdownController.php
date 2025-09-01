@@ -826,5 +826,318 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         echo '</tbody></table></div>';
         exit();
     }
+    if ($action === 'getJobkeys') {
+    // Get jobkeys for selected month/year that are approved
+    $month = $_POST['month'];
+    $year = $_POST['year'];
+    $jobkeys = [];
+    $sql = "SELECT j.jobID, j.jobkey, j.start_date, j.comment FROM jobs j
+            INNER JOIN approvals a ON j.jobID = a.jobID
+            WHERE YEAR(j.start_date) = ? AND MONTH(j.start_date) = ?
+              AND a.approval_status = 1 AND a.approval_stage = 'job_approval'
+            ORDER BY j.jobkey";
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param('is', $year, $month);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    while ($row = $result->fetch_assoc()) {
+        $jobkeys[] = $row;
+    }
+    if (count($jobkeys) > 0) {
+        echo '<option value="">Select Jobkey</option>';
+        foreach ($jobkeys as $job) {
+            $label = htmlspecialchars($job['jobkey']) . ' - ' . date('Y-m-d', strtotime($job['start_date'])) . ' - ' . htmlspecialchars($job['comment']);
+            echo '<option value="' . htmlspecialchars($job['jobkey']) . '">' . $label . '</option>';
+        }
+    } else {
+        echo '<option value="">No jobkeys found</option>';
+    }
+    exit();
+}if ($action === 'getJobkeyBreakdown') {
+    $jobkey = $_POST['jobkey'];
+    $month = $_POST['jobkeyMonth'];
+    $year = $_POST['jobkeyYear'];
+    
+    // Get job ID from jobkey
+    $sql = "SELECT jobID FROM jobs WHERE jobkey = ? LIMIT 1";
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param('s', $jobkey);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $job = $result->fetch_assoc();
+    
+    if (!$job) {
+        echo '<div class="alert alert-warning">Job not found for this jobkey.</div>';
+        exit();
+    }
+    
+    $jobID = $job['jobID'];
+    
+    // 1. Check approval
+    $sql = "SELECT approval_status, approval_stage FROM approvals WHERE jobID = ? ORDER BY approvalID DESC LIMIT 1";
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param('i', $jobID);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $approval = $result->fetch_assoc();
+    if (!$approval || $approval['approval_status'] != 1 || $approval['approval_stage'] !== 'job_approval') {
+        echo '<div class="alert alert-warning">This job is not approved or not at the correct approval stage.</div>';
+        exit();
+    }
+    
+    // 2. Get job details
+    $sql = "SELECT jobkey, start_date, end_date FROM jobs WHERE jobID = ?";
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param('i', $jobID);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $jobDetails = $result->fetch_assoc();
+    
+    // 3. Get assigned employees with day counts (jobassignments) - Updated for trips structure
+    $assigned = [];
+    $sql = "SELECT ja.empID, COUNT(*) as day_count 
+            FROM jobassignments ja 
+            JOIN trips t ON ja.tripID = t.tripID 
+            WHERE t.jobID = ?
+            GROUP BY ja.empID";
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param('i', $jobID);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    while ($row = $result->fetch_assoc()) {
+        $assigned[$row['empID']] = $row['day_count'];
+    }
+    
+    // 4. Get all unique standby_attendanceIDs for this job - Updated for trips structure
+    $standby_attendanceIDs = [];
+    $sql = "SELECT DISTINCT ja.standby_attendanceID 
+            FROM job_attendance ja 
+            JOIN trips t ON ja.tripID = t.tripID 
+            WHERE t.jobID = ? AND ja.standby_attendanceID IS NOT NULL";
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param('i', $jobID);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    while ($row = $result->fetch_assoc()) {
+        if ($row['standby_attendanceID']) {
+            $standby_attendanceIDs[] = $row['standby_attendanceID'];
+        }
+    }
+    
+    // 5. For each unique standby_attendanceID, only process if this job is the first APPROVED job for that standby_attendanceID
+    $standby_empIDs = [];
+    $report_preparation_by = null;
+    $debug_log = [];
+    foreach ($standby_attendanceIDs as $standby_attendanceID) {
+        // Find all jobs that use this standby_attendanceID, ordered by jobID
+        $sql = "SELECT t.jobID FROM job_attendance ja 
+                JOIN trips t ON ja.tripID = t.tripID 
+                WHERE ja.standby_attendanceID = ? 
+                ORDER BY t.jobID ASC";
+        $stmt = $conn->prepare($sql);
+        $stmt->bind_param('i', $standby_attendanceID);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $firstApprovedJobID = null;
+        while ($row = $result->fetch_assoc()) {
+            $candidateJobID = $row['jobID'];
+            // Check approval for this candidate job
+            $sql2 = "SELECT approval_status, approval_stage FROM approvals WHERE jobID = ? ORDER BY approvalID DESC LIMIT 1";
+            $stmt2 = $conn->prepare($sql2);
+            $stmt2->bind_param('i', $candidateJobID);
+            $stmt2->execute();
+            $result2 = $stmt2->get_result();
+            $approval2 = $result2->fetch_assoc();
+            if ($approval2 && $approval2['approval_status'] == 1 && $approval2['approval_stage'] === 'job_approval') {
+                $firstApprovedJobID = $candidateJobID;
+                break;
+            }
+        }
+        if ($firstApprovedJobID && $firstApprovedJobID == $jobID) {
+            $debug_log[] = "<span style='color:green'>standby_attendanceID $standby_attendanceID: processed for job $jobID (first APPROVED occurrence)</span>";
+            // Only process if this job is the first APPROVED job for this standby_attendanceID
+            // Standby employees
+            $sql2 = "SELECT empID FROM standbyassignments WHERE standby_attendanceID = ?";
+            $stmt2 = $conn->prepare($sql2);
+            $stmt2->bind_param('i', $standby_attendanceID);
+            $stmt2->execute();
+            $result2 = $stmt2->get_result();
+            while ($row2 = $result2->fetch_assoc()) {
+                $standby_empIDs[] = $row2['empID'];
+            }
+            // Report preparation user (if not already set)
+            if ($report_preparation_by === null) {
+                $sql3 = "SELECT report_preparation_by FROM jobreport_preparation WHERE standby_attendanceID = ? LIMIT 1";
+                $stmt3 = $conn->prepare($sql3);
+                $stmt3->bind_param('i', $standby_attendanceID);
+                $stmt3->execute();
+                $result3 = $stmt3->get_result();
+                if ($row3 = $result3->fetch_assoc()) {
+                    $report_preparation_by = $row3['report_preparation_by'];
+                }
+            }
+        } else {
+            $debug_log[] = "<span style='color:red'>standby_attendanceID $standby_attendanceID: skipped for job $jobID (already processed in approved job " . ($firstApprovedJobID ? $firstApprovedJobID : '-') . ")</span>";
+        }
+    }
+    
+    // Remove duplicate empIDs from standby_empIDs
+    $standby_empIDs = array_unique($standby_empIDs);
+    
+    // 6. Get rates
+    $rates = [];
+    $sql = "SELECT rateID, rate FROM rates";
+    $result = $conn->query($sql);
+    while ($row = $result->fetch_assoc()) {
+        $rates[$row['rateID']] = $row['rate'];
+    }
+    
+    // Get standby counts for all employees using the new function
+    $standbyCountsData = getStandbyCounts($conn, $month, $year);
+    $standbyCounts = $standbyCountsData['all'];
+    
+    // 7. Prepare employee data
+    $employees = [];
+    // Assigned employees: jobAllowance + jobMealAllowance (based on day count)
+    foreach ($assigned as $empID => $dayCount) {
+        // Get userID from employees
+        $sql = "SELECT userID FROM employees WHERE empID = ? LIMIT 1";
+        $stmt = $conn->prepare($sql);
+        $stmt->bind_param('i', $empID);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $row = $result->fetch_assoc();
+        if (!$row) continue;
+        $userID = $row['userID'];
+        // Get user info
+        $sql = "SELECT fname, lname, rateID FROM users WHERE userID = ? LIMIT 1";
+        $stmt = $conn->prepare($sql);
+        $stmt->bind_param('i', $userID);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $user = $result->fetch_assoc();
+        if (!$user) continue;
+        $fullName = $user['fname'] . ' ' . $user['lname'];
+        $rateID = $user['rateID'];
+        $jobAllowance = isset($rates[$rateID]) ? $rates[$rateID] * $dayCount : 0;
+        $jobMealAllowance = isset($rates[3]) ? $rates[3] * $dayCount : 0;
+        $employees[$userID] = [
+            'name' => $fullName,
+            'jobAllowance' => $jobAllowance,
+            'jobMealAllowance' => $jobMealAllowance,
+            'standbyAttendanceAllowance' => 0,
+            'standbyMealAllowance' => 0,
+            'reportPreparationAllowance' => 0
+        ];
+    }
+    
+    // Standby employees: standbyAttendanceAllowance + standbyMealAllowance (using calculated counts)
+    foreach ($standby_empIDs as $empID) {
+        $sql = "SELECT userID FROM employees WHERE empID = ? LIMIT 1";
+        $stmt = $conn->prepare($sql);
+        $stmt->bind_param('i', $empID);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $row = $result->fetch_assoc();
+        if (!$row) continue;
+        $userID = $row['userID'];
+        $sql = "SELECT fname, lname FROM users WHERE userID = ? LIMIT 1";
+        $stmt = $conn->prepare($sql);
+        $stmt->bind_param('i', $userID);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $user = $result->fetch_assoc();
+        if (!$user) continue;
+        $fullName = $user['fname'] . ' ' . $user['lname'];
+        
+        // Use the calculated standby count for this employee
+        $standbyCount = $standbyCounts[$empID] ?? 0;
+        $standbyAttendanceAllowance = isset($rates[1]) ? $rates[1] * $standbyCount : 0;
+        $standbyMealAllowance = isset($rates[2]) ? $rates[2] * $standbyCount : 0;
+        
+        if (!isset($employees[$userID])) {
+            $employees[$userID] = [
+                'name' => $fullName,
+                'jobAllowance' => 0,
+                'jobMealAllowance' => 0,
+                'standbyAttendanceAllowance' => $standbyAttendanceAllowance,
+                'standbyMealAllowance' => $standbyMealAllowance,
+                'reportPreparationAllowance' => 0
+            ];
+        } else {
+            $employees[$userID]['standbyAttendanceAllowance'] = $standbyAttendanceAllowance;
+            $employees[$userID]['standbyMealAllowance'] = $standbyMealAllowance;
+        }
+    }
+    
+    // Report preparation allowance
+    if ($report_preparation_by) {
+        $sql = "SELECT fname, lname FROM users WHERE userID = ? LIMIT 1";
+        $stmt = $conn->prepare($sql);
+        $stmt->bind_param('i', $report_preparation_by);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $user = $result->fetch_assoc();
+        if ($user) {
+            $fullName = $user['fname'] . ' ' . $user['lname'];
+            if (!isset($employees[$report_preparation_by])) {
+                $employees[$report_preparation_by] = [
+                    'name' => $fullName,
+                    'jobAllowance' => 0,
+                    'jobMealAllowance' => 0,
+                    'standbyAttendanceAllowance' => 0,
+                    'standbyMealAllowance' => 0,
+                    'reportPreparationAllowance' => isset($rates[4]) ? $rates[4] : 0
+                ];
+            } else {
+                $employees[$report_preparation_by]['reportPreparationAllowance'] = isset($rates[4]) ? $rates[4] : 0;
+            }
+        }
+    }
+    
+    // Output debug log
+    if (count($debug_log) > 0) {
+        echo '<div class="mb-2"><strong>DEBUG LOG:</strong><br>' . implode('<br>', $debug_log) . '</div>';
+    }
+    
+    // Output job details
+    echo '<div class="card mb-3">';
+    echo '<div class="card-header"><h5>Job Details</h5></div>';
+    echo '<div class="card-body">';
+    echo '<div class="row">';
+    echo '<div class="col-md-4"><strong>Jobkey:</strong> ' . htmlspecialchars($jobDetails['jobkey']) . '</div>';
+    echo '<div class="col-md-4"><strong>Start Date:</strong> ' . date('Y-m-d', strtotime($jobDetails['start_date'])) . '</div>';
+    echo '<div class="col-md-4"><strong>End Date:</strong> ' . ($jobDetails['end_date'] ? date('Y-m-d', strtotime($jobDetails['end_date'])) : 'N/A') . '</div>';
+    echo '</div>';
+    echo '</div>';
+    echo '</div>';
+    
+    // Output table
+    if (count($employees) === 0) {
+        echo '<div class="alert alert-info">No employees found for this job.</div>';
+        exit();
+    }
+    
+    echo '<div class="table-responsive"><table class="table table-bordered table-striped">';
+    echo '<thead><tr><th>Employee</th><th>Job Allowance</th><th>Job Meal Allowance</th><th>Standby Attendance Allowance</th><th>Standby Meal Allowance</th><th>Report Preparation Allowance</th><th>Total</th></tr></thead><tbody>';
+    $grandTotal = 0;
+    foreach ($employees as $emp) {
+        $total = $emp['jobAllowance'] + $emp['jobMealAllowance'] + $emp['standbyAttendanceAllowance'] + $emp['standbyMealAllowance'] + $emp['reportPreparationAllowance'];
+        $grandTotal += $total;
+        echo '<tr>';
+        echo '<td>' . htmlspecialchars($emp['name']) . '</td>';
+        echo '<td>' . number_format($emp['jobAllowance'], 2) . '</td>';
+        echo '<td>' . number_format($emp['jobMealAllowance'], 2) . '</td>';
+        echo '<td>' . number_format($emp['standbyAttendanceAllowance'], 2) . '</td>';
+        echo '<td>' . number_format($emp['standbyMealAllowance'], 2) . '</td>';
+        echo '<td>' . number_format($emp['reportPreparationAllowance'], 2) . '</td>';
+        echo '<td class="fw-bold">' . number_format($total, 2) . '</td>';
+        echo '</tr>';
+    }
+    // Add total row
+    echo '<tr class="table-info fw-bold"><td colspan="6" class="text-end">Total Allowance for Job</td><td>' . number_format($grandTotal, 2) . '</td></tr>';
+    echo '</tbody></table></div>';
+    exit();
+}
 }
 echo '<div class="alert alert-danger">Invalid request.</div>';
