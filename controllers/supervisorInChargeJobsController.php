@@ -183,6 +183,7 @@ function getJobsForSupervisorInCharge($conn, $search = '') {
 
         $jobs[] = [
             'jobID' => $job['jobID'],
+            'jobkey' => $job['jobkey'],
             'job_type' => $job_type,
             'boat_name' => $boat_name,
             'portname' => $portname,
